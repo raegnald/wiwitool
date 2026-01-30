@@ -1,0 +1,27 @@
+# Reference: https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+
+BasedOnStyle: LLVM
+
+IndentWidth: 2
+
+ColumnLimit: 80
+
+# Removing unnecessary stuff
+RemoveSemicolon: true
+
+# Spacing
+SeparateDefinitionBlocks: Always
+SpaceAfterCStyleCast: true
+AllowShortBlocksOnASingleLine: Always
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortEnumsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+
+# Aligning
+AlignAfterOpenBracket: Align
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: true
+  AlignCaseColons: false
