@@ -1,0 +1,50 @@
+
+static std::string default_music_namespace{"custommusic"};
+
+struct Song : Minecraft_identifiable {
+  struct int default_comparator_output = 15;
+
+  std::filesystem::path song_file;
+  std::filesystem::path cover_file;
+  std::string description;
+  float length_seconds;
+  int comparator_output{default_comparator_output};
+
+  Song(std::filesystem::path song_filepath);
+
+  void generate_jukebox_json(std::filesystem::path in_folder);
+  void generate_recipe_json(std::filesystem::path in_folder);
+};
+
+class Music_discs_pack : Minecraft_pack {
+  std::vector<Song> songs;
+
+  std::string music_namespace{default_music_namespace};
+
+  void generate_music_discs_json(void) {
+    // simply write a static file "tags/item/music_discs.json"
+  }
+
+protected:
+  virtual void generate_data() {
+    // Jukebox song definitions
+    {
+      const auto jukebox_song_folder = in_data_folder("jukebox_song");
+
+      for (song : songs)
+        song.generate_jukebox_json(jukebox_song_folder);
+    }
+
+    // Recipe definitions
+    {
+      const auto recipe_folder = in_data_folder("recipe");
+
+      for (song : songs)
+        song.generate_recipe_json(recipe_folder);
+    }
+
+    generate_music_discs_json();
+  }
+
+  virtual void generate_resource() = 0;
+};

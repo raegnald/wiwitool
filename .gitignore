@@ -1,0 +1,14 @@
+.DS_Store
+Icon*
+build/
+*.mp3
+*.zip
+datapack/
+respack/
+wiwpacks/
+cuadros-python/
+\#*\#
+*.dSYM/
+*.exe
+*.o
+*.a
