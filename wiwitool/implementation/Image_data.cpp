@@ -39,7 +39,8 @@ Image_data::~Image_data(void) {
 
 Image_data::Image_data(const Image_data &other)
     : path{other.path}, width{other.width}, height{other.height},
-channels{other.channels}, is_stbi_allocated{false} {
+      channels{other.channels}, is_stbi_allocated{false} {
+
   const auto image_data_size =
       width * height * channels * sizeof(unsigned char);
 

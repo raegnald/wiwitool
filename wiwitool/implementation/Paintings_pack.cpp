@@ -120,7 +120,7 @@ Painting &Paintings_pack::add_painting(std::string filename) {
 using namespace emscripten;
 
 EMSCRIPTEN_BINDINGS(paintings_pack) {
-  class_<Painting>("Painting")
+  class_<Painting>("Painting")  // TODO: Add ctor
       .function("set_title", &Painting::set_title)
       .function("get_title", &Painting::get_title)
       .function("set_author", &Painting::set_author)
@@ -131,6 +131,8 @@ EMSCRIPTEN_BINDINGS(paintings_pack) {
   class_<Paintings_pack>("Paintings_pack")
       .constructor<>()
       .function("add_painting", &Paintings_pack::add_painting,
-                return_value_policy::reference());
+                return_value_policy::reference())
+      .function("generate", &Minecraft_pack::generate)
+      .function("compress", &Minecraft_pack::compress);
 }
 #endif

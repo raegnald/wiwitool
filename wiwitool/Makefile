@@ -80,7 +80,7 @@ $(NATIVE_TARGET): $(NATIVE_OBJS)
 # Location for wasm objects
 WASM_OBJ_DIR := $(BUILD_DIR)/wasm
 WASM_OBJS    := $(patsubst $(SRC_DIR)/%.cpp, $(WASM_OBJ_DIR)/%.o, $(SRCS))
-WASM_TARGET  := $(WASM_OBJ_DIR)/index.js
+WASM_TARGET  := $(WASM_OBJ_DIR)/wiwitool.js
 
 wasm: $(BUILD_DIR)/wasm
 	@echo "--- Building WebAssembly ---"
@@ -89,7 +89,7 @@ wasm: $(BUILD_DIR)/wasm
 
 # Compile WASM objects (from implementation/)
 $(WASM_OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CXX_WASM) $(CXXFLAGS) --bind -c $< -o $@
+	$(CXX_WASM) $(CXXFLAGS) -c $< -o $@
 
 # Link everything into the final WASM module
 $(WASM_TARGET): $(WASM_OBJS) $(WASM_SRC)/executable.cpp
