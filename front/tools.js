@@ -1,6 +1,10 @@
 // FS.readdir('/');
 
-function downloadFromFS(path, filename = null, mime = "application/octet-stream") {
+function downloadFromFS(
+  path,
+  filename = null,
+  mime = "application/octet-stream",
+) {
   const data = FS.readFile(path); // Uint8Array
 
   const blob = new Blob([data], { type: mime });
