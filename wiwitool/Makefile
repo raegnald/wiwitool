@@ -99,6 +99,7 @@ $(WASM_TARGET): $(WASM_OBJS) $(WASM_SRC)/executable.cpp
 		$(EXT_OBJS) \
     --bind \
 		-o $@ \
+		-sNO_DISABLE_EXCEPTION_CATCHING \
 		-s WASM=1 -s ALLOW_MEMORY_GROWTH=1
 	@echo "WASM module created at: $@"
 

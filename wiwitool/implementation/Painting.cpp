@@ -4,6 +4,7 @@
 
 #include <format>
 #include <fstream>
+#include <print>
 
 #include "Paintings_pack/Painting_converter.hpp"
 #include "nlohmann/json.hpp"
@@ -14,7 +15,9 @@ Painting::Painting(std::string mc_namespace, std::filesystem::path image_path)
     : Minecraft_identifiable{mc_namespace,
                              painting_id_string(painting_id =
                                                     next_painting_id++)},
-      original_image{image_path} {}
+      original_image{image_path} {
+  std::println("Loaded image (painting id = {})", painting_id);
+}
 
 
 void Painting::generate_painting_variant_json(std::filesystem::path in_folder) {
