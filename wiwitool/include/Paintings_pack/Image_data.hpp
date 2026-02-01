@@ -40,6 +40,7 @@ public:
 
   // Image manipulation
 
+  // Nearest-neighbour scaling
   Image_data scale(float factor) const;
   Image_data scale(size_t target_w, size_t target_h) const;
 
