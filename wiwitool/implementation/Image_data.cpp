@@ -1,5 +1,8 @@
 #include "Paintings_pack/Image_data.hpp"
 
+#include "strutil.hpp"
+#include "fileutil.hpp"
+
 #include <string>
 #include <cstdlib>
 #include <filesystem>
@@ -9,94 +12,185 @@
 #include "stb_image.h"
 #include "stb_image_write.h"
 
-Image_data::Image_data(std::filesystem::path filepath) : path(filepath) {
+// Image_data::Pixel* == void* returned by stb_image
+static_assert(std::is_trivially_copyable_v<Image_data::Pixel>);
+static_assert(sizeof(Image_data::Pixel) == 4);
+
+Image_data::Image_data(std::filesystem::path filepath) : path_{filepath} {
   std::println("Loading image data from path {}", filepath.string());
 
-  data = stbi_load(path.string().c_str(), &width, &height, NULL, 4);
-  channels = 4;
+  int w, h;
+  const auto imgdata = reinterpret_cast<Pixel *>(
+      stbi_load(filepath.c_str(), &w, &h, nullptr, channels_));
 
-  if (not data)
-    throw std::runtime_error("Failed to load image: " + path.string());
+  if (not imgdata)
+    throw std::runtime_error("Image_data: failed to load " + path_.string());
 
-  is_stbi_allocated = true;
+  width_ = w;
+  height_ = h;
+
+  data_ = Stb_image{reinterpret_cast<Pixel *>(imgdata), stbi_image_free};
 }
 
-Image_data::Image_data(int w, int h, int ch)
-    : width{w}, height{h}, channels{ch} {
-  const size_t size = width * height * channels;
-  data = malloc(size);
-  if (not data) throw std::runtime_error("Allocation failed");
+Image_data::Image_data(size_t w, size_t h) : width_{w}, height_{h} {
+  const size_t size = width_ * height_ * sizeof(Pixel);
+  data_ = Stb_image{reinterpret_cast<Pixel *>(malloc(size)), free};
+  if (not data_) throw std::runtime_error("Allocation failed");
 }
 
-Image_data::~Image_data(void) {
-  if (data) {
-    if (is_stbi_allocated)
-      stbi_image_free(data);
-    else
-      free(data);
-  }
-}
-
+// Copy ctor
 Image_data::Image_data(const Image_data &other)
-    : path{other.path}, width{other.width}, height{other.height},
-      channels{other.channels}, is_stbi_allocated{false} {
+    : width_{other.width_}, height_{other.height_}, path_{other.path_} {
 
-  const auto image_data_size =
-      width * height * channels * sizeof(unsigned char);
+  const auto size = width_ * height_ * sizeof(Pixel);
 
-  data = malloc(image_data_size);
-  if (not data) throw std::runtime_error("Image_data: allocation failed during copy");
+  data_ = Stb_image{reinterpret_cast<Pixel *>(malloc(size)), free};
+  if (not data_) throw std::runtime_error("Image_data: allocation failed during copy");
 
-  memcpy(this->data, other.data, image_data_size);
+  memcpy(this->data_.get(), other.data_.get(), size);
 }
 
-Image_data::Image_data(Image_data &&other) noexcept
-    : path{std::move(other.path)}, width{other.width}, height{other.height},
-      channels{other.channels}, data{other.data},
-      is_stbi_allocated{other.is_stbi_allocated} {
-  other.data = nullptr;
-  other.width = other.height = other.channels = 0;
-  other.is_stbi_allocated = false;
-}
-
-Image_data &Image_data::operator=(Image_data &&other) noexcept {
+// Copy assignment
+Image_data &Image_data::operator=(const Image_data &other) {
   if (this != &other) {
-    if (data) stbi_image_free(data);
+    if (data_) data_.reset(nullptr);
 
-    path = std::move(other.path);
-    width = other.width;
-    height = other.height;
-    channels = other.channels;
-    data = other.data;
-    is_stbi_allocated = other.is_stbi_allocated;
+    path_ = other.path_;
+    width_ = other.width_;
+    height_ = other.height_;
 
-    other.data = nullptr; // steal ownership
-    other.width = other.height = other.channels = 0;
-    other.path = "";
+    const auto size = width_ * height_ * sizeof(Pixel);
+
+    data_ = Stb_image{reinterpret_cast<Pixel *>(malloc(size)), free};
+    if (not data_) throw std::runtime_error("Image_data: allocation failed during copy");
+
+    memcpy(this->data_.get(), other.data_.get(), size);
   }
+
   return *this;
 }
 
-Pixel &Image_data::at(std::size_t x, std::size_t y) const {
-    if (x >= width or y >= height)
-      throw std::invalid_argument(std::format(
-          "Image_data::get: accessing ({}, {}) but image is of size ({}, {})",
-          x, y, width, height));
 
-    return static_cast<Pixel *>(data)[y * width + x];
-  }
+Image_data::Pixel &Image_data::at(size_t x, size_t y) {
+  if (x >= width_ or y >= height_)
+    throw std::invalid_argument(std::format(
+        "Image_data::get: accessing ({}, {}) but image is of size ({}, {})", x,
+        y, width_, height_));
 
-void Image_data::save_as(std::filesystem::path name) {
-  if (name.extension() == ".png") {
-    stbi_write_png(name.string().c_str(), width, height, 4, data, width * 4);
+  return data_.get()[y * width_ + x];
+}
+
+
+const Image_data::Pixel &Image_data::at(size_t x, size_t y) const {
+  if (x >= width_ or y >= height_)
+    throw std::invalid_argument(std::format(
+        "Image_data::get: accessing ({}, {}) but image is of size ({}, {})", x,
+        y, width_, height_));
+
+  return data_.get()[y * width_ + x];
+}
+
+Image_data Image_data::scale(float factor) const {
+  return scale(static_cast<size_t>(width() * factor),
+               static_cast<size_t>(height() * factor));
+}
+
+Image_data Image_data::scale(size_t target_w, size_t target_h) const {
+  const auto step_x = static_cast<float>(width()) / target_w;
+  const auto step_y = static_cast<float>(height()) / target_h;
+
+  Image_data out{target_w, target_h};
+
+  const auto sample = [&](int x, int y) {
+    int src_y = y * step_y, src_x = x * step_x;
+
+    if (src_y >= height()) src_y = height() - 1;
+    if (src_x >= width()) src_x = width() - 1;
+
+    return at(src_x, src_y);
+  };
+
+  for (size_t y = 0; y < target_h; ++y)
+    for (size_t x = 0; x < target_w; ++x)
+      out.at(x, y) = sample(x, y);
+
+  return out;
+}
+
+Image_data Image_data::crop(size_t x0, size_t y0, size_t w, size_t h) const {
+  Image_data out{w, h};
+
+  for (size_t y = 0; y < h; ++y)
+    for (size_t x = 0; x < w; ++x)
+      out.at(x, y) = this->at(x0 + x, y0 + y);
+
+  return out;
+}
+
+Image_data Image_data::rotate_clockwise(void) const {
+  Image_data out{height(), width()};
+
+  for (size_t y = 0; y < this->height(); ++y)
+    for (size_t x = 0; x < this->width(); ++x)
+      out.at(height() - y - 1, x) = this->at(x, y);
+
+  return out;
+}
+
+Image_data Image_data::rotate_anticlockwise(void) const {
+  Image_data out{height(), width()};
+
+  for (size_t y = 0; y < this->height(); ++y)
+    for (size_t x = 0; x < this->width(); ++x)
+      out.at(y, width() - x - 1) = this->at(x, y);
+
+  return out;
+}
+
+Image_data Image_data::flip_vertically(void) const {
+  Image_data out{width(), height()};
+
+  for (size_t y = 0; y < height(); ++y)
+    for (size_t x = 0; x < width(); ++x)
+      out.at(x, height() - y - 1) = this->at(x, y);
+
+  return out;
+}
+
+Image_data Image_data::flip_horizontally(void) const {
+  Image_data out{width(), height()};
+
+  for (size_t y = 0; y < height(); ++y)
+    for (size_t x = 0; x < width(); ++x)
+      out.at(width() - x - 1, y) = this->at(x, y);
+
+  return out;
+}
+
+void Image_data::save_png(std::filesystem::path name) const {
+  const auto stride = width_ * sizeof(Pixel);
+  stbi_write_png(name.c_str(), width_, height_, channels_, data_.get(), stride);
+}
+
+void Image_data::save_jpg(std::filesystem::path name,
+                          size_t quality_percentage) const {
+  stbi_write_jpg(name.c_str(), width_, height_, 4, data_.get(),
+                 quality_percentage);
+}
+
+void Image_data::save_as(std::filesystem::path name) const {
+  const auto ext = tolower(name.extension());
+
+  if (ext == ".png") {
+    save_png(name);
     return;
   }
 
-  if (name.extension() == ".jpg") {
-    stbi_write_jpg(name.string().c_str(), width, height, 4, data, 100);
+  if (ext == ".jpg" or ext == ".jpeg") {
+    save_jpg(name);
     return;
   }
 
-  std::invalid_argument(
-      "Image_data::save_as: invalid image extension (use .jpg or .png)");
+  throw std::invalid_argument(
+      "Image_data::save_as: invalid image extension (use .jpg/.jpeg or .png)");
 }
