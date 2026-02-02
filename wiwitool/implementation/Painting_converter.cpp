@@ -1,4 +1,5 @@
 #include "Paintings_pack/Painting_converter.hpp"
+
 #include "Paintings_pack/Painting_ratio.hpp"
 
 #include <print>
@@ -70,25 +71,20 @@ Image_data miniature_frame(Image_data image) {
   return frame_data;
 }
 
-void Painting_converter::miniatureise(std::filesystem::path output) {
+Image_data Painting_converter::miniatureise(void) {
   auto cropped = crop(image, ICON_RATIO); // 11:8 aspect ratio
   auto downscaled = cropped.scale(11, 8); // 11x8 pixels
   auto miniaturised = miniature_frame(std::move(downscaled));
 
-  std::println("Saving miniature to {}...", output.c_str());
-  miniaturised.save_as(output);
+  return miniaturised;
 }
 
-std::pair<unsigned, unsigned>
-Painting_converter::convert(std::filesystem::path output,
-                            Painting_ratio ratio) {
+Image_data Painting_converter::convert(Painting_ratio ratio) {
   if (ratio == Nearest) ratio = nearest_ratio(image.width(), image.height());
 
   auto cropped = crop(image, ratio);
   auto downscaled = downscale(std::move(cropped), ratio);
   auto framed = frame(std::move(downscaled), ratio);
 
-  framed.save_as(output);
-
-  return {framed.width(), framed.height()};
+  return framed;
 }

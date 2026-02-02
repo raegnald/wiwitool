@@ -6,8 +6,6 @@
 struct Painting_converter {
   const Image_data &image;
 
-  std::pair<unsigned, unsigned> convert(std::filesystem::path output,
-                                        Painting_ratio ratio = Nearest);
-
-  void miniatureise(std::filesystem::path output);
+  Image_data convert(Painting_ratio ratio = Nearest);
+  Image_data miniatureise(void);
 };

@@ -2,7 +2,10 @@
 
 #include <fstream>
 
+#include "Paintings_pack/Painting_converter.hpp"
+
 #include "nlohmann/json.hpp"
+#include "wiwidebug.hpp"
 using json = nlohmann::ordered_json;
 
 Paintings_pack::Paintings_pack(void)
@@ -29,15 +32,46 @@ void Paintings_pack::generate_data(void) {
 
   // Custom paintings namespace
 
-  for (auto &painting : paintings) {
+  for (const auto &painting : paintings) {
     // Declare a new painting
-    painting.generate_painting_variant_json(in_data_folder(
-        data_subfolder / paintings_namespace / "painting_variant"));
+    generate_painting_variant_json(
+        painting, in_data_folder(data_subfolder / paintings_namespace /
+                                 "painting_variant"));
 
     // Stone cutter recipe to obtain the painting
-    painting.generate_recipe_json(
+    generate_recipe_json(
+        painting,
         in_data_folder(data_subfolder / paintings_namespace / "recipe"));
   }
+}
+
+void Paintings_pack::generate_recipe_json(const Painting &painting,
+                                          std::filesystem::path in_folder) {
+  const auto json_name = painting.string_id() + "_recipe.json";
+  std::ofstream jsonfile{in_folder / json_name};
+
+  json data;
+
+  data["type"] = "minecraft:stonecutting";
+  data["ingredient"] = "minecraft:painting";
+  data["result"] = {
+      {"id", "minecraft:painting"},
+      {"components", {{"minecraft:painting/variant", painting.string_id()}}},
+      {"count", 1}};
+
+  jsonfile << data.dump(4) << std::endl;
+}
+
+void Paintings_pack::generate_painting_resource(
+    const Painting &painting, std::filesystem::path directory) {
+  const auto output_filename = std::format("painting_{}.png", painting.string_id());
+  wiwidebug std::println("Generating painting {}...", output_filename);
+
+  // const auto [w, h] =
+  // Painting_converter(painting.get_).convert(directory / output_filename);
+
+  // converted_width = w / 16;     // FOTUT: hard coded
+  // converted_height = h / 16;
 }
 
 
@@ -45,7 +79,7 @@ std::vector<std::string> Paintings_pack::get_painting_ids(void) const {
   auto painting_ids = std::vector<std::string>{};
 
   for (const auto &painting : paintings)
-    painting_ids.push_back(painting.id());
+    painting_ids.push_back(painting.string_id());
 
   return painting_ids;
 }
@@ -68,19 +102,21 @@ void Paintings_pack::generate_resource(void) {
   const auto painting_to_icon_json_folder =
       in_resource_folder(assets_subfolder / "minecraft" / "items");
 
-  for (auto &painting : paintings) {
-    painting.generate_painting_resource(paintings_image_folder); // FOTUT: must run before generating JSON
+  for (const auto &painting : paintings) {
+    generate_painting_resource(painting, paintings_image_folder); // FOTUT: must run before generating JSON
 
     // Miniature (aka. item)
-    painting.generate_respack_item_json(item_jsons_folder);
-    painting.generate_miniature_resource(miniatures_folder);
+    generate_respack_item_json(painting, item_jsons_folder);
+    generate_miniature_resource(painting, miniatures_folder);
 
     // Linking painting to miniature
-    generate_painting_json(painting_to_icon_json_folder);
+    generate_painting_json(painting, painting_to_icon_json_folder);
   }
 }
 
-void Paintings_pack::generate_painting_json(std::filesystem::path directory) {
+
+void Paintings_pack::generate_painting_json(const Painting &painting,
+                                            std::filesystem::path directory) {
   std::ofstream jsonfile{directory / "painting.json"};
 
   json data;
@@ -91,10 +127,10 @@ void Paintings_pack::generate_painting_json(std::filesystem::path directory) {
 
   for (const auto &painting : paintings) {
     data["model"]["cases"].push_back({
-      {"when", painting.id()},
+      {"when", painting.string_id()},
       {"model", {
         {"type", "minecraft:model"},
-        {"model", painting.item_id()}
+        {"model", item_id(painting)}
       }}
     });
   }
@@ -105,13 +141,57 @@ void Paintings_pack::generate_painting_json(std::filesystem::path directory) {
   jsonfile << data.dump(4) << std::endl;
 }
 
+void Paintings_pack::generate_miniature_resource(
+    const Painting &painting, std::filesystem::path directory) {
+
+  const auto output_filename = std::format("painting_{}.png", painting.string_id());
+  wiwidebug std::println("Generating painting miniature {}...", output_filename);
+  const auto item_image = Painting_converter(painting.original_data()).miniatureise();
+  item_image.save_as(directory / output_filename);
+}
+
+
+void Paintings_pack::generate_respack_item_json(
+    const Painting &painting, std::filesystem::path directory) {
+
+  const auto json_name = painting.string_id() + ".json";
+  std::ofstream jsonfile{directory / json_name};
+
+  json data;
+
+  data["parent"] = "minecraft:item/generated";
+  data["textures"] = {{"layer0", item_id(painting)}};
+
+  jsonfile << data.dump(4) << std::endl;
+}
+
+void Paintings_pack::generate_painting_variant_json(
+    const Painting &painting, std::filesystem::path in_folder) {
+
+  const auto json_name = painting.string_id() + ".json";
+  std::ofstream jsonfile{in_folder / json_name};
+
+  wiwidebug std::println("Writing {}", (in_folder / json_name).string());
+
+  json data;
+
+  data["asset_id"] = painting_id(painting);
+  // I still don't like for the scale of 16 to be hard-coded
+  data["width"] = painting.painting_data().width() / 16;
+  data["height"] = painting.painting_data().height() / 16;
+  data["title"].push_back({{"text", painting.get_title()}});
+  data["author"].push_back({{"text", painting.get_author()}});
+
+  jsonfile << data.dump(4) << std::endl;
+}
 
 
 Painting &Paintings_pack::add_painting(std::string filename) {
-  std::println("Adding painting from file {}", filename);
-  paintings.push_back(Painting{paintings_namespace, filename});
+  wiwidebug std::println("Adding painting from file {}", filename);
+  paintings.push_back(Painting{filename});
   return paintings.back();
 }
+
 
 
 #ifdef EMSCRIPTEN
@@ -120,6 +200,8 @@ Painting &Paintings_pack::add_painting(std::string filename) {
 using namespace emscripten;
 
 EMSCRIPTEN_BINDINGS(paintings_pack) {
+  // FOTUT: Painting should not go here! This binding should be
+  // located in Painting.cpp
   class_<Painting>("Painting")  // TODO: Add ctor
       .function("set_title", &Painting::set_title)
       .function("get_title", &Painting::get_title)

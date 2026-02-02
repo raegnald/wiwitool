@@ -1,7 +1,5 @@
 #include "Paintings_pack/Painting.hpp"
 
-#include "Minecraft_identifiable.hpp"
-
 #include <format>
 #include <fstream>
 #include <print>
@@ -11,76 +9,37 @@
 #include "nlohmann/json.hpp"
 using json = nlohmann::ordered_json;
 
-
-Painting::Painting(std::string mc_namespace, std::filesystem::path image_path)
-    : Minecraft_identifiable{mc_namespace,
-                             painting_id_string(painting_id =
-                                                    next_painting_id++)},
-      original_image{image_path} {
-  std::println("Loaded image (painting id = {})", painting_id);
+Painting::Painting(std::filesystem::path image_path)
+  : painting_id{next_painting_id++}, original_image{image_path} {
   wiwidebug std::println("Loaded image (painting id = {})", painting_id);
+  refresh();
+}
+
+const Image_data Painting::original_data(void) const { return original_image; }
+
+const Image_data Painting::painting_data(void) const {
+  compute_painting_and_icon_if_necessary();
+  return painting;
+}
+
+const Image_data Painting::icon_data(void) const {
+  compute_painting_and_icon_if_necessary();
+  return icon;
+}
+
+void Painting::refresh(void) const {
+  auto converter = Painting_converter{original_image};
+  painting = converter.convert();
+  icon = converter.miniatureise();
 }
 
 
-void Painting::generate_painting_variant_json(std::filesystem::path in_folder) {
-  const auto json_name = object_name + ".json";
-  std::ofstream jsonfile{in_folder / json_name};
-
-  std::println("Writing {}", (in_folder / json_name).string());
-
-  json data;
-
-  data["asset_id"] = id();
-  data["width"] = converted_width;
-  data["height"] = converted_height;
-  data["title"].push_back({{"text", title}});
-  data["author"].push_back({{"text", author}});
-
-  jsonfile << data.dump(4) << std::endl;
+void Painting::rotate_clockwise(void) {
+  original_image.rotate_clockwise();
+  refresh();
 }
 
-
-void Painting::generate_recipe_json(std::filesystem::path in_folder) {
-  const auto json_name = object_name + "_recipe.json";
-  std::ofstream jsonfile{in_folder / json_name};
-
-  json data;
-
-  data["type"] = "minecraft:stonecutting";
-  data["ingredient"] = "minecraft:painting";
-  data["result"] = {{"id", "minecraft:painting"},
-                    {"components", {{"minecraft:painting/variant", id()}}},
-                    {"count", 1}};
-
-  jsonfile << data.dump(4) << std::endl;
-}
-
-
-void Painting::generate_painting_resource(std::filesystem::path directory) {
-  const auto output_filename = std::format("painting_{}.png", painting_id);
-  std::println("Generating painting {}...", output_filename);
-
-  const auto [w, h] =
-      Painting_converter(original_image).convert(directory / output_filename);
-
-  converted_width = w / 16;     // FOTUT: hard coded
-  converted_height = h / 16;
-}
-
-void Painting::generate_miniature_resource(std::filesystem::path directory) {
-  const auto output_filename = std::format("painting_{}.png", painting_id);
-  std::println("Generating painting miniature {}...", output_filename);
-  Painting_converter(original_image).miniatureise(directory / output_filename);
-}
-
-void Painting::generate_respack_item_json(std::filesystem::path directory) {
-  const auto json_name = object_name + ".json";
-  std::ofstream jsonfile{directory / json_name};
-
-  json data;
-
-  data["parent"] = "minecraft:item/generated";
-  data["textures"] = {{"layer0", item_id()}};
-
-  jsonfile << data.dump(4) << std::endl;
+void Painting::rotate_anticlockwise(void) {
+  original_image.rotate_anticlockwise();
+  refresh();
 }
