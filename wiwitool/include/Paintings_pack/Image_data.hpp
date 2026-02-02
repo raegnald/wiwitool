@@ -11,7 +11,7 @@ class Image_data {
 public:
   struct Pixel { unsigned char r, g, b, a; };
 
-  Image_data(void) = delete;
+  Image_data(void) = default; // empty image (width == 0 and height == 0)
   Image_data(size_t w, size_t h);
   Image_data(std::filesystem::path filepath);
 
@@ -30,6 +30,9 @@ public:
   inline size_t width(void) const noexcept { return width_; }
   inline size_t height(void) const noexcept { return height_; }
   inline size_t channels(void) const noexcept { return channels_; }
+
+  // Predicates
+  inline bool empty(void) const noexcept { return width_ == 0 or height_ == 0; }
 
   // Access pixel data
   Pixel &at(size_t x, size_t y);
