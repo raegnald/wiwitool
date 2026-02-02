@@ -1,7 +1,7 @@
 #include "Paintings_pack/Image_data.hpp"
 
 #include "strutil.hpp"
-#include "fileutil.hpp"
+#include "wiwidebug.hpp"
 
 #include <string>
 #include <cstdlib>
@@ -17,7 +17,7 @@ static_assert(std::is_trivially_copyable_v<Image_data::Pixel>);
 static_assert(sizeof(Image_data::Pixel) == 4);
 
 Image_data::Image_data(std::filesystem::path filepath) : path_{filepath} {
-  std::println("Loading image data from path {}", filepath.string());
+  wiwidebug std::println("Loading image data from path {}", filepath.string());
 
   int w, h;
   const auto imgdata = reinterpret_cast<Pixel *>(

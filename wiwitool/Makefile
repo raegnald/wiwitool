@@ -7,7 +7,7 @@ AR_NATIVE  := ar
 AR_WASM    := emar
 
 # Flags common to all build targets
-CPPFLAGS := -Iinclude -Iexternal/json/include -Iexternal/stb -Iexternal/zip_file
+CPPFLAGS := -Iinclude -Iexternal/json/include -Iexternal/stb -Iexternal/zip_file -DWIWIDEBUG
 CXXFLAGS := -Wall -std=c++23 -g $(CPPFLAGS)
 
 # Directories

@@ -1,6 +1,7 @@
 #include "Minecraft_pack.hpp"
 
 #include <fstream>
+#include <utility>
 
 #include "nlohmann/json.hpp"
 using json = nlohmann::ordered_json;
@@ -37,6 +38,7 @@ void compress_folder(std::filesystem::path folder,
                      std::filesystem::path zipname) {
   // TODO: Fix the compression feature
   std::println("Compression unimplemented");
+  std::unreachable();
 
   // using namespace miniz_cpp;
   // using namespace std::filesystem;
@@ -45,7 +47,7 @@ void compress_folder(std::filesystem::path folder,
 
   // const auto all_entries = recursive_directory_iterator(folder);
   // for (const directory_entry &entry : all_entries) {
-  //   std::println("Compressing {} in {}...", entry.path().string(),
+  //   wiwidebug std::println("Compressing {} in {}...", entry.path().string(),
   //                zipname.string());
   //   if (entry.is_regular_file())
   //     zip.write(entry.path());

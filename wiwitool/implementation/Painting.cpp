@@ -7,6 +7,7 @@
 #include <print>
 
 #include "Paintings_pack/Painting_converter.hpp"
+#include "wiwidebug.hpp"
 #include "nlohmann/json.hpp"
 using json = nlohmann::ordered_json;
 
@@ -17,6 +18,7 @@ Painting::Painting(std::string mc_namespace, std::filesystem::path image_path)
                                                     next_painting_id++)},
       original_image{image_path} {
   std::println("Loaded image (painting id = {})", painting_id);
+  wiwidebug std::println("Loaded image (painting id = {})", painting_id);
 }
 
 

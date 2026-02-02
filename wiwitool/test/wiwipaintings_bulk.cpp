@@ -11,6 +11,7 @@
 #include "Minecraft_pack.hpp"
 #include "Paintings_pack.hpp"
 #include "Paintings_pack/Painting.hpp"
+#include "wiwidebug.hpp"
 
 int main(int argc, const char *argv[]) {
   Minecraft_pack::genpath = std::filesystem::temp_directory_path() / "wiwitool";
@@ -30,14 +31,14 @@ int main(int argc, const char *argv[]) {
                   entry.path().extension()) != image_extensions.end();
 
     if (entry.is_regular_file() and is_image) {
-      std::println("Adding image {}...", entry.path().string());
+      wiwidebug std::println("Adding image {}...", entry.path().string());
       auto &painting = pack.add_painting(entry.path());
       painting.set_title(entry.path().filename());
       painting.set_author("R2");
     }
   }
 
-  std::println("Generating packs...");
+  wiwidebug std::println("Generating packs...");
   pack.generate();
 
   return EXIT_SUCCESS;
