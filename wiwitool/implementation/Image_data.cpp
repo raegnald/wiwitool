@@ -1,7 +1,7 @@
 #include "Paintings_pack/Image_data.hpp"
 
-#include "strutil.hpp"
-#include "wiwidebug.hpp"
+#include "util/strutil.hpp"
+#include "util/wiwidebug.hpp"
 
 #include <string>
 #include <cstdlib>

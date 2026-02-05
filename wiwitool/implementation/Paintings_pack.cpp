@@ -4,9 +4,11 @@
 
 #include "Paintings_pack/Painting_converter.hpp"
 
+#include "util/wiwidebug.hpp"
+
 #include "nlohmann/json.hpp"
-#include "wiwidebug.hpp"
 using json = nlohmann::ordered_json;
+
 
 Paintings_pack::Paintings_pack(void)
     : Minecraft_pack{"A pack with custom paintings"} {}

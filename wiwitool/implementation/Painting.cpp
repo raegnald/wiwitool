@@ -1,13 +1,11 @@
 #include "Paintings_pack/Painting.hpp"
 
-#include <format>
-#include <fstream>
 #include <print>
 
 #include "Paintings_pack/Painting_converter.hpp"
-#include "wiwidebug.hpp"
-#include "nlohmann/json.hpp"
-using json = nlohmann::ordered_json;
+
+#include "util/wiwidebug.hpp"
+
 
 Painting::Painting(std::filesystem::path image_path)
   : painting_id{next_painting_id++}, original_image{image_path} {

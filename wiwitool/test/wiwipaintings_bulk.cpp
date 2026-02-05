@@ -11,7 +11,8 @@
 #include "Minecraft_pack.hpp"
 #include "Paintings_pack.hpp"
 #include "Paintings_pack/Painting.hpp"
-#include "wiwidebug.hpp"
+
+#include "util/wiwidebug.hpp"
 
 int main(int argc, const char *argv[]) {
   Minecraft_pack::genpath = std::filesystem::temp_directory_path() / "wiwitool";
