@@ -92,9 +92,8 @@ $(WASM_OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CXX_WASM) $(CXXFLAGS) -c $< -o $@
 
 # Link everything into the final WASM module
-$(WASM_TARGET): $(WASM_OBJS) $(WASM_SRC)/executable.cpp
+$(WASM_TARGET): $(WASM_OBJS)
 	$(CXX_WASM) $(CXXFLAGS) \
-		$(WASM_SRC)/executable.cpp \
 		$(WASM_OBJS) \
 		$(EXT_OBJS) \
     --bind \
