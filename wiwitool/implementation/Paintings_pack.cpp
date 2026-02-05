@@ -202,16 +202,6 @@ Painting &Paintings_pack::add_painting(std::string filename) {
 using namespace emscripten;
 
 EMSCRIPTEN_BINDINGS(paintings_pack) {
-  // FOTUT: Painting should not go here! This binding should be
-  // located in Painting.cpp
-  class_<Painting>("Painting")  // TODO: Add ctor
-      .function("set_title", &Painting::set_title)
-      .function("get_title", &Painting::get_title)
-      .function("set_author", &Painting::set_author)
-      .function("get_author", &Painting::get_author);
-  // FOTUT: binding methods taking std::filesystem::path without
-  // writing a wrapper that accepts std::string is hard
-
   class_<Paintings_pack>("Paintings_pack")
       .constructor<>()
       .function("add_painting", &Paintings_pack::add_painting,

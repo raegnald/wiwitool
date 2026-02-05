@@ -51,3 +51,50 @@ void Painting::rotate_anticlockwise(void) {
   original_image.rotate_anticlockwise();
   refresh();
 }
+
+
+#ifdef EMSCRIPTEN
+#include <emscripten/bind.h>
+#include <emscripten/val.h>
+#include <string>
+
+using namespace emscripten;
+
+EMSCRIPTEN_BINDINGS(paintings_pack) {
+
+  // Register std::vector<uint8_t> so we can pass arrays from JS to
+  // the Painting constructor
+  register_vector<uint8_t>("BufferVector");
+
+  // We bind Painting as a smart_ptr to handle the move-only nature of
+  // the class safely in Javascript
+  class_<Painting>("Painting")
+    .smart_ptr<std::shared_ptr<Painting>>("Painting") // allows passing managed instances
+    // Constructor 1: Wrapper for Filepath
+    .constructor(optional_override([](std::string path_str) {
+      return std::make_shared<Painting>(std::filesystem::path(path_str));
+    }))
+    // Constructor 2: Vector (requires the registered 'BufferVector')
+    .constructor(optional_override([](std::vector<uint8_t> data) {
+      return std::make_shared<Painting>(std::move(data));
+    }))
+
+    // Properties (Getters/Setters mapping to JS properties)
+    .property("title", &Painting::get_title, &Painting::set_title)
+    .property("author", &Painting::get_author, &Painting::set_author)
+    .function("stringId", &Painting::string_id)
+
+    // Image Accessors
+    // These return Image_data by value, which works because
+    // Image_data is also registered in Javascript
+    .function("originalData", &Painting::original_data)
+    .function("paintingData", &Painting::painting_data)
+    .function("iconData", &Painting::icon_data)
+
+    // Transformations
+    .function("rotateClockwise", &Painting::rotate_clockwise)
+    .function("rotateAnticlockwise", &Painting::rotate_anticlockwise)
+    ;
+
+}
+#endif

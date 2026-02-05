@@ -213,3 +213,76 @@ void Image_data::save_as(std::filesystem::path name) const {
   throw std::invalid_argument(
       "Image_data::save_as: invalid image extension (use .jpg/.jpeg or .png)");
 }
+
+#ifdef EMSCRIPTEN
+#include <emscripten/bind.h>
+#include <emscripten/val.h>
+#include <string>
+
+using namespace emscripten;
+
+EMSCRIPTEN_BINDINGS(image_data) {
+
+  // 2. Bind the inner Pixel struct as a value object (converts to/from JS Object {r,g,b,a})
+  value_object<Image_data::Pixel>("Pixel")
+    .field("r", &Image_data::Pixel::r)
+    .field("g", &Image_data::Pixel::g)
+    .field("b", &Image_data::Pixel::b)
+    .field("a", &Image_data::Pixel::a);
+
+  // 3. Bind Image_data
+  class_<Image_data>("Image_data")
+    // Constructors
+    .constructor<>()
+    .constructor<size_t, size_t>()
+    // Wrapper constructor for std::filesystem::path -> std::string
+    .constructor(optional_override([](std::string path_str) {
+      return std::make_unique<Image_data>(std::filesystem::path(path_str));
+    }))
+
+    // Attributes
+    .property("width", &Image_data::width)
+    .property("height", &Image_data::height)
+    .property("channels", &Image_data::channels)
+    .function("empty", &Image_data::empty)
+
+    // Path handling (wrapper to return string instead of filesystem::path)
+    .function("path", optional_override([](const Image_data& self) {
+      return self.path().string();
+    }))
+
+    // Pixel Access
+    // Helper: Returns a typed view into WASM memory.
+    // This is ZERO-COPY and allows direct use with HTML Canvas APIs.
+    .function("getPixels", optional_override([](const Image_data& self) {
+      const size_t size = self.width() * self.height() * 4; // 4 channels
+      const uint8_t* ptr = reinterpret_cast<const uint8_t*>(self.data());
+
+      // Return a Uint8ClampedArray (standard for Canvas ImageData)
+      return val(typed_memory_view(size, ptr));
+    }))
+    // Single pixel access
+    .function("at", select_overload<const Image_data::Pixel&(size_t, size_t) const>(&Image_data::at))
+
+    // Manipulation (These return new Image_data objects by value)
+    .function("scaleFactor", select_overload<Image_data(float) const>(&Image_data::scale))
+    .function("scaleDims", select_overload<Image_data(size_t, size_t) const>(&Image_data::scale))
+    .function("crop", &Image_data::crop)
+    .function("rotateClockwise", &Image_data::rotate_clockwise)
+    .function("rotateAnticlockwise", &Image_data::rotate_anticlockwise)
+    .function("flipVertically", &Image_data::flip_vertically)
+    .function("flipHorizontally", &Image_data::flip_horizontally)
+
+    // Export (Wrappers for std::string)
+    .function("saveAs", optional_override([](const Image_data& self, std::string path) {
+      self.save_as(std::filesystem::path(path));
+    }))
+    .function("savePng", optional_override([](const Image_data& self, std::string path) {
+      self.save_png(std::filesystem::path(path));
+    }))
+    .function("saveJpg", optional_override([](const Image_data& self, std::string path, size_t quality) {
+      self.save_jpg(std::filesystem::path(path), quality);
+    }));
+
+}
+#endif
