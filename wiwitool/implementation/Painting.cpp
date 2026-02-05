@@ -60,20 +60,20 @@ void Painting::rotate_anticlockwise(void) {
 
 using namespace emscripten;
 
-EMSCRIPTEN_BINDINGS(paintings_pack) {
+EMSCRIPTEN_BINDINGS(painting) {
 
   // Register std::vector<uint8_t> so we can pass arrays from JS to
   // the Painting constructor
-  register_vector<uint8_t>("BufferVector");
+  register_vector<uint8_t>("PaintingBufferVector");
 
   // We bind Painting as a smart_ptr to handle the move-only nature of
   // the class safely in Javascript
   class_<Painting>("Painting")
     .smart_ptr<std::shared_ptr<Painting>>("Painting") // allows passing managed instances
-    // Constructor 1: Wrapper for Filepath
-    .constructor(optional_override([](std::string path_str) {
-      return std::make_shared<Painting>(std::filesystem::path(path_str));
-    }))
+    // // Constructor 1: Wrapper for Filepath
+    // .constructor(optional_override([](std::string path_str) {
+    //   return std::make_shared<Painting>(std::filesystem::path(path_str));
+    // }))
     // Constructor 2: Vector (requires the registered 'BufferVector')
     .constructor(optional_override([](std::vector<uint8_t> data) {
       return std::make_shared<Painting>(std::move(data));
