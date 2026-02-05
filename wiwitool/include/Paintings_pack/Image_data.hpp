@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <filesystem>
 #include <memory>
+#include <vector>
 
 class Image_data {
 public:
@@ -14,6 +15,7 @@ public:
   Image_data(void) = default; // empty image (width == 0 and height == 0)
   Image_data(size_t w, size_t h);
   Image_data(std::filesystem::path filepath);
+  Image_data(std::vector<uint8_t> data);
 
   ~Image_data(void) = default;
 

@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <print>
 #include <stdexcept>
+#include <vector>
 
 #include "stb_image.h"
 #include "stb_image_write.h"
@@ -31,6 +32,24 @@ Image_data::Image_data(std::filesystem::path filepath) : path_{filepath} {
 
   data_ = Stb_image{reinterpret_cast<Pixel *>(imgdata), stbi_image_free};
 }
+
+
+Image_data::Image_data(std::vector<uint8_t> data) {
+  wiwidebug std::println("Loading image data from data");
+
+  int w, h;
+  const auto imgdata = reinterpret_cast<Pixel *>(stbi_load_from_memory(
+      data.data(), data.size(), &w, &h, nullptr, channels_));
+
+  if (not imgdata)
+    throw std::runtime_error("Image_data: failed to load from data");
+
+  width_ = w;
+  height_ = h;
+
+  data_ = Stb_image{reinterpret_cast<Pixel *>(imgdata), stbi_image_free};
+}
+
 
 Image_data::Image_data(size_t w, size_t h) : width_{w}, height_{h} {
   const size_t size = width_ * height_ * sizeof(Pixel);
