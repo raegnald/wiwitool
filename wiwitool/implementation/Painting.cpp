@@ -9,7 +9,17 @@
 
 Painting::Painting(std::filesystem::path image_path)
   : painting_id{next_painting_id++}, original_image{image_path} {
-  wiwidebug std::println("Loaded image (painting id = {})", painting_id);
+
+  wiwidebug std::println("Loaded image from file {} (painting id = {})",
+                         image_path.string(), painting_id);
+  refresh();
+}
+
+Painting::Painting(std::vector<uint8_t> image_data)
+    : painting_id{next_painting_id++}, original_image{image_data} {
+
+  wiwidebug std::println("Loaded image from data (painting id = {})",
+                         painting_id);
   refresh();
 }
 
