@@ -1,6 +1,6 @@
-#include "Paintings_pack/Painting_converter.hpp"
+#include "paintings/Painting_converter.hpp"
 
-#include "Paintings_pack/Painting_ratio.hpp"
+#include "paintings/Painting_ratio.hpp"
 
 #include <print>
 #include <stdexcept>

@@ -5,7 +5,7 @@
 
 #include "Minecraft_identifiable.hpp"
 #include "Minecraft_pack.hpp"
-#include "Paintings_pack/Painting.hpp"
+#include "paintings/Painting.hpp"
 
 static std::string default_paintings_namespace{"custompaintings"};
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Image_data.hpp"
-#include "Paintings_pack/Painting_ratio.hpp"
+#include "paintings/Painting_ratio.hpp"
 
 struct Painting_converter {
   const Image_data &image;

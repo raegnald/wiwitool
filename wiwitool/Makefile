@@ -16,7 +16,7 @@ WASM_SRC  := wasm
 BUILD_DIR := build
 
 # Source files
-SRCS      := $(wildcard $(SRC_DIR)/*.cpp)
+SRCS      := $(shell find $(SRC_DIR) -type file -name '*.cpp')
 
 # External object files
 EXT_OBJS  := external/json/json.o            \
@@ -66,6 +66,7 @@ native: $(BUILD_DIR)/native compile_flags.txt
 
 # Compile native objects
 $(NATIVE_OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(dir $@)
 	$(CXX_NATIVE) $(CXXFLAGS) -c $< -o $@
 
 # Rule to create the static library archive
@@ -89,6 +90,7 @@ wasm: $(BUILD_DIR)/wasm
 
 # Compile WASM objects (from implementation/)
 $(WASM_OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(dir $@)
 	$(CXX_WASM) $(CXXFLAGS) -c $< -o $@
 
 # Link everything into the final WASM module

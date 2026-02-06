@@ -1,8 +1,8 @@
-#include "Paintings_pack/Painting.hpp"
+#include "paintings/Painting.hpp"
 
 #include <print>
 
-#include "Paintings_pack/Painting_converter.hpp"
+#include "paintings/Painting_converter.hpp"
 
 #include "util/wiwidebug.hpp"
 

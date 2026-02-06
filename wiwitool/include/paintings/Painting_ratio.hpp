@@ -3,7 +3,8 @@
 #include <filesystem>
 #include <array>
 #include <utility>
-#include "Paintings_pack/Image_data.hpp"
+
+#include "Image_data.hpp"
 
 const inline std::filesystem::path frames_directory{"frames/"};
 

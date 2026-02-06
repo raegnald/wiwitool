@@ -1,4 +1,4 @@
-#include "Paintings_pack/Image_data.hpp"
+#include "Image_data.hpp"
 
 #include "util/strutil.hpp"
 #include "util/wiwidebug.hpp"
