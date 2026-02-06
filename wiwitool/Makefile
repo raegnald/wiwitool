@@ -7,7 +7,7 @@ AR_NATIVE  := ar
 AR_WASM    := emar
 
 # Flags common to all build targets
-CPPFLAGS := -Iinclude -Iexternal/json/include -Iexternal/stb -Iexternal/zip_file
+CPPFLAGS := -Iinclude -Iexternal/json/include -Iexternal/stb -Iexternal/zip_file -DWIWIDEBUG
 CXXFLAGS := -Wall -std=c++23 -g $(CPPFLAGS)
 
 # Directories
@@ -16,7 +16,7 @@ WASM_SRC  := wasm
 BUILD_DIR := build
 
 # Source files
-SRCS      := $(wildcard $(SRC_DIR)/*.cpp)
+SRCS      := $(shell find $(SRC_DIR) -type file -name '*.cpp')
 
 # External object files
 EXT_OBJS  := external/json/json.o            \
@@ -66,6 +66,7 @@ native: $(BUILD_DIR)/native compile_flags.txt
 
 # Compile native objects
 $(NATIVE_OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(dir $@)
 	$(CXX_NATIVE) $(CXXFLAGS) -c $< -o $@
 
 # Rule to create the static library archive
@@ -80,7 +81,7 @@ $(NATIVE_TARGET): $(NATIVE_OBJS)
 # Location for wasm objects
 WASM_OBJ_DIR := $(BUILD_DIR)/wasm
 WASM_OBJS    := $(patsubst $(SRC_DIR)/%.cpp, $(WASM_OBJ_DIR)/%.o, $(SRCS))
-WASM_TARGET  := $(WASM_OBJ_DIR)/index.js
+WASM_TARGET  := $(WASM_OBJ_DIR)/wiwitool.js
 
 wasm: $(BUILD_DIR)/wasm
 	@echo "--- Building WebAssembly ---"
@@ -89,16 +90,17 @@ wasm: $(BUILD_DIR)/wasm
 
 # Compile WASM objects (from implementation/)
 $(WASM_OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CXX_WASM) $(CXXFLAGS) --bind -c $< -o $@
+	@mkdir -p $(dir $@)
+	$(CXX_WASM) $(CXXFLAGS) -c $< -o $@
 
 # Link everything into the final WASM module
-$(WASM_TARGET): $(WASM_OBJS) $(WASM_SRC)/executable.cpp
+$(WASM_TARGET): $(WASM_OBJS)
 	$(CXX_WASM) $(CXXFLAGS) \
-		$(WASM_SRC)/executable.cpp \
 		$(WASM_OBJS) \
 		$(EXT_OBJS) \
     --bind \
 		-o $@ \
+		-sNO_DISABLE_EXCEPTION_CATCHING \
 		-s WASM=1 -s ALLOW_MEMORY_GROWTH=1
 	@echo "WASM module created at: $@"
 

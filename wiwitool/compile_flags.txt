@@ -1,0 +1,8 @@
+-Wall
+-std=c++23
+-g
+-Iinclude
+-Iexternal/json/include
+-Iexternal/stb
+-Iexternal/zip_file
+-DWIWIDEBUG

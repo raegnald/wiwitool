@@ -41,15 +41,3 @@ protected:
 
   static inline const std::filesystem::path assets_subfolder{"assets/"};
 };
-
-#ifdef EMSCRIPTEN
-#include <emscripten/bind.h>
-
-using namespace emscripten;
-
-EMSCRIPTEN_BINDINGS(minecraft_pack) {
-  class_<Minecraft_pack>("Minecraft_pack")
-    .function("generate", &Minecraft_pack::generate)
-    .function("compress", &Minecraft_pack::compress);
-}
-#endif
