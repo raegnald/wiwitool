@@ -187,13 +187,9 @@ void Paintings_pack::generate_painting_variant_json(
   jsonfile << data.dump(4) << std::endl;
 }
 
-
-Painting &Paintings_pack::add_painting(std::string filename) {
-  wiwidebug std::println("Adding painting from file {}", filename);
-  paintings.push_back(Painting{filename});
-  return paintings.back();
+void Paintings_pack::set_paintings(std::vector<Painting> paintings) {
+  this->paintings = std::move(paintings);
 }
-
 
 
 #ifdef EMSCRIPTEN
@@ -203,8 +199,10 @@ using namespace emscripten;
 
 EMSCRIPTEN_BINDINGS(paintings_pack) {
   class_<Paintings_pack>("Paintings_pack")
+  register_vector<Painting>("PaintingsVector");
+
       .constructor<>()
-      .function("add_painting", &Paintings_pack::add_painting,
+      .function("set_paintings", &Paintings_pack::set_paintings,
                 return_value_policy::reference())
       .function("generate", &Minecraft_pack::generate)
       .function("compress", &Minecraft_pack::compress);

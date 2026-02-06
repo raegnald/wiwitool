@@ -12,9 +12,9 @@ static std::string default_paintings_namespace{"custompaintings"};
 class Paintings_pack : public Minecraft_pack {
 public:
   Paintings_pack(void);
-  virtual ~Paintings_pack() = default;
+  virtual ~Paintings_pack(void) = default;
 
-  Painting &add_painting(std::string filename);
+  void set_paintings(std::vector<Painting> paintings);
 
 protected:
   virtual void generate_data(void) override;
