@@ -231,7 +231,7 @@ EMSCRIPTEN_BINDINGS(image_data) {
     .field("a", &Image_data::Pixel::a);
 
   // 3. Bind Image_data
-  class_<Image_data>("Image_data")
+  class_<Image_data>("ImageData")
     // Constructors
     .constructor<>()
     .constructor<size_t, size_t>()

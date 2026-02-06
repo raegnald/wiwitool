@@ -198,9 +198,9 @@ void Paintings_pack::set_paintings(std::vector<Painting> paintings) {
 using namespace emscripten;
 
 EMSCRIPTEN_BINDINGS(paintings_pack) {
-  class_<Paintings_pack>("Paintings_pack")
   register_vector<Painting>("PaintingsVector");
 
+  class_<Paintings_pack>("PaintingsPack")
       .constructor<>()
       .function("set_paintings", &Paintings_pack::set_paintings,
                 return_value_policy::reference())
