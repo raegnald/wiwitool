@@ -187,8 +187,8 @@ void Paintings_pack::generate_painting_variant_json(
   jsonfile << data.dump(4) << std::endl;
 }
 
-void Paintings_pack::set_paintings(std::vector<Painting> ps) {
-  this->paintings = ps;
+void Paintings_pack::set_paintings(std::vector<Painting> paintings) {
+  this->paintings = std::move(paintings);
 }
 
 
@@ -200,8 +200,11 @@ using namespace emscripten;
 EMSCRIPTEN_BINDINGS(paintings_pack) {
   register_vector<Painting>("PaintingsVector");
 
-  class_<Paintings_pack, base<Minecraft_pack>>("PaintingsPack")
+  class_<Paintings_pack>("PaintingsPack")
       .constructor<>()
-      .function("setPaintings", &Paintings_pack::set_paintings);
+      .function("set_paintings", &Paintings_pack::set_paintings,
+                return_value_policy::reference())
+      .function("generate", &Minecraft_pack::generate)
+      .function("compress", &Minecraft_pack::compress);
 }
 #endif

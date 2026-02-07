@@ -1,4 +1,4 @@
-SUBDIRS := json stb
+SUBDIRS := json stb zip_file
 
 .PHONY: all $(SUBDIRS)
 

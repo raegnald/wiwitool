@@ -1,13 +1,12 @@
 #include "Minecraft_pack.hpp"
 
 #include <fstream>
-#include <print>
+#include <utility>
 
 #include "nlohmann/json.hpp"
-#include "util/wiwidebug.hpp"
 using json = nlohmann::ordered_json;
 
-#include "miniz_cpp.hpp"
+// #include "zip_file.hpp"
 
 void Minecraft_pack::generate_pack_skeletons(void) {
   json pack;
@@ -37,20 +36,24 @@ void Minecraft_pack::generate_pack_skeletons(void) {
 
 void compress_folder(std::filesystem::path folder,
                      std::filesystem::path zipname) {
-  miniz_cpp::zip_file zip;
+  // TODO: Fix the compression feature
+  std::println("Compression unimplemented");
+  std::unreachable();
 
-  const auto all_entries =
-      std::filesystem::recursive_directory_iterator(folder);
+  // using namespace miniz_cpp;
+  // using namespace std::filesystem;
 
-  for (const std::filesystem::directory_entry &entry : all_entries) {
-    wiwidebug std::println("Compressing {} in {}...", entry.path().string(),
-                           zipname.string());
+  // zip_file zip;
 
-    if (entry.is_regular_file())
-      zip.write(entry.path());
-  }
+  // const auto all_entries = recursive_directory_iterator(folder);
+  // for (const directory_entry &entry : all_entries) {
+  //   wiwidebug std::println("Compressing {} in {}...", entry.path().string(),
+  //                zipname.string());
+  //   if (entry.is_regular_file())
+  //     zip.write(entry.path());
+  // }
 
-  zip.save(zipname);
+  // zip.save(zipname);
 }
 
 void Minecraft_pack::generate(void) {
@@ -59,23 +62,9 @@ void Minecraft_pack::generate(void) {
   generate_data();
 }
 
-void Minecraft_pack::compress_packs(void) {
-  const auto datapack_zip = genpath / "datapack.zip";
-  const auto respack_zip = genpath / "respack.zip";
-  const auto packs_zip = genpath / "packs.zip";
-
-  compress_folder(genpath / "datapack", datapack_zip);
-  compress_folder(genpath / "respack", respack_zip);
-
-  // Compressing data and resouce pack zips into a single zip file
-  {
-    miniz_cpp::zip_file zip;
-
-    zip.write(datapack_zip);
-    zip.write(respack_zip);
-
-    zip.save(packs_zip);
-  }
+void Minecraft_pack::compress(void) {
+  compress_folder(genpath / "datapack", genpath / "datapack.zip");
+  compress_folder(genpath / "respack", genpath / "respack.zip");
 }
 
 std::filesystem::path Minecraft_pack::in_data_folder(std::string name) {
@@ -89,16 +78,3 @@ std::filesystem::path Minecraft_pack::in_resource_folder(std::string name) {
   std::filesystem::create_directories(dir);
   return dir;
 }
-
-
-#ifdef EMSCRIPTEN
-#include <emscripten/bind.h>
-
-using namespace emscripten;
-
-EMSCRIPTEN_BINDINGS(minecraft_pack) {
-  class_<Minecraft_pack>("MinecraftPack")
-      .function("generate", &Minecraft_pack::generate)
-      .function("compress", &Minecraft_pack::compress_packs);
-}
-#endif
