@@ -4,5 +4,5 @@
 -Iinclude
 -Iexternal/json/include
 -Iexternal/stb
--Iexternal/zip_file
+-Iexternal/miniz_cpp
 -DWIWIDEBUG
