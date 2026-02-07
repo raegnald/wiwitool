@@ -1,4 +1,5 @@
-import { writable } from 'svelte/store';
+import { writable } from "svelte/store";
 
-// global state
-// export const counter = writable(0);
+// This will hold objects looking like:
+// { id: number, cppPainting: CppObject, title: string, author: string, ... }
+export const paintingsStore = writable([]);

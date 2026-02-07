@@ -10,9 +10,9 @@ class Painting {
 public:
   Painting(void) = delete;
 
-  // NO copy
-  Painting(const Painting &) = delete;
-  Painting& operator=(const Painting &) = delete;
+  // Copy
+  Painting(const Painting &) = default;
+  Painting& operator=(const Painting &) = default;
 
   // Move-only type
   Painting(Painting&& other) noexcept = default;
