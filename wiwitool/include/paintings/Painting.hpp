@@ -20,6 +20,7 @@ public:
 
   Painting(std::filesystem::path path);
   Painting(std::vector<uint8_t> image_data);
+  Painting(Image_data image_data);
 
   // Getter/setter title
   inline void set_title(std::string the_title) { title = the_title; }

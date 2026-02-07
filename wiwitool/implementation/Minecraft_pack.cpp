@@ -37,7 +37,7 @@ void Minecraft_pack::generate_pack_skeletons(void) {
 }
 
 void compress_directory(std::filesystem::path folder,
-                     std::filesystem::path zipname) {
+                        std::filesystem::path zipname) {
   using namespace std::filesystem;
   const auto all_entries = recursive_directory_iterator(folder);
 
@@ -47,8 +47,16 @@ void compress_directory(std::filesystem::path folder,
     wiwidebug std::println("Compressing {} in {}...", entry.path().string(),
                            zipname.string());
 
-    if (entry.is_regular_file())
-      zip.write(entry.path());
+    if (entry.is_regular_file()) {
+      const auto archive_name = entry.path().string().substr(
+          folder.string().length() + 1); // FOTUT really fotut
+      // /folder/a/b/c.txt ---> a/b/c.txt
+
+      wiwidebug std::println("Archive name for {} is {}", entry.path().string(),
+                             archive_name);
+
+      zip.write(entry.path(), archive_name);
+    }
   }
 
   zip.save(zipname);

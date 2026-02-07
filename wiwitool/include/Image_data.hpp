@@ -46,16 +46,17 @@ public:
   // Image manipulation
 
   // Nearest-neighbour scaling
-  Image_data scale(float factor) const;
-  Image_data scale(size_t target_w, size_t target_h) const;
+  [[nodiscard]] Image_data scale(float factor) const;
+  [[nodiscard]] Image_data scale(size_t target_w, size_t target_h) const;
 
-  Image_data crop(size_t x, size_t y, size_t width, size_t height) const;
+  [[nodiscard]] Image_data crop(size_t x, size_t y, size_t width,
+                                size_t height) const;
 
-  Image_data rotate_clockwise(void) const;
-  Image_data rotate_anticlockwise(void) const;
+  [[nodiscard]] Image_data rotate_clockwise(void) const;
+  [[nodiscard]] Image_data rotate_anticlockwise(void) const;
 
-  Image_data flip_vertically(void) const;
-  Image_data flip_horizontally(void) const;
+  [[nodiscard]] Image_data flip_vertically(void) const;
+  [[nodiscard]] Image_data flip_horizontally(void) const;
 
   // Export
 

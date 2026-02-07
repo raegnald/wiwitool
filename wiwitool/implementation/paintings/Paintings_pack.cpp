@@ -58,7 +58,9 @@ void Paintings_pack::generate_recipe_json(const Painting &painting,
   data["ingredient"] = "minecraft:painting";
   data["result"] = {
       {"id", "minecraft:painting"},
-      {"components", {{"minecraft:painting/variant", painting.string_id()}}},
+      {"components",
+       {{"minecraft:painting/variant",
+         paintings_namespace + ":" + painting.string_id()}}},
       {"count", 1}};
 
   jsonfile << data.dump(4) << std::endl;
@@ -80,7 +82,7 @@ std::vector<std::string> Paintings_pack::get_painting_ids(void) const {
   auto painting_ids = std::vector<std::string>{};
 
   for (const auto &painting : paintings)
-    painting_ids.push_back(painting.string_id());
+    painting_ids.push_back(paintings_namespace + ":" + painting.string_id());
 
   return painting_ids;
 }
@@ -128,7 +130,7 @@ void Paintings_pack::generate_painting_json(const Painting &painting,
 
   for (const auto &painting : paintings) {
     data["model"]["cases"].push_back({
-      {"when", painting.string_id()},
+      {"when", paintings_namespace + ":" + painting.string_id()},
       {"model", {
         {"type", "minecraft:model"},
         {"model", item_id(painting)}
@@ -145,7 +147,7 @@ void Paintings_pack::generate_painting_json(const Painting &painting,
 void Paintings_pack::generate_miniature_resource(
     const Painting &painting, std::filesystem::path directory) {
 
-  const auto output_filename = std::format("painting_{}.png", painting.string_id());
+  const auto output_filename = std::format("{}.png", painting.string_id());
   wiwidebug std::println("Generating painting miniature {}...", output_filename);
   const auto item_image = Painting_converter(painting.original_data()).miniatureise();
   item_image.save_as(directory / output_filename);
