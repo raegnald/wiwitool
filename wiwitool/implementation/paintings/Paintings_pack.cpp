@@ -66,14 +66,13 @@ void Paintings_pack::generate_recipe_json(const Painting &painting,
 
 void Paintings_pack::generate_painting_resource(
     const Painting &painting, std::filesystem::path directory) {
-  const auto output_filename = std::format("painting_{}.png", painting.string_id());
+
+  const auto output_filename = painting.string_id() + ".png";
   wiwidebug std::println("Generating painting {}...", output_filename);
 
-  // const auto [w, h] =
-  // Painting_converter(painting.get_).convert(directory / output_filename);
-
-  // converted_width = w / 16;     // FOTUT: hard coded
-  // converted_height = h / 16;
+  auto painting_image = Painting_converter{painting.painting_data()}.convert();
+  painting_image.save_png(directory / output_filename);
+  wiwidebug std::println("Saved painting to ", (directory / output_filename).string());
 }
 
 

@@ -107,7 +107,7 @@ $(WASM_TARGET): $(WASM_OBJS)
 		-s MODULARIZE=1 \
 		-s EXPORT_NAME='createWiwitoolModule' \
 		-s EXPORTED_RUNTIME_METHODS='["FS"]' \
-		--preload-file $(ASSETS_DIR)@/frames
+		--preload-file $(ASSETS_DIR)@/
 	@echo "WASM module created at: $@"
 
 # --- Cleaning ---
