@@ -4,7 +4,8 @@ all: library
 
 library:
 	$(MAKE) -C wiwitool wasm
-	cp wiwitool/build/wasm/wiwitool.{js,wasm} front/wasm
+	@mkdir -p front/public/wasm/
+	cp wiwitool/build/wasm/wiwitool.{js,wasm,data} front/public/wasm/
 
-run: library
-	cd front && python3 -m http.server 8080
+run-dev: library
+	cd front && npm run dev

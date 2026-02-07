@@ -14,12 +14,12 @@ private:
   void generate_pack_skeletons(void);
 
 public:
-  static inline std::filesystem::path genpath{"/tmp"};
+  static inline std::filesystem::path genpath{"/"};
 
   virtual ~Minecraft_pack(void) = default;
 
   void generate(void);
-  void compress(void);
+  void compress_packs(void);
 
 protected:
   explicit Minecraft_pack(std::string description) : description{description} {}

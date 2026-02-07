@@ -7,12 +7,13 @@ AR_NATIVE  := ar
 AR_WASM    := emar
 
 # Flags common to all build targets
-CPPFLAGS := -Iinclude -Iexternal/json/include -Iexternal/stb -Iexternal/zip_file -DWIWIDEBUG
+CPPFLAGS := -Iinclude -Iexternal/json/include -Iexternal/stb -Iexternal/miniz_cpp -DWIWIDEBUG
 CXXFLAGS := -Wall -std=c++23 -g $(CPPFLAGS)
 
 # Directories
 SRC_DIR   := implementation
 WASM_SRC  := wasm
+ASSETS_DIR := assets/frames
 BUILD_DIR := build
 
 # Source files
@@ -21,8 +22,7 @@ SRCS      := $(shell find $(SRC_DIR) -type file -name '*.cpp')
 # External object files
 EXT_OBJS  := external/json/json.o            \
              external/stb/stb_image.o        \
-             external/stb/stb_image_write.o  \
-             external/zip_file/zip_file.o
+             external/stb/stb_image_write.o
 
 # --- Targets ---
 
@@ -98,12 +98,16 @@ $(WASM_TARGET): $(WASM_OBJS)
 	$(CXX_WASM) $(CXXFLAGS) \
 		$(WASM_OBJS) \
 		$(EXT_OBJS) \
-    --bind \
+		--bind \
 		-o $@ \
-		-sNO_DISABLE_EXCEPTION_CATCHING \
-		-s WASM=1 -s ALLOW_MEMORY_GROWTH=1
+		-s NO_DISABLE_EXCEPTION_CATCHING \
+		-s WASM=1 \
+		-s ALLOW_MEMORY_GROWTH=1 \
 		-s FORCE_FILESYSTEM=1 \
 		--preload-file $(ASSETS_DIR)@/frames \
+		-s MODULARIZE=1 \
+		-s EXPORT_NAME='createWiwitoolModule' \
+		-s EXPORTED_RUNTIME_METHODS='["FS"]'
 	@echo "WASM module created at: $@"
 
 # --- Cleaning ---
