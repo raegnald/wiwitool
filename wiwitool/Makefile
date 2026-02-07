@@ -102,6 +102,8 @@ $(WASM_TARGET): $(WASM_OBJS)
 		-o $@ \
 		-sNO_DISABLE_EXCEPTION_CATCHING \
 		-s WASM=1 -s ALLOW_MEMORY_GROWTH=1
+		-s FORCE_FILESYSTEM=1 \
+		--preload-file $(ASSETS_DIR)@/frames \
 	@echo "WASM module created at: $@"
 
 # --- Cleaning ---
