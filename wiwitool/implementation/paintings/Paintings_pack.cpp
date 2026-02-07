@@ -200,11 +200,8 @@ using namespace emscripten;
 EMSCRIPTEN_BINDINGS(paintings_pack) {
   register_vector<Painting>("PaintingsVector");
 
-  class_<Paintings_pack>("PaintingsPack")
+  class_<Paintings_pack, base<Minecraft_pack>>("PaintingsPack")
       .constructor<>()
-      .function("set_paintings", &Paintings_pack::set_paintings,
-                return_value_policy::reference())
-      .function("generate", &Minecraft_pack::generate)
-      .function("compress", &Minecraft_pack::compress);
+      .function("setPaintings", &Paintings_pack::set_paintings);
 }
 #endif

@@ -7,7 +7,7 @@ AR_NATIVE  := ar
 AR_WASM    := emar
 
 # Flags common to all build targets
-CPPFLAGS := -Iinclude -Iexternal/json/include -Iexternal/stb -Iexternal/zip_file -DWIWIDEBUG
+CPPFLAGS := -Iinclude -Iexternal/json/include -Iexternal/stb -Iexternal/miniz_cpp -DWIWIDEBUG
 CXXFLAGS := -Wall -std=c++23 -g $(CPPFLAGS)
 
 # Directories
@@ -22,8 +22,7 @@ SRCS      := $(shell find $(SRC_DIR) -type file -name '*.cpp')
 # External object files
 EXT_OBJS  := external/json/json.o            \
              external/stb/stb_image.o        \
-             external/stb/stb_image_write.o  \
-             external/zip_file/zip_file.o
+             external/stb/stb_image_write.o
 
 # --- Targets ---
 
