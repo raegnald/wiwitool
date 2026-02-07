@@ -13,6 +13,7 @@ CXXFLAGS := -Wall -std=c++23 -g $(CPPFLAGS)
 # Directories
 SRC_DIR   := implementation
 WASM_SRC  := wasm
+ASSETS_DIR := assets/
 BUILD_DIR := build
 
 # Source files
@@ -98,12 +99,16 @@ $(WASM_TARGET): $(WASM_OBJS)
 	$(CXX_WASM) $(CXXFLAGS) \
 		$(WASM_OBJS) \
 		$(EXT_OBJS) \
-    --bind \
+		--bind \
 		-o $@ \
-		-sNO_DISABLE_EXCEPTION_CATCHING \
-		-s WASM=1 -s ALLOW_MEMORY_GROWTH=1
+		-s NO_DISABLE_EXCEPTION_CATCHING \
+		-s WASM=1 \
+		-s ALLOW_MEMORY_GROWTH=1 \
 		-s FORCE_FILESYSTEM=1 \
-		--preload-file $(ASSETS_DIR)@/frames \
+		-s MODULARIZE=1 \
+		-s EXPORT_NAME='createWiwitoolModule' \
+		-s EXPORTED_RUNTIME_METHODS='["FS"]' \
+		--preload-file $(ASSETS_DIR)@/frames
 	@echo "WASM module created at: $@"
 
 # --- Cleaning ---
