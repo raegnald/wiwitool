@@ -50,6 +50,7 @@
           id: Math.random(), // Simple ID for UI keys
           title: name,
           author: "User",
+          originalImageBytes: uint8View,
           cppPainting: painting,
         },
       ]);
@@ -107,11 +108,53 @@
 </script>
 
 <main>
-  <h1>Minecraft Painting Generator</h1>
+  <div id="wiwi-logo-wide">
+    <img src="/logo-wide.svg" alt="Wide logo" />
+  </div>
 
   {#if !$wasmReady}
     <p>Loading Wasm Module...</p>
   {:else}
+    <h2>What is this tool all about?</h2>
+    <p>
+      This is a web tool for creating <b
+        >custom painting items in Minecraft out of your own images</b
+      >. You drag and drop all the images you want to have as Minecraft painting
+      items, and this tool bundles them into two files:
+      <code>datapack.zip</code>
+      and <code>respack.zip</code>.
+    </p>
+
+    <img
+      clas="how-to-use-wiwitool-img"
+      src="/flow.png"
+      alt="Workflow of using the wiwitool"
+    />
+
+    <p>
+      The paitings you get can be crafted out of a stonecutter. You can any of
+      your paintings by adding any painting to a stonecutter.
+    </p>
+
+    <h3>Wiwitool features</h3>
+
+    <ul>
+      <li>
+        Open-source software (<a
+          href="https://github.com/raegnald/wiwitool/"
+          target="_blank">Github repository</a
+        >). Free to use forever.
+      </li>
+      <li>
+        Runs locally on your browser (all your images are kept on <i>your</i> machine.)
+      </li>
+      <li>
+        You can manipulate and preview how your image will be seen in Minecraft.
+      </li>
+    </ul>
+
+    <h2>1. Load your images</h2>
+
     <button
       class="drop-zone"
       class:hover={isDragOver}
@@ -122,6 +165,10 @@
       <p>Drag and drop images here</p>
     </button>
 
+    {#if $paintingsStore.length > 0}
+      <h2>2. Customise your paintings</h2>
+    {/if}
+
     <div class="list">
       {#each $paintingsStore as wrapper (wrapper.id)}
         <PaintingCard {wrapper} />
@@ -129,20 +176,33 @@
     </div>
 
     {#if $paintingsStore.length > 0}
-      <button on:click={generatePack} class="generate-btn">
-        Generate Minecraft Pack
-      </button>
+      <div id="generate-btn-container">
+        <button on:click={generatePack} class="generate-btn">
+          Generate Minecraft Pack
+        </button>
+      </div>
     {/if}
   {/if}
 </main>
 
 <style>
+  #wiwi-logo-wide {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 25px;
+  }
+
+  #wiwi-logo-wide img {
+    margin: 50px 0;
+    width: 100%;
+    max-width: 768px;
+  }
   .drop-zone {
     display: block;
     width: 100%;
     cursor: default;
     border: 2px dashed #aaa;
-    padding: 2rem;
+    padding: 6rem;
     text-align: center;
     margin-bottom: 2rem;
     transition: 0.2s;
@@ -151,10 +211,23 @@
     background-color: #f0f8ff;
     border-color: #007bff;
   }
+
   .list {
-    display: flex;
-    flex-wrap: wrap;
+    /*display: flex;
+    flex-wrap: wrap;*/
+    margin-bottom: 200px;
   }
+
+  #generate-btn-container {
+    position: sticky;
+    z-index: 100;
+    bottom: 30px;
+    width: 100%;
+    max-width: 1024px;
+    display: flex;
+    justify-content: center;
+  }
+
   .generate-btn {
     font-size: 1.5rem;
     padding: 10px 20px;
@@ -162,5 +235,12 @@
     color: white;
     border: none;
     cursor: pointer;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  @media (prefers-color-scheme: light) {
+    .drop-zone {
+      background-color: #e7f0a5;
+    }
   }
 </style>
