@@ -72,7 +72,9 @@ void Paintings_pack::generate_painting_resource(
   const auto output_filename = painting.string_id() + ".png";
   wiwidebug std::println("Generating painting {}...", output_filename);
 
-  auto painting_image = Painting_converter{painting.painting_data()}.convert();
+  auto painting_image = Painting_converter{painting.painting_data()}.convert(
+      painting.get_ratio());
+
   painting_image.save_png(directory / output_filename);
   wiwidebug std::println("Saved painting to ", (directory / output_filename).string());
 }
