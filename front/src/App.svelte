@@ -5,7 +5,10 @@
   import PaintingCard from "./components/PaintingCard.svelte";
 
   let module = null;
-  let isDragOver = false;
+  let isDragOver = $state(false);
+
+  let totalFiles = $state(0);
+  let loadedFiles = $state(0);
 
   onMount(async () => {
     module = await getWasmModule();
@@ -17,6 +20,7 @@
     if (!module) return;
 
     const files = e.dataTransfer.files;
+    totalFiles = files.length;
 
     for (const file of files) {
       const buffer = await file.arrayBuffer();
@@ -54,6 +58,9 @@
           cppPainting: painting,
         },
       ]);
+
+      loadedFiles++;
+      if (loadedFiles == totalFiles) loadedFiles = totalFiles = 0;
     }
   }
 
@@ -113,56 +120,63 @@
   </div>
 
   {#if !$wasmReady}
-    <p>Loading Wasm Module...</p>
+    <p>Loading webassembly module...</p>
   {:else}
-    <h2>What is this tool all about?</h2>
-    <p>
-      This is a web tool for creating <b
-        >custom painting items in Minecraft out of your own images</b
-      >. You drag and drop all the images you want to have as Minecraft painting
-      items, and this tool bundles them into two files:
-      <code>datapack.zip</code>
-      and <code>respack.zip</code>.
-    </p>
+    <details class="app-card">
+      <summary>Information about this tool</summary>
 
-    <img
-      clas="how-to-use-wiwitool-img"
-      src="/flow.png"
-      alt="Workflow of using the wiwitool"
-    />
+      <h2>What is this tool all about?</h2>
+      <p>
+        This is a web tool for creating <b
+          >custom painting items in Minecraft out of your own images</b
+        >. You drag and drop all the images you want to have as Minecraft
+        painting items, and this tool bundles them into two files:
+        <code>datapack.zip</code>
+        and <code>respack.zip</code>.
+      </p>
 
-    <p>
-      The paitings you get can be crafted out of a stonecutter. You can any of
-      your paintings by adding any painting to a stonecutter.
-    </p>
+      <div class="how-to-use-wiwitool">
+        <img src="/flow.png" alt="Workflow of using the wiwitool" />
+      </div>
 
-    <h3>Wiwitool features</h3>
+      <p>
+        The paitings you get can be crafted from a stonecutter. You can obtain
+        any of your paintings by adding any painting to a stonecutter.
+      </p>
 
-    <ul>
-      <li>
-        Open-source software (<a
-          href="https://github.com/raegnald/wiwitool/"
-          target="_blank">Github repository</a
-        >). Free to use forever.
-      </li>
-      <li>
-        Runs locally on your browser (all your images are kept on <i>your</i> machine.)
-      </li>
-      <li>
-        You can manipulate and preview how your image will be seen in Minecraft.
-      </li>
-    </ul>
+      <h3>Wiwitool features</h3>
+
+      <ul>
+        <li>
+          Open-source software (<a
+            href="https://github.com/raegnald/wiwitool/"
+            target="_blank">Github repository</a
+          >). Free to use forever.
+        </li>
+        <li>
+          Runs locally on your browser (all your images are kept on <i>your</i> machine.)
+        </li>
+        <li>
+          You can manipulate and preview how your image will be seen in
+          Minecraft.
+        </li>
+      </ul>
+    </details>
 
     <h2>1. Load your images</h2>
 
     <button
       class="drop-zone"
       class:hover={isDragOver}
-      on:drop={handleDrop}
-      on:dragover={handleDragOver}
-      on:dragleave={handleDragLeave}
+      ondrop={handleDrop}
+      ondragover={handleDragOver}
+      ondragleave={handleDragLeave}
     >
-      <p>Drag and drop images here</p>
+      {#if totalFiles - loadedFiles > 0}
+        <p>Loaded {loadedFiles} of {totalFiles}</p>
+      {:else}
+        <p>Drag and drop images here</p>
+      {/if}
     </button>
 
     {#if $paintingsStore.length > 0}
@@ -176,8 +190,9 @@
     </div>
 
     {#if $paintingsStore.length > 0}
+      <h2>3. Enjoy your paintings!</h2>
       <div id="generate-btn-container">
-        <button on:click={generatePack} class="generate-btn">
+        <button onclick={generatePack} class="generate-btn">
           Generate Minecraft Pack
         </button>
       </div>
@@ -186,6 +201,9 @@
 </main>
 
 <style>
+  main {
+    margin-bottom: 200px;
+  }
   #wiwi-logo-wide {
     display: flex;
     justify-content: center;
@@ -197,6 +215,7 @@
     width: 100%;
     max-width: 768px;
   }
+
   .drop-zone {
     display: block;
     width: 100%;
@@ -215,7 +234,7 @@
   .list {
     /*display: flex;
     flex-wrap: wrap;*/
-    margin-bottom: 200px;
+    margin-bottom: 50px;
   }
 
   #generate-btn-container {
@@ -241,6 +260,16 @@
   @media (prefers-color-scheme: light) {
     .drop-zone {
       background-color: #e7f0a5;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    #wiwi-logo-wide,
+    .how-to-use-wiwitool {
+      background-color: #fefefe;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      padding: 20px;
     }
   }
 </style>

@@ -90,7 +90,7 @@
   });
 </script>
 
-<div class="card">
+<div class="app-card card">
   <div class="actions">
     <button on:click={rotate}>Rotate ↻</button>
     <button on:click={remove} class="delete">Remove</button>
@@ -144,15 +144,10 @@
 
 <style>
   .card {
-    border: 1px solid #ccc;
-    padding: 20px;
     margin: 20px 0px;
     display: flex;
     align-items: center;
     gap: 1rem;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   .transformation {
     display: flex;
