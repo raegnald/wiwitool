@@ -2,8 +2,6 @@
 
 #include <fstream>
 
-#include "paintings/Painting_converter.hpp"
-
 #include "util/wiwidebug.hpp"
 
 #include "nlohmann/json.hpp"
@@ -72,8 +70,7 @@ void Paintings_pack::generate_painting_resource(
   const auto output_filename = painting.string_id() + ".png";
   wiwidebug std::println("Generating painting {}...", output_filename);
 
-  auto painting_image = Painting_converter{painting.painting_data()}.convert(
-      painting.get_ratio());
+  auto painting_image = painting.painting_data();
 
   painting_image.save_png(directory / output_filename);
   wiwidebug std::println("Saved painting to ", (directory / output_filename).string());
@@ -151,7 +148,8 @@ void Paintings_pack::generate_miniature_resource(
 
   const auto output_filename = std::format("{}.png", painting.string_id());
   wiwidebug std::println("Generating painting miniature {}...", output_filename);
-  const auto item_image = Painting_converter(painting.original_data()).miniatureise();
+
+  const auto item_image = painting.icon_data();
   item_image.save_as(directory / output_filename);
 }
 
