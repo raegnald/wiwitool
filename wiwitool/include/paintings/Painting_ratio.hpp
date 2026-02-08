@@ -35,6 +35,8 @@ double ratio_value(Painting_ratio r) noexcept;
 
 Painting_ratio nearest_ratio(int width, int height) noexcept;
 
+Painting_ratio opposite_ratio(Painting_ratio) noexcept;
+
 Image_data load_frame(Painting_ratio ratio);
 
 std::string string_of_ratio(Painting_ratio r);

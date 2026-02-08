@@ -12,7 +12,7 @@
   let title = wrapper.title;
   let author = wrapper.author;
 
-  let currentRatio = wrapper.cppPainting.ratio;
+  let currentRatio;
 
   // Reactive: Update C++ object when inputs change
   // 3. Update references inside the reactive block
@@ -76,10 +76,17 @@
     iconData.delete();
   }
 
-  function rotate() {
+  function rotateClockwise() {
     wrapper.cppPainting.rotateClockwise();
-    renderPainting();
-    renderOriginalImage();
+    refresh();
+
+    // Trigger Svelte update
+    paintingsStore.update((items) => items);
+  }
+
+  function rotateAnticlockwise() {
+    wrapper.cppPainting.rotateAnticlockwise();
+    refresh();
 
     // Trigger Svelte update
     paintingsStore.update((items) => items);
@@ -92,19 +99,20 @@
   }
 
   onMount(() => {
-    currentRatio = wrapper.cppPainting.ratio;
     refresh();
   });
 
   function refresh() {
     renderPainting();
     renderOriginalImage();
+    currentRatio = wrapper.cppPainting.ratio;
   }
 </script>
 
 <div class="app-card card">
   <div class="actions">
-    <button onclick={rotate}>Rotate ↻</button>
+    <button onclick={rotateClockwise}>Rotate ↻</button>
+    <button onclick={rotateAnticlockwise}>Rotate ↺</button>
     <button onclick={remove} class="delete">Remove</button>
   </div>
 

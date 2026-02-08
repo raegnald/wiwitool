@@ -4,6 +4,7 @@
 
 #include "paintings/Painting_converter.hpp"
 
+#include "paintings/Painting_ratio.hpp"
 #include "util/wiwidebug.hpp"
 
 // These ctors really need some refactoring...
@@ -47,14 +48,16 @@ void Painting::refresh(void) const {
 
 
 void Painting::rotate_clockwise(void) {
-  wiwidebug std::println("Rotating painting width id = {} clockwise", painting_id);
-
   original_image = original_image.rotate_clockwise();
+  conversion_ratio = opposite_ratio(conversion_ratio);
+
   refresh();
 }
 
 void Painting::rotate_anticlockwise(void) {
   original_image = original_image.rotate_anticlockwise();
+  conversion_ratio = opposite_ratio(conversion_ratio);
+
   refresh();
 }
 

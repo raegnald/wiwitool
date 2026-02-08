@@ -79,3 +79,22 @@ Painting_ratio ratio_of_string(std::string s) {
 
   return Painting_ratio::Nearest;
 }
+
+Painting_ratio opposite_ratio(Painting_ratio r) noexcept {
+  switch (r) {
+  case Nearest     : return Nearest;
+  case ONE_ONE     : return ONE_ONE;
+  case ONE_TWO     : return TWO_ONE;
+  case TWO_ONE     : return ONE_TWO;
+  case TWO_TWO     : return TWO_TWO;
+  case TWO_THREE   : return THREE_TWO;
+  case TWO_FOUR    : return FOUR_TWO;
+  case THREE_TWO   : return TWO_THREE;
+  case THREE_THREE : return THREE_THREE;
+  case THREE_FOUR  : return FOUR_THREE;
+  case FOUR_TWO    : return TWO_FOUR;
+  case FOUR_THREE  : return FOUR_THREE;
+  case FOUR_FOUR   : return FOUR_FOUR;
+  case ICON_RATIO  : return ICON_RATIO;
+  }
+}
