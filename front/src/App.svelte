@@ -184,7 +184,7 @@
     {/if}
 
     <div class="list">
-      {#each $paintingsStore as wrapper (wrapper.id)}
+      {#each [...$paintingsStore].reverse() as wrapper (wrapper.id)}
         <PaintingCard {wrapper} />
       {/each}
     </div>
