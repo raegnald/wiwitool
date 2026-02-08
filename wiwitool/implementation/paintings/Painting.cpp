@@ -6,25 +6,18 @@
 
 #include "util/wiwidebug.hpp"
 
+// These ctors really need some refactoring...
 
 Painting::Painting(std::filesystem::path image_path)
-  : painting_id{next_painting_id++}, original_image{image_path} {
-
-  wiwidebug std::println("Loaded image from file {} (painting id = {})",
-                         image_path.string(), painting_id);
-  refresh();
-}
+    : Painting{Image_data{image_path}} {}
 
 Painting::Painting(std::vector<uint8_t> image_data)
-    : painting_id{next_painting_id++}, original_image{image_data} {
-
-  wiwidebug std::println("Loaded image from data (painting id = {})",
-                         painting_id);
-  refresh();
-}
+    : Painting{Image_data{image_data}} {}
 
 Painting::Painting(Image_data image_data)
-    : painting_id{next_painting_id++}, original_image{image_data} {
+    : painting_id{next_painting_id++}, original_image{image_data},
+      conversion_ratio{
+          nearest_ratio(original_image.width(), original_image.height())} {
 
   wiwidebug std::println("Loaded image from image data (painting id = {})",
                          painting_id);
@@ -46,7 +39,7 @@ const Image_data Painting::icon_data(void) const {
 
 void Painting::refresh(void) const {
   auto converter = Painting_converter{original_image};
-  painting = converter.convert();
+  painting = converter.convert(conversion_ratio);
   icon = converter.miniatureise();
 
   wiwidebug std::println("Painting and icon image data computed!");
@@ -88,7 +81,7 @@ EMSCRIPTEN_BINDINGS(painting) {
         Image_data hires{std::move(data)};
 
         const double maxlen = std::max(hires.width(), hires.height());
-        const double newmaxlen = 200; // in pixels
+        const double newmaxlen = 256; // in pixels
 
         wiwidebug std::println("Scaling image by factor of {} (maxlen = {})",
                                newmaxlen / maxlen, maxlen);
@@ -100,6 +93,18 @@ EMSCRIPTEN_BINDINGS(painting) {
       .property("title", &Painting::get_title, &Painting::set_title)
       .property("author", &Painting::get_author, &Painting::set_author)
       .function("stringId", &Painting::string_id)
+
+      .property(
+          "ratio",
+          // Getter
+          +[](const Painting &self) -> std::string {
+            return string_of_ratio(self.get_ratio());
+          },
+          // Setter
+          +[](Painting &self, std::string ratio_str) {
+            wiwidebug std::println("Setting ratio to ", ratio_str);
+            self.set_ratio(ratio_of_string(ratio_str));
+          })
 
       // Image Accessors
       // These return Image_data by value, which works because

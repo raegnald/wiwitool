@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Image_data.hpp"
+#include "paintings/Painting_ratio.hpp"
 
 class Painting {
 public:
@@ -30,6 +31,10 @@ public:
   inline void set_author(std::string the_author) { author = the_author; }
   inline std::string get_author(void) const { return author; }
 
+  // Getter/setter for conversion ratio
+  inline void set_ratio(Painting_ratio ratio) { conversion_ratio = ratio; refresh(); }
+  inline Painting_ratio get_ratio(void) const { return conversion_ratio; }
+
   // Getters for the painting and icon images
   const Image_data original_data(void) const;
   const Image_data painting_data(void) const;
@@ -53,6 +58,8 @@ private:
 
   Image_data original_image;
   mutable Image_data painting, icon;
+
+  Painting_ratio conversion_ratio{Nearest};
 
   // Compute painting and icon based on the original_image
   void refresh(void) const;

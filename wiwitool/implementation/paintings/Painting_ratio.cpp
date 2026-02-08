@@ -1,10 +1,13 @@
 
 #include "paintings/Painting_ratio.hpp"
+#include "util/wiwidebug.hpp"
 
 #include <algorithm>
 #include <array>
 #include <cstdlib>
 #include <format>
+#include <print>
+#include <stdexcept>
 #include <utility>
 
 std::array<Painting_ratio, 12> all_ratios(void) noexcept {
@@ -44,4 +47,35 @@ Image_data load_frame(Painting_ratio ratio) {
   const auto frame_file = std::format("{}{}.png", width, height);
 
   return Image_data{frames_directory / frame_file};
+}
+
+std::string string_of_ratio(Painting_ratio r) {
+  if (r == Painting_ratio::Nearest) return "nearest";
+
+  const auto digit = [](int i) {
+    switch (i) {
+    case 1: return "ONE";
+    case 2: return "TWO";
+    case 3: return "THREE";
+    case 4: return "FOUR";
+    default: throw std::invalid_argument("string_of_ratio: digit");
+    }
+  };
+
+  // ratio_sizes extracts the high/low bytes from the enum value
+  auto [w, h] = ratio_sizes(r);
+  return std::format("{}_{}", digit(w), digit(h));
+}
+
+
+Painting_ratio ratio_of_string(std::string s) {
+  if (s == "nearest" || s == "Nearest") return Painting_ratio::Nearest;
+
+  for (auto r : all_ratios())
+    if (string_of_ratio(r) == s) return r;
+
+  wiwidebug std::println(
+      "Warning: Invalid ratio string '{}', defaulting to Nearest", s);
+
+  return Painting_ratio::Nearest;
 }

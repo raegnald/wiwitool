@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <array>
+#include <string>
 #include <utility>
 
 #include "Image_data.hpp"
@@ -35,3 +36,6 @@ double ratio_value(Painting_ratio r) noexcept;
 Painting_ratio nearest_ratio(int width, int height) noexcept;
 
 Image_data load_frame(Painting_ratio ratio);
+
+std::string string_of_ratio(Painting_ratio r);
+Painting_ratio ratio_of_string(std::string s);
