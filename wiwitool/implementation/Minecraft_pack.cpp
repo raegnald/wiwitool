@@ -63,6 +63,14 @@ void compress_directory(std::filesystem::path folder,
 }
 
 void Minecraft_pack::generate(void) {
+  // Clean up previous runs of generating packs
+  {
+    using namespace std::filesystem;
+
+    if (exists(genpath / "datapack")) remove_all(genpath / "datapack");
+    if (exists(genpath / "respack")) remove_all(genpath / "respack");
+  }
+
   generate_pack_skeletons();
   generate_resource(); // FOTUT: resuce must be generated beforehand
   generate_data();
