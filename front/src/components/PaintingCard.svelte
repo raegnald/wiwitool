@@ -1,12 +1,17 @@
 <script>
   import { onMount } from "svelte";
   import { paintingsStore } from "../stores";
+  import {
+    CopyIcon,
+    RotateCcwIcon,
+    RotateCwIcon,
+    Trash2Icon,
+  } from "svelte-feather-icons";
 
-  // 1. CHANGE THIS NAME to match what you pass in App.svelte
   export let wrapper;
 
   let originalImageCanvas;
-  let canvas;
+  let paintingCanvas;
 
   // 2. Update references here
   let title = wrapper.title;
@@ -24,6 +29,21 @@
   $: if (wrapper.cppPainting && currentRatio) {
     wrapper.cppPainting.ratio = currentRatio;
     refresh();
+  }
+
+  function scalePixelCanvas(c, imgW, imgH) {
+    const containerSize = 256;
+
+    c.width = imgW;
+    c.height = imgH;
+
+    const scale = Math.min(containerSize / imgW, containerSize / imgH);
+    const cssW = Math.floor(imgW * scale);
+    const cssH = Math.floor(imgH * scale);
+
+    // Change the CSS
+    c.style.width = `${cssW}px`;
+    c.style.height = `${cssH}px`;
   }
 
   function renderOriginalImage() {
@@ -46,8 +66,7 @@
     const imageData = new ImageData(clampedArray, width, height);
 
     // 4. Draw to Canvas
-    originalImageCanvas.width = width;
-    originalImageCanvas.height = height;
+    scalePixelCanvas(originalImageCanvas, width, height);
     const ctx = originalImageCanvas.getContext("2d");
     ctx.putImageData(imageData, 0, 0);
 
@@ -57,7 +76,7 @@
 
   function renderPainting() {
     // 4. Update references
-    if (!wrapper.cppPainting || !canvas) return;
+    if (!wrapper.cppPainting || !paintingCanvas) return;
 
     // const iconData = wrapper.cppPainting.iconData();
     const iconData = wrapper.cppPainting.paintingData();
@@ -68,9 +87,9 @@
     const clampedArray = new Uint8ClampedArray(pixelView);
     const imageData = new ImageData(clampedArray, width, height);
 
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
+    console.log("Painting canvas");
+    scalePixelCanvas(paintingCanvas, width, height);
+    const ctx = paintingCanvas.getContext("2d");
     ctx.putImageData(imageData, 0, 0);
 
     iconData.delete();
@@ -111,9 +130,16 @@
 
 <div class="app-card card">
   <div class="actions">
-    <button onclick={rotateClockwise}>Rotate ↻</button>
-    <button onclick={rotateAnticlockwise}>Rotate ↺</button>
-    <button onclick={remove} class="delete">Remove</button>
+    <button onclick={rotateClockwise} title="Rotate clockwise"
+      ><RotateCwIcon /></button
+    >
+    <button onclick={rotateAnticlockwise} title="Rotate anticlockwise"
+      ><RotateCcwIcon /></button
+    >
+    <button onclick={cloneImage} title="Clone image"><CopyIcon /></button>
+    <button onclick={remove} class="delete" title="Delete painting"
+      ><Trash2Icon /></button
+    >
   </div>
 
   <div class="transformation">
@@ -123,7 +149,7 @@
 
     <div class="transformation-ratio-selection">
       <div>
-        <span>Ratio </span>
+        <span>Aspect ratio </span>
         <select id="painting-ratio" bind:value={currentRatio}>
           <optgroup label="Square">
             <option value="ONE_ONE">1:1</option>
@@ -147,36 +173,22 @@
           </optgroup>
         </select>
       </div>
-      <svg
-        class="rightarrow"
-        width="129"
-        height="32"
-        viewBox="0 0 129 32"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M2 16H127M127 16L113 30M127 16L113 2"
-          stroke="#A4A4A4"
-          stroke-width="4"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
+
+      <img class="rightarrow" src="rightarrow.svg" alt="Right arrow" />
+
+      <div class="inputs">
+        <label>
+          <span>Title </span><input type="text" bind:value={title} />
+        </label>
+        <label>
+          <span>Author </span><input type="text" bind:value={author} />
+        </label>
+      </div>
     </div>
 
     <div class="canvas-transformation-container">
-      <canvas bind:this={canvas} class="pixel-art"></canvas>
+      <canvas bind:this={paintingCanvas} class="pixel-art"></canvas>
     </div>
-  </div>
-
-  <div class="inputs">
-    <label>
-      <span>Title </span><input type="text" bind:value={title} />
-    </label>
-    <label>
-      <span>Author </span><input type="text" bind:value={author} />
-    </label>
   </div>
 </div>
 
@@ -186,6 +198,8 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex-wrap: nowrap;
+    justify-content: space-between;
   }
   .transformation {
     display: flex;
@@ -196,39 +210,56 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    padding: 10px;
   }
   .pixel-art {
     image-rendering: pixelated;
-    width: 100%;
   }
   .inputs {
     display: flex;
     flex-direction: column;
     gap: 5px;
+    margin-top: 30px;
   }
   .inputs label span {
     display: inline-block;
     min-width: 60px;
     user-select: none;
   }
+  .rightarrow {
+    width: 100%;
+  }
   .actions {
     display: flex;
     flex-direction: column;
     gap: 5px;
   }
+  .actions button {
+    padding: 0.5em;
+    line-height: 0.9;
+  }
   .delete {
     background-color: #ffcccc;
-    border: 1px solid #ffaaaa;
+    border: 2px solid #ffaaaa;
+  }
+  .delete:hover {
+    border-color: #ff5555;
   }
   button {
     cursor: pointer;
     padding: 4px 8px;
   }
   .canvas-transformation-container {
-    width: 200px;
-    height: 200px;
+    width: 256px;
+    height: 256px;
+    min-width: 256px;
+    min-height: 256px;
+    flex-shrink: 0;
+    padding: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
+    background: #eee;
   }
 </style>

@@ -12,6 +12,7 @@
 
   onMount(async () => {
     module = await getWasmModule();
+    feather.replace();
   });
 
   async function handleDrop(e) {
@@ -238,7 +239,6 @@
   }
 
   #generate-btn-container {
-    position: sticky;
     z-index: 100;
     bottom: 30px;
     width: 100%;

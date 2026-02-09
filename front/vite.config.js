@@ -1,6 +1,11 @@
-import { defineConfig } from 'vite'
-import { svelte } from '@sveltejs/vite-plugin-svelte'
+import { defineConfig } from "vite";
+import { svelte } from "@sveltejs/vite-plugin-svelte";
 
 export default defineConfig({
-  plugins: [svelte()]
-})
+  plugins: [svelte()],
+  server: {
+    host: "0.0.0.0", // all addresses
+    port: 8080,
+    allowedHosts: ["suspi.gligan.net"],
+  },
+});
