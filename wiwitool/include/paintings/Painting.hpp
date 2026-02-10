@@ -15,13 +15,15 @@ public:
   Painting(const Painting &) = default;
   Painting& operator=(const Painting &) = default;
 
-  // Move-only type
+  // Move
   Painting(Painting&& other) noexcept = default;
   Painting& operator=(Painting&& other) noexcept = default;
 
   Painting(std::filesystem::path path);
   Painting(std::vector<uint8_t> image_data);
   Painting(Image_data image_data);
+
+  std::shared_ptr<Painting> clone(void) const;
 
   // Getter/setter title
   inline void set_title(std::string the_title) { title = the_title; }

@@ -26,6 +26,14 @@ Painting::Painting(Image_data image_data)
   refresh();
 }
 
+// Painting::Painting(const Painting &other) : Painting{other.original_image} {}
+
+std::shared_ptr<Painting> Painting::clone(void) const {
+  auto cloned = std::make_shared<Painting>(*this);
+  cloned->painting_id = next_painting_id++;
+  return cloned;
+}
+
 const Image_data Painting::original_data(void) const { return original_image; }
 
 const Image_data Painting::painting_data(void) const {
@@ -91,6 +99,8 @@ EMSCRIPTEN_BINDINGS(painting) {
 
         return std::make_shared<Painting>(hires.scale(newmaxlen / maxlen));
       }))
+
+      .function("clone", &Painting::clone)
 
       // Properties (Getters/Setters mapping to JS properties)
       .property("title", &Painting::get_title, &Painting::set_title)

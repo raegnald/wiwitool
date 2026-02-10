@@ -96,7 +96,9 @@ input {
   a:hover {
     color: #535bf2;
   }
-  button {
+  button,
+  input,
+  select {
     background-color: #1a1a1a;
   }
   .app-card {

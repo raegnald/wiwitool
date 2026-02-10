@@ -19,11 +19,11 @@
 
   let currentRatio;
 
-  // Reactive: Update C++ object when inputs change
-  // 3. Update references inside the reactive block
+  // Reactive update
   $: if (wrapper.cppPainting) {
     wrapper.cppPainting.title = title;
     wrapper.cppPainting.author = author;
+    currentRatio = wrapper.cppPainting.ratio;
   }
 
   $: if (wrapper.cppPainting && currentRatio) {
@@ -41,91 +41,77 @@
     const cssW = Math.floor(imgW * scale);
     const cssH = Math.floor(imgH * scale);
 
-    // Change the CSS
     c.style.width = `${cssW}px`;
     c.style.height = `${cssH}px`;
   }
 
-  function renderOriginalImage() {
-    if (!wrapper.cppPainting || !originalImageCanvas) return;
-
-    // 1. Get the Image_data from C++
-    // This returns the RAW pixels (RGBA), already decoded and potentially rotated
-    const img = wrapper.cppPainting.originalData();
+  function renderCppImage(canvas, img) {
+    if (!wrapper.cppPainting || !canvas) return;
 
     const width = img.width;
     const height = img.height;
 
-    // 2. Get the view into WASM memory
     const pixelView = img.getPixels();
-
-    // 3. Create HTML ImageData
-    // We create a Uint8ClampedArray from the view.
-    // This copies the data, which is safe and prevents issues if WASM memory grows.
-    const clampedArray = new Uint8ClampedArray(pixelView);
+    const clampedArray = new Uint8ClampedArray(pixelView); // copies data
     const imageData = new ImageData(clampedArray, width, height);
 
-    // 4. Draw to Canvas
-    scalePixelCanvas(originalImageCanvas, width, height);
-    const ctx = originalImageCanvas.getContext("2d");
+    // Draw to Canvas
+    scalePixelCanvas(canvas, width, height);
+    const ctx = canvas.getContext("2d");
     ctx.putImageData(imageData, 0, 0);
 
-    // 5. IMPORTANT: Delete the C++ object to free memory
     img.delete();
   }
 
+  function renderOriginalImage() {
+    renderCppImage(originalImageCanvas, wrapper.cppPainting.originalData());
+  }
+
   function renderPainting() {
-    // 4. Update references
-    if (!wrapper.cppPainting || !paintingCanvas) return;
-
-    // const iconData = wrapper.cppPainting.iconData();
-    const iconData = wrapper.cppPainting.paintingData();
-    const width = iconData.width;
-    const height = iconData.height;
-
-    const pixelView = iconData.getPixels();
-    const clampedArray = new Uint8ClampedArray(pixelView);
-    const imageData = new ImageData(clampedArray, width, height);
-
-    console.log("Painting canvas");
-    scalePixelCanvas(paintingCanvas, width, height);
-    const ctx = paintingCanvas.getContext("2d");
-    ctx.putImageData(imageData, 0, 0);
-
-    iconData.delete();
+    renderCppImage(paintingCanvas, wrapper.cppPainting.paintingData());
   }
 
   function rotateClockwise() {
     wrapper.cppPainting.rotateClockwise();
-    refresh();
-
-    // Trigger Svelte update
     paintingsStore.update((items) => items);
   }
 
   function rotateAnticlockwise() {
     wrapper.cppPainting.rotateAnticlockwise();
-    refresh();
-
-    // Trigger Svelte update
-    paintingsStore.update((items) => items);
+    paintingsStore.update((items) => items); // trigger Svelte update
   }
 
   function remove() {
-    // 6. Update references
     wrapper.cppPainting.delete();
     paintingsStore.update((list) => list.filter((p) => p.id !== wrapper.id));
   }
 
-  onMount(() => {
-    refresh();
-  });
+  function clonePainting() {
+    const newCppPainting = wrapper.cppPainting.clone();
+
+    const newWrapper = {
+      id: Math.random(), // Unique ID for Svelte's #each key
+      title: wrapper.title + " (copy)",
+      author: wrapper.author,
+      cppPainting: newCppPainting,
+    };
+
+    // 3. Add to store immediately after the current item
+    paintingsStore.update((list) => {
+      const index = list.findIndex((p) => p.id === wrapper.id);
+      const newList = [...list];
+      newList.splice(index + 1, 0, newWrapper);
+      return newList;
+    });
+  }
 
   function refresh() {
     renderPainting();
     renderOriginalImage();
-    currentRatio = wrapper.cppPainting.ratio;
+    wrapper.cppPainting.ratio = currentRatio;
   }
+
+  onMount(refresh);
 </script>
 
 <div class="app-card card">
@@ -136,7 +122,7 @@
     <button onclick={rotateAnticlockwise} title="Rotate anticlockwise"
       ><RotateCcwIcon /></button
     >
-    <button onclick={cloneImage} title="Clone image"><CopyIcon /></button>
+    <button onclick={clonePainting} title="Clone image"><CopyIcon /></button>
     <button onclick={remove} class="delete" title="Delete painting"
       ><Trash2Icon /></button
     >
