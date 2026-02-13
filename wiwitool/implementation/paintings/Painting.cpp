@@ -7,8 +7,6 @@
 #include "paintings/Painting_ratio.hpp"
 #include "util/wiwidebug.hpp"
 
-// These ctors really need some refactoring...
-
 Painting::Painting(std::filesystem::path image_path)
     : Painting{Image_data{image_path}} {}
 

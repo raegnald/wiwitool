@@ -115,20 +115,20 @@
 </script>
 
 <div class="app-card card">
-  <div class="actions">
-    <button onclick={rotateClockwise} title="Rotate clockwise"
-      ><RotateCwIcon /></button
-    >
-    <button onclick={rotateAnticlockwise} title="Rotate anticlockwise"
-      ><RotateCcwIcon /></button
-    >
-    <button onclick={clonePainting} title="Clone image"><CopyIcon /></button>
-    <button onclick={remove} class="delete" title="Delete painting"
-      ><Trash2Icon /></button
-    >
-  </div>
-
   <div class="transformation">
+    <div class="actions">
+      <button onclick={rotateClockwise} title="Rotate clockwise"
+        ><RotateCwIcon /></button
+      >
+      <button onclick={rotateAnticlockwise} title="Rotate anticlockwise"
+        ><RotateCcwIcon /></button
+      >
+      <button onclick={clonePainting} title="Clone image"><CopyIcon /></button>
+      <button onclick={remove} class="delete" title="Delete painting"
+        ><Trash2Icon /></button
+      >
+    </div>
+
     <div class="canvas-transformation-container">
       <canvas bind:this={originalImageCanvas} class="original-image"></canvas>
     </div>
@@ -191,6 +191,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    width: 100%;
   }
   .transformation-ratio-selection {
     display: flex;
@@ -214,12 +215,13 @@
     user-select: none;
   }
   .rightarrow {
-    width: 100%;
+    width: 75%;
   }
   .actions {
     display: flex;
     flex-direction: column;
     gap: 5px;
+    padding-right: 2%;
   }
   .actions button {
     padding: 0.5em;
@@ -242,10 +244,8 @@
     min-width: 256px;
     min-height: 256px;
     flex-shrink: 0;
-    padding: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: #eee;
   }
 </style>
