@@ -1,0 +1,71 @@
+<script lang="ts">
+  let { handler } = $props();
+
+  let isDragOver = $state(false);
+
+  let totalFiles = $state(0);
+  let loadedFiles = $state(0);
+
+  async function handleDrop(e: DragEvent) {
+    e.preventDefault();
+    isDragOver = false;
+
+    const files = e.dataTransfer.files;
+    totalFiles = files.length;
+
+    for (const file of files) {
+      await handler(file);
+
+      loadedFiles++;
+      if (loadedFiles == totalFiles) loadedFiles = totalFiles = 0;
+    }
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    isDragOver = true;
+  }
+  function handleDragLeave() {
+    isDragOver = false;
+  }
+</script>
+
+<button
+  class="drop-zone"
+  class:hover={isDragOver}
+  ondrop={handleDrop}
+  ondragover={handleDragOver}
+  ondragleave={handleDragLeave}
+>
+  {#if totalFiles - loadedFiles > 0}
+    <p>Loaded {loadedFiles} of {totalFiles}</p>
+  {:else}
+    <p>Drag and drop images here</p>
+  {/if}
+</button>
+
+<style>
+  .drop-zone {
+    display: block;
+    width: 100%;
+    cursor: default;
+    border: 2px dashed #aaa;
+    padding: 6rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    transition: 0.2s;
+  }
+
+  .drop-zone.hover {
+    border-color: #007bff;
+  }
+
+  @media (prefers-color-scheme: light) {
+    .drop-zone.hover {
+      background-color: #f0f8ff;
+    }
+    .drop-zone {
+      background-color: #ffff99;
+    }
+  }
+</style>
