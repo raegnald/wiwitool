@@ -128,7 +128,6 @@
         ><Trash2Icon /></button
       >
     </div>
-
     <div class="canvas-transformation-container">
       <canvas bind:this={originalImageCanvas} class="original-image"></canvas>
     </div>
@@ -186,12 +185,13 @@
     gap: 1rem;
     flex-wrap: nowrap;
     justify-content: space-between;
+    overflow: scroll;
   }
+
   .transformation {
     display: flex;
     align-items: center;
     gap: 10px;
-    width: 100%;
   }
   .transformation-ratio-selection {
     display: flex;
@@ -215,13 +215,12 @@
     user-select: none;
   }
   .rightarrow {
-    width: 75%;
+    width: 100%;
   }
   .actions {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    padding-right: 2%;
   }
   .actions button {
     padding: 0.5em;
@@ -244,8 +243,21 @@
     min-width: 256px;
     min-height: 256px;
     flex-shrink: 0;
+    padding: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
+    background: #eee;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .delete {
+      background-color: #e21f1f;
+      color: #f4d9d9;
+      border: 2px solid #f4d9d9;
+    }
+    .canvas-transformation-container {
+      background: #222;
+    }
   }
 </style>

@@ -1,108 +1,132 @@
+@import url("https://fonts.googleapis.com/css2?family=Jacquarda+Bastarda+9&display=swap");
+
+.jb9 {
+    font-family: "Jacquarda Bastarda 9", serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
 
-  color-scheme: light dark;
+    color-scheme: light dark;
 
-  color: #213547;
-  background-color: #f8ffc7;
+    color: #213547;
+    background-color: #ffff80;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+    font-weight: 500;
+    color: #646cff;
+    text-decoration: inherit;
 }
 a:hover {
-  color: #747bff;
+    color: #747bff;
 }
 
 body {
-  margin: 0;
-  padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+    font-size: 3.2em;
+    line-height: 1.1;
 }
 
 img {
-  max-width: 100%;
+    max-width: 100%;
+    image-rendering: pixelated;
+}
+
+table {
+    width: 100%;
+    text-align: center;
+    margin: inherit auto;
+}
+
+table td:nth-child(even) {
+    width: 7.3%;
+    font-size: 80%;
+}
+
+table td:nth-child(odd) {
+    width: 19.5%;
 }
 
 .app-card {
-  border: 1px solid #ccc;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+    border: 1px solid #ccc;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
 }
 
 #app {
-  max-width: 1024px;
-  margin: 0 auto;
-  padding: 2rem;
+    max-width: 1024px;
+    margin: 0 auto;
+    padding: 2rem;
 }
 
 details summary {
-  user-select: none;
-  cursor: pointer;
+    user-select: none;
+    cursor: pointer;
 }
 
 button,
 input,
 select {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #f9f9f9;
-  transition: border-color 0.25s;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #f9f9f9;
+    transition: border-color 0.25s;
 }
 
 button {
-  padding: 0.6em 1.2em;
-  cursor: pointer;
-  border: 1px solid #ccc;
+    padding: 0.6em 1.2em;
+    cursor: pointer;
+    border: 1px solid #ccc;
 }
 
 button:hover {
-  border-color: #646cff;
+    border-color: #646cff;
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+    outline: 4px auto -webkit-focus-ring-color;
 }
 
 select,
 input {
-  padding: 0.5em 0.7em;
-  border: 1px solid #bbb;
+    padding: 0.5em 0.7em;
+    border: 1px solid #bbb;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
-  }
-  a:hover {
-    color: #535bf2;
-  }
-  button,
-  input,
-  select {
-    background-color: #1a1a1a;
-  }
-  .app-card {
-    background-color: #292929;
-    border-color: #666;
-  }
+    :root {
+        color: rgba(255, 255, 255, 0.87);
+        background-color: #242424;
+    }
+    a:hover {
+        color: #535bf2;
+    }
+    button,
+    input,
+    select {
+        background-color: #1a1a1a;
+    }
+    .app-card {
+        background-color: #292929;
+        border-color: #666;
+    }
 }
