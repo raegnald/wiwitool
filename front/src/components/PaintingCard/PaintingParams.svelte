@@ -1,7 +1,7 @@
-<script>
+<script lang="ts">
   import RatioSelect from "./RatioSelect.svelte";
 
-  export let currentRatio, title, author;
+  export let currentRatio: string, title: string, author: string;
 </script>
 
 <div class="transformation-ratio-selection">

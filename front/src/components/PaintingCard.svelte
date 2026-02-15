@@ -1,20 +1,21 @@
-<script>
+<script lang="ts">
   import { onMount } from "svelte";
-  import { paintingsStore } from "../stores";
+  import { paintingsStore, type PaintingWrapper } from "../stores";
 
   import PaintingActions from "./PaintingCard/PaintingActions.svelte";
   import PaintingCanvas from "./PaintingCard/PaintingCanvas.svelte";
   import PaintingParams from "./PaintingCard/PaintingParams.svelte";
+  import type { ImageData } from "../bindings/wiwitool";
 
-  export let wrapper;
+  export let wrapper: PaintingWrapper;
 
-  let originalImageCanvas;
-  let paintingCanvas;
+  let originalImageCanvas: HTMLCanvasElement;
+  let paintingCanvas: HTMLCanvasElement;
 
   let title = wrapper.title;
   let author = wrapper.author;
 
-  let currentRatio;
+  let currentRatio: string;
 
   // Reactive update
   $: if (wrapper.cppPainting) {
@@ -28,7 +29,7 @@
     refresh();
   }
 
-  function scalePixelCanvas(c, imgW, imgH) {
+  function scalePixelCanvas(c: HTMLCanvasElement, imgW: number, imgH: number) {
     const containerSize = 256;
 
     c.width = imgW;
@@ -42,7 +43,7 @@
     c.style.height = `${cssH}px`;
   }
 
-  function renderCppImage(canvas, img) {
+  function renderCppImage(canvas: HTMLCanvasElement, img: ImageData) {
     if (!wrapper.cppPainting || !canvas) return;
 
     const width = img.width;
@@ -86,11 +87,12 @@
   function clone() {
     const newCppPainting = wrapper.cppPainting.clone();
 
-    const newWrapper = {
-      id: Math.random(), // Unique ID for Svelte's #each key
+    const newWrapper: PaintingWrapper = {
+      id: Math.random(),
       title: wrapper.title + " (copy)",
       author: wrapper.author,
       cppPainting: newCppPainting,
+      originalImageBytes: wrapper.originalImageBytes,
     };
 
     // 3. Add to store immediately after the current item

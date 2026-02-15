@@ -1,5 +1,5 @@
-<script>
-  export let value;
+<script lang="ts">
+  export let value: string;
 </script>
 
 <select id="painting-ratio" bind:value>

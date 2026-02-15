@@ -6,6 +6,6 @@ export default defineConfig({
   server: {
     host: "0.0.0.0", // all addresses
     port: 8080,
-    allowedHosts: ["suspi.gligan.net"],
+    allowedHosts: ["xulo.local", "suspi.gligan.net"],
   },
 });

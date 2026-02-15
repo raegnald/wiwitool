@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import {
     CopyIcon,
     RotateCcwIcon,
@@ -6,7 +6,12 @@
     Trash2Icon,
   } from "svelte-feather-icons";
 
-  export let rotateClockwise, rotateAnticlockwise, clone, remove;
+  type ButtonClickHandler = () => void;
+
+  export let rotateClockwise: ButtonClickHandler;
+  export let rotateAnticlockwise: ButtonClickHandler;
+  export let clone: ButtonClickHandler;
+  export let remove: ButtonClickHandler;
 </script>
 
 <div class="actions">
