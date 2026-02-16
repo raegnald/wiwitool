@@ -6,8 +6,11 @@
     Trash2Icon,
   } from "svelte-feather-icons";
 
+  import Wiwicheckbox from "../Wiwicheckbox.svelte";
+
   type ButtonClickHandler = () => void;
 
+  export let selected: boolean;
   export let rotateClockwise: ButtonClickHandler;
   export let rotateAnticlockwise: ButtonClickHandler;
   export let clone: ButtonClickHandler;
@@ -15,20 +18,37 @@
 </script>
 
 <div class="actions">
-  <button onclick={rotateClockwise} title="Rotate clockwise"
-    ><RotateCwIcon /></button
-  >
-  <button onclick={rotateAnticlockwise} title="Rotate anticlockwise"
-    ><RotateCcwIcon /></button
-  >
-  <button onclick={clone} title="Clone image"><CopyIcon /></button>
-  <button onclick={remove} class="delete" title="Delete painting"
-    ><Trash2Icon /></button
-  >
+  <div class="first">
+    <Wiwicheckbox bind:checked={selected} />
+  </div>
+
+  <div>
+    <button onclick={rotateClockwise} title="Rotate clockwise"
+      ><RotateCwIcon /></button
+    >
+    <button onclick={rotateAnticlockwise} title="Rotate anticlockwise"
+      ><RotateCcwIcon /></button
+    >
+    <button onclick={clone} title="Clone image"><CopyIcon /></button>
+    <button onclick={remove} class="delete" title="Delete painting"
+      ><Trash2Icon /></button
+    >
+  </div>
 </div>
 
 <style>
   .actions {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .actions .first {
+    min-height: 70px;
+  }
+
+  .actions > div {
     display: flex;
     flex-direction: column;
     gap: 5px;

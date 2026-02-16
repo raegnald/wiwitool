@@ -10,6 +10,7 @@ export interface PaintingWrapper {
   title: string;
   author: string;
   cppPainting: Painting;
+  selected: boolean;
 }
 
 export const paintingsStore: Writable<PaintingWrapper[]> = writable([]);

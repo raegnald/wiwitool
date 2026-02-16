@@ -1,5 +1,6 @@
 <script lang="ts">
   import { invisibleItemFramesPack } from "../../stores/invisibleItemFrameStore";
+  import Wiwicheckbox from "../Wiwicheckbox.svelte";
 
   export let move: (id: string) => void;
 </script>
@@ -7,15 +8,9 @@
 <div>
   <div class="app-card">
     <div class="check-option">
-      <input
-        type="checkbox"
-        id="invisible-item-frames"
-        checked={$invisibleItemFramesPack}
-        onclick={(e: Event) => invisibleItemFramesPack.set(e.target.checked)}
-      />
-      <label for="invisible-item-frames"
-        >Invisible item frames can be crafted as recipes</label
-      >
+      <Wiwicheckbox bind:checked={$invisibleItemFramesPack}>
+        Invisible item frames can be crafted as recipes
+      </Wiwicheckbox>
     </div>
 
     <details>

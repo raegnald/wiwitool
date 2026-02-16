@@ -118,7 +118,13 @@
 
 <div class="app-card card">
   <div class="transformation">
-    <PaintingActions {rotateClockwise} {rotateAnticlockwise} {clone} {remove} />
+    <PaintingActions
+      bind:selected={wrapper.selected}
+      {rotateClockwise}
+      {rotateAnticlockwise}
+      {clone}
+      {remove}
+    />
     <PaintingCanvas bind:canvas={originalImageCanvas} />
     <PaintingParams bind:currentRatio bind:title bind:author />
     <PaintingCanvas bind:canvas={paintingCanvas} />
@@ -139,5 +145,6 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    align-items: stretch;
   }
 </style>
