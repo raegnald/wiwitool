@@ -18,6 +18,7 @@
     justify-content: center;
     align-items: center;
     background: #eee;
+    border-radius: 8px;
   }
 
   canvas {

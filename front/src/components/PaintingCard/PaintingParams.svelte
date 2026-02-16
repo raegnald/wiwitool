@@ -6,7 +6,7 @@
 
 <div class="transformation-ratio-selection">
   <div>
-    <span>Aspect ratio </span>
+    <span>Aspect ratio&nbsp; </span>
     <RatioSelect bind:value={currentRatio} />
   </div>
   <img class="rightarrow" src="rightarrow.svg" alt="Right arrow" />
@@ -28,6 +28,7 @@
     align-items: center;
     width: 100%;
     padding: 10px;
+    user-select: none;
   }
   .inputs {
     display: flex;
@@ -38,7 +39,6 @@
   .inputs label span {
     display: inline-block;
     min-width: 60px;
-    user-select: none;
   }
   .rightarrow {
     width: 100%;

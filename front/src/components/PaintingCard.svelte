@@ -96,6 +96,7 @@
       author: wrapper.author,
       cppPainting: newCppPainting,
       originalImageBytes: wrapper.originalImageBytes,
+      selected: false,
     };
 
     // 3. Add to store immediately after the current item
@@ -117,17 +118,19 @@
 </script>
 
 <div class="app-card card">
-  <div class="transformation">
-    <PaintingActions
-      bind:selected={wrapper.selected}
-      {rotateClockwise}
-      {rotateAnticlockwise}
-      {clone}
-      {remove}
-    />
-    <PaintingCanvas bind:canvas={originalImageCanvas} />
-    <PaintingParams bind:currentRatio bind:title bind:author />
-    <PaintingCanvas bind:canvas={paintingCanvas} />
+  <div class="card-padding" class:selected={wrapper.selected}>
+    <div class="transformation">
+      <PaintingActions
+        bind:selected={wrapper.selected}
+        {rotateClockwise}
+        {rotateAnticlockwise}
+        {clone}
+        {remove}
+      />
+      <PaintingCanvas bind:canvas={originalImageCanvas} />
+      <PaintingParams bind:currentRatio bind:title bind:author />
+      <PaintingCanvas bind:canvas={paintingCanvas} />
+    </div>
   </div>
 </div>
 
@@ -140,7 +143,20 @@
     flex-wrap: nowrap;
     justify-content: space-between;
     overflow: scroll;
+    padding: 0;
   }
+
+  .card-padding {
+    width: 100%;
+    border: 10px solid transparent;
+    padding: 10px;
+    transition: 100ms;
+  }
+
+  .card-padding.selected {
+    border-color: #646cff;
+  }
+
   .transformation {
     display: flex;
     align-items: center;

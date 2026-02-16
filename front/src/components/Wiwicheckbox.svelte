@@ -1,12 +1,28 @@
 <script lang="ts">
-  import { CheckIcon } from "svelte-feather-icons";
+  import { CheckIcon, XIcon } from "svelte-feather-icons";
 
   export let checked: boolean;
+
+  function toggle() {
+    checked = !checked;
+  }
 </script>
 
-<div class="checkbox-container" onclick={() => (checked = !checked)}>
+<div
+  class="checkbox-container"
+  onclick={toggle}
+  onkeydown={toggle}
+  tabindex="0"
+  aria-label="Checkbox"
+  role="checkbox"
+  aria-checked={checked}
+>
   <button class:checked>
-    <CheckIcon />
+    {#if checked}
+      <CheckIcon />
+    {:else}
+      <XIcon />
+    {/if}
   </button>
   <slot />
 </div>
@@ -29,7 +45,7 @@
     justify-content: center;
     padding: 0.5em;
     line-height: 0.9;
-    color: #f9f9f9;
+    color: #ccc;
   }
 
   button.checked {
@@ -40,5 +56,12 @@
 
   button:hover {
     border-color: #646cff;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    button {
+      background-color: #444;
+      border-color: #666;
+    }
   }
 </style>

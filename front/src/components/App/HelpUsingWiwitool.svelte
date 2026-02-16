@@ -18,14 +18,14 @@
           paintings.</td
         >
         <td></td>
-        <td>You tell the Wiwitool how to generate the images</td>
+        <td>You customise your paintings with the Wiwitool.</td>
         <td></td>
         <td
-          >The wiwitool gives you two zip files that you can import into
+          >The Wiwitool gives you two zip files that you can import into
           Minecraft.</td
         >
         <td></td>
-        <td>Lorem ipsum dolor sit, amet consectetur adipisicingelit.</td>
+        <td>You can use your own paintings in Minecraft.</td>
       </tr>
       <tr>
         <td><img src="/before.jpg" alt="Source picture" /></td>
@@ -59,7 +59,7 @@
           <code>landscape.png</code>...</td
         >
         <td></td>
-        <td><span class="jb9">The Wiwitool</span></td>
+        <td><span class="jb9 wiwitool-text">The Wiwitool</span></td>
         <td></td>
         <td
           ><code>datapack.zip</code> &
@@ -72,9 +72,16 @@
   </table>
 
   <p>
-    The paitings you get can be crafted from a stonecutter. You can obtain any
-    of your paintings by adding any painting to a stonecutter.
+    The generated paitings can be crafted from a stonecutter, simply add any
+    painting to obtain any of your custom paintings.
   </p>
+
+  <center>
+    <img
+      src="/stonecutter.png"
+      alt="Transforming any painting into a custom painting"
+    />
+  </center>
 
   <h3>Wiwitool features</h3>
 
@@ -99,5 +106,8 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+  .wiwitool-text {
+    font-size: 150%;
   }
 </style>
