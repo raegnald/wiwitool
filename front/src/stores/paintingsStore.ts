@@ -1,5 +1,8 @@
+// Paintings store
+
 import { writable, type Writable } from "svelte/store";
-import type { Painting } from "./bindings/wiwitool";
+
+import type { Painting } from "../bindings/wiwitool";
 
 export interface PaintingWrapper {
   id: number;

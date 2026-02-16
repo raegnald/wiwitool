@@ -1,6 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { paintingsStore, type PaintingWrapper } from "../stores";
+  import {
+    paintingsStore,
+    type PaintingWrapper,
+  } from "../stores/paintingsStore";
 
   import PaintingActions from "./PaintingCard/PaintingActions.svelte";
   import PaintingCanvas from "./PaintingCard/PaintingCanvas.svelte";

@@ -3,6 +3,8 @@ import { writable } from "svelte/store";
 import type { MainModule } from "./bindings/wiwitool";
 import type MainModuleFactory from "./bindings/wiwitool";
 
+import { toast, ERROR, INFO } from "./stores/toastsStore";
+
 export const wasmReady = writable(false);
 let wasmModule: MainModule | null = null;
 
@@ -35,8 +37,13 @@ export async function getWasmModule(): Promise<MainModule> {
       console.log("Locate file ", path);
       return path;
     },
-    print: (text: string) => console.log("[WASM]", text),
-    printErr: (text: string) => console.error("[WASM Error]", text),
+    print: (text: string) => {
+      console.log("[WASM]", text);
+    },
+    printErr: (text: string) => {
+      toast(ERROR, text);
+      console.error("[WASM Error]", text);
+    },
   });
 
   wasmReady.set(true);

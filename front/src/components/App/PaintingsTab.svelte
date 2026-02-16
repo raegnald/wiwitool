@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { paintingsStore } from "../../stores";
+  import { paintingsStore } from "../../stores/paintingsStore";
   import type { MainModule } from "../../bindings/wiwitool";
 
   import HelpUsingWiwitool from "./HelpUsingWiwitool.svelte";

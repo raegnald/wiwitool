@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { ERROR, toast } from "../../stores/toastsStore";
+
   let { handler } = $props();
 
   let isDragOver = $state(false);
@@ -14,14 +16,19 @@
     totalFiles = files.length;
 
     for (const file of files) {
-      await handler(file);
+      try {
+        await handler(file);
+        loadedFiles++;
+      } catch (e) {
+        toast(ERROR, "Could not load image: " + e);
+        totalFiles--;
+      }
 
-      loadedFiles++;
       if (loadedFiles == totalFiles) loadedFiles = totalFiles = 0;
     }
   }
 
-  function handleDragOver(e) {
+  function handleDragOver(e: DragEvent) {
     e.preventDefault();
     isDragOver = true;
   }

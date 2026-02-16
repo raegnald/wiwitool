@@ -9,6 +9,10 @@
   import PaintingsTab from "./components/App/PaintingsTab.svelte";
   import MiscTab from "./components/App/MiscTab.svelte";
 
+  import Toasts from "./components/Toasts.svelte";
+  import { INFO, toast } from "./stores/toastsStore";
+  import GenerateTab from "./components/App/GenerateTab.svelte";
+
   let module: MainModule | null = null;
 
   onMount(async () => {
@@ -34,9 +38,11 @@
       </Tab>
 
       <Tab title="Generate" id="generate">
-        <p>Extra configs and download packs</p>
+        <GenerateTab />
       </Tab>
     </Tabs>
+
+    <Toasts />
   {/if}
 </main>
 
