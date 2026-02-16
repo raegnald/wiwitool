@@ -29,8 +29,8 @@
         <PaintingsTab {module} {move} />
       </Tab>
 
-      <Tab title="Miscellaneous" id="misc">
-        <MiscTab />
+      <Tab title="Miscellaneous" id="misc" let:move>
+        <MiscTab {move} />
       </Tab>
 
       <Tab title="Generate" id="generate">

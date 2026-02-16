@@ -17,7 +17,9 @@
     </details>
   </div>
 
-  <div class="next">
+  <div class="pagination">
+    <button class="secondary" onclick={() => move("paintings")}>Previous</button
+    >
     <button onclick={() => move("generate")}>Next</button>
   </div>
 </div>
@@ -29,9 +31,10 @@
     font-size: 120%;
   }
 
-  .next {
+  .pagination {
     margin: 50px 0;
     display: flex;
     justify-content: center;
+    gap: 10px;
   }
 </style>
