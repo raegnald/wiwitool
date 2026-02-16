@@ -126,7 +126,7 @@
     margin-bottom: 50px;
   }
 
-  #generate-btn-container {
+  /*#generate-btn-container {
     z-index: 100;
     bottom: 30px;
     width: 100%;
@@ -140,5 +140,5 @@
     padding: 10px 20px;
     cursor: pointer;
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
-  }
+  }*/
 </style>

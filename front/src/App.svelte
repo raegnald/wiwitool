@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { getWasmModule, wasmReady } from "./wasm";
+  import { getWasmModule, wasmReady } from "./stores/wasmStore";
   import type { MainModule } from "./bindings/wiwitool";
 
   import Tabs from "./components/Tabs/Tabs.svelte";

@@ -1,5 +1,7 @@
 <script>
+  import { invisibleItemFramesPack } from "../../stores/invisibleItemFrameStore";
   import { paintingsStore } from "../../stores/paintingsStore";
+
   import { INFO, toast } from "../../stores/toastsStore";
 </script>
 
@@ -8,11 +10,12 @@
 
   <p>Your pack will contain:</p>
   <ul>
-    {#if $paintingsStore.length > 0}
-      <li>{$paintingsStore.length} paintings</li>
-    {/if}
+    <li>
+      {$paintingsStore.length > 0 ? $paintingsStore.length : "No"}
+      painting{$paintingsStore.length != 1 ? "s" : ""}
+    </li>
 
-    {#if true}
+    {#if $invisibleItemFramesPack}
       <li>Invisible item frames (normal and glow variants)</li>
     {/if}
   </ul>

@@ -1,9 +1,9 @@
 import { writable } from "svelte/store";
 
-import type { MainModule } from "./bindings/wiwitool";
-import type MainModuleFactory from "./bindings/wiwitool";
+import type { MainModule } from "../bindings/wiwitool";
+import type MainModuleFactory from "../bindings/wiwitool";
 
-import { toast, ERROR, INFO } from "./stores/toastsStore";
+import { toast, ERROR, INFO } from "./toastsStore";
 
 export const wasmReady = writable(false);
 let wasmModule: MainModule | null = null;
