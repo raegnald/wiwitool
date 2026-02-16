@@ -117,9 +117,7 @@
   <div class="transformation">
     <PaintingActions {rotateClockwise} {rotateAnticlockwise} {clone} {remove} />
     <PaintingCanvas bind:canvas={originalImageCanvas} />
-
     <PaintingParams bind:currentRatio bind:title bind:author />
-
     <PaintingCanvas bind:canvas={paintingCanvas} />
   </div>
 </div>
