@@ -48,48 +48,6 @@
       },
     ]);
   }
-
-  function generatePack() {
-    if (!module) return;
-
-    const pack = new module.PaintingsPack();
-    const paintingVector = new module.PaintingsVector();
-
-    $paintingsStore.forEach((wrapper) => {
-      paintingVector.push_back(wrapper.cppPainting);
-    });
-
-    pack.setPaintings(paintingVector);
-    pack.generate();
-    pack.compress();
-    download();
-
-    // Cleanup
-    pack.delete();
-    paintingVector.delete();
-  }
-
-  function download() {
-    if (!module) return;
-
-    try {
-      const zipPath = "/packs.zip";
-      const fileContent = module.FS.readFile(zipPath);
-
-      const blob = new Blob([fileContent], { type: "application/zip" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-
-      a.href = url;
-      a.download = "paintings_pack.zip";
-      a.click();
-
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      console.error("Error reading generated file:", e);
-      alert("Generation finished, but failed to read zip");
-    }
-  }
 </script>
 
 <div>
@@ -109,16 +67,12 @@
         <PaintingCard {wrapper} />
       {/each}
     </div>
-
-    <!-- <button onclick={generatePack} class="generate-btn">
-        Generate Minecraft Pack
-      </button> -->
   {/if}
 
   <center>
-    <button onclick={() => move("misc")}
-      >{$paintingsStore.length > 0 ? "Next" : "Skip"}</button
-    >
+    <button onclick={() => move("misc")}>
+      {$paintingsStore.length > 0 ? "Next" : "Skip"}
+    </button>
   </center>
 </div>
 
@@ -126,20 +80,4 @@
   .list {
     margin-bottom: 50px;
   }
-
-  /*#generate-btn-container {
-    z-index: 100;
-    bottom: 30px;
-    width: 100%;
-    max-width: 1024px;
-    display: flex;
-    justify-content: center;
-  }
-
-  .generate-btn {
-    font-size: 1.5rem;
-    padding: 10px 20px;
-    cursor: pointer;
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
-  }*/
 </style>

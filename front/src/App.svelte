@@ -45,7 +45,7 @@
       </Tab>
 
       <Tab title="Generate" id="generate">
-        <GenerateTab />
+        <GenerateTab {module} />
       </Tab>
     </Tabs>
 

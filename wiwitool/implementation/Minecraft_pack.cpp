@@ -62,9 +62,9 @@ void compress_directory(std::filesystem::path folder,
   zip.save(zipname);
 }
 
-void Minecraft_pack::generate(void) {
+void Minecraft_pack::generate(bool fresh) {
   // Clean up previous runs of generating packs
-  {
+  if (fresh) {
     using namespace std::filesystem;
 
     if (exists(genpath / "datapack")) remove_all(genpath / "datapack");
@@ -76,10 +76,9 @@ void Minecraft_pack::generate(void) {
   generate_data();
 }
 
-void Minecraft_pack::compress_packs(void) {
+void Minecraft_pack::compress_genpath(std::filesystem::path packs_zip) {
   const auto datapack_zip = genpath / "datapack.zip";
   const auto respack_zip = genpath / "respack.zip";
-  const auto packs_zip = genpath / "packs.zip";
 
   compress_directory(genpath / "datapack", datapack_zip);
   compress_directory(genpath / "respack", respack_zip);
@@ -92,6 +91,10 @@ void Minecraft_pack::compress_packs(void) {
   zip.write(respack_zip);
 
   zip.save(packs_zip);
+}
+
+void Minecraft_pack::compress_packs(void) {
+  Minecraft_pack::compress_genpath(genpath / "packs.zip");
 }
 
 std::filesystem::path Minecraft_pack::in_data_folder(std::string name) {

@@ -18,8 +18,10 @@ public:
 
   virtual ~Minecraft_pack(void) = default;
 
-  void generate(void);
+  void generate(bool fresh = true);
   void compress_packs(void);
+
+  static void compress_genpath(std::filesystem::path zip_output);
 
 protected:
   explicit Minecraft_pack(std::string description) : description{description} {}
