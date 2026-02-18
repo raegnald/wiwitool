@@ -2,9 +2,8 @@
   import { paintingsStore } from "../../stores/paintingsStore";
   import type { MainModule } from "../../bindings/wiwitool";
 
-  import HelpUsingWiwitool from "./HelpUsingWiwitool.svelte";
+  import HelpUsingPaintingsTool from "./HelpUsingPaintingsTool.svelte";
   import DropZone from "./DropZone.svelte";
-
   import PaintingCard from "../PaintingCard.svelte";
 
   export let module: MainModule;
@@ -94,11 +93,13 @@
 </script>
 
 <div>
-  <HelpUsingWiwitool />
+  <HelpUsingPaintingsTool />
 
   <h2>1. Load your images</h2>
 
-  <DropZone handler={handleImageDrop} />
+  <DropZone handler={handleImageDrop}>
+    <p>Drag and drop images here</p>
+  </DropZone>
 
   {#if $paintingsStore.length > 0}
     <h2>2. Customise your paintings</h2>

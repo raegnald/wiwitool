@@ -1,7 +1,5 @@
-<details class="app-card">
+<details class="app-card help-card">
   <summary>Information about this tool</summary>
-
-  <h2>What is this tool all about?</h2>
   <p>
     This is a web tool for creating <b
       >custom painting items in Minecraft out of your own images</b
@@ -72,7 +70,7 @@
   </table>
 
   <p>
-    The generated paitings can be crafted from a stonecutter, simply add any
+    The generated paintings can be crafted from a stonecutter. Simply add any
     painting to obtain any of your custom paintings.
   </p>
 
@@ -82,23 +80,6 @@
       alt="Transforming any painting into a custom painting"
     />
   </center>
-
-  <h3>Wiwitool features</h3>
-
-  <ul>
-    <li>
-      Open-source software (<a
-        href="https://github.com/raegnald/wiwitool/"
-        target="_blank">Github repository</a
-      >). Free to use forever.
-    </li>
-    <li>
-      Runs locally on your browser (all your images are kept on <i>your</i> machine.)
-    </li>
-    <li>
-      You can manipulate and preview how your image will be seen in Minecraft.
-    </li>
-  </ul>
 </details>
 
 <style>

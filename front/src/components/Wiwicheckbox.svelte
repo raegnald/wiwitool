@@ -11,18 +11,14 @@
 <div
   class="checkbox-container"
   onclick={toggle}
-  onkeydown={toggle}
+  onkeydown={() => {}}
   tabindex="0"
   aria-label="Checkbox"
   role="checkbox"
   aria-checked={checked}
 >
   <button class:checked>
-    {#if checked}
-      <CheckIcon />
-    {:else}
-      <XIcon />
-    {/if}
+    <CheckIcon />
   </button>
   <slot />
 </div>
@@ -45,7 +41,7 @@
     justify-content: center;
     padding: 0.5em;
     line-height: 0.9;
-    color: #ccc;
+    color: #ddd;
   }
 
   button.checked {
@@ -62,6 +58,7 @@
     button {
       background-color: #444;
       border-color: #666;
+      color: #555;
     }
   }
 </style>

@@ -36,6 +36,13 @@
     gap: 5px;
     margin-top: 30px;
   }
+  .inputs label {
+    display: flex;
+    align-items: center;
+  }
+  .inputs label input {
+    max-width: 200px;
+  }
   .inputs label span {
     display: inline-block;
     min-width: 60px;

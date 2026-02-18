@@ -47,7 +47,7 @@
   {#if totalFiles - loadedFiles > 0}
     <p>Loaded {loadedFiles} of {totalFiles}</p>
   {:else}
-    <p>Drag and drop images here</p>
+    <slot />
   {/if}
 </button>
 

@@ -97,6 +97,7 @@
       cppPainting: newCppPainting,
       originalImageBytes: wrapper.originalImageBytes,
       selected: false,
+      crop: null,
     };
 
     // 3. Add to store immediately after the current item
@@ -148,9 +149,10 @@
 
   .card-padding {
     width: 100%;
-    border: 10px solid transparent;
-    padding: 10px;
+    border: 5px solid transparent;
+    padding: 15px;
     transition: 100ms;
+    border-radius: 11px;
   }
 
   .card-padding.selected {
@@ -162,5 +164,6 @@
     align-items: center;
     gap: 10px;
     align-items: stretch;
+    align-items: center;
   }
 </style>

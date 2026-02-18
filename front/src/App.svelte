@@ -12,6 +12,7 @@
   import Toasts from "./components/Toasts.svelte";
   import { INFO, toast } from "./stores/toastsStore";
   import GenerateTab from "./components/App/GenerateTab.svelte";
+  import StartTab from "./components/App/StartTab.svelte";
 
   let module: MainModule | null = null;
 
@@ -26,9 +27,15 @@
   </div>
 
   {#if !$wasmReady}
-    <p>Loading webassembly module...</p>
+    <center>
+      <p>Loading webassembly module...</p>
+    </center>
   {:else}
     <Tabs>
+      <Tab title="Start" id="start" let:move>
+        <StartTab {move} />
+      </Tab>
+
       <Tab title="Paintings" id="paintings" let:move>
         <PaintingsTab {module} {move} />
       </Tab>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import {
     CopyIcon,
+    CropIcon,
     RotateCcwIcon,
     RotateCwIcon,
     Trash2Icon,
@@ -23,12 +24,19 @@
   </div>
 
   <div>
-    <button onclick={rotateClockwise} title="Rotate clockwise"
-      ><RotateCwIcon /></button
+    <button onclick={() => alert("Crop!")} title="Crop image"
+      ><CropIcon /></button
     >
-    <button onclick={rotateAnticlockwise} title="Rotate anticlockwise"
-      ><RotateCcwIcon /></button
-    >
+
+    <div class="actions-pack">
+      <button onclick={rotateClockwise} title="Rotate clockwise"
+        ><RotateCwIcon /></button
+      >
+      <button onclick={rotateAnticlockwise} title="Rotate anticlockwise"
+        ><RotateCcwIcon /></button
+      >
+    </div>
+
     <button onclick={clone} title="Clone image"><CopyIcon /></button>
     <button onclick={remove} class="delete" title="Delete painting"
       ><Trash2Icon /></button
@@ -67,6 +75,12 @@
   button {
     cursor: pointer;
     padding: 4px 8px;
+  }
+
+  .actions-pack {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
   }
 
   @media (prefers-color-scheme: dark) {
