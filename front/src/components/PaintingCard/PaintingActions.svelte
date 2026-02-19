@@ -8,19 +8,34 @@
   } from "svelte-feather-icons";
 
   import Wiwicheckbox from "../Wiwicheckbox.svelte";
+  import {
+    paintingsStore,
+    type PaintingWrapper,
+  } from "../../stores/paintingsStore";
 
   type ButtonClickHandler = () => void;
 
+  export let id: number;
   export let selected: boolean;
   export let rotateClockwise: ButtonClickHandler;
   export let rotateAnticlockwise: ButtonClickHandler;
   export let clone: ButtonClickHandler;
   export let remove: ButtonClickHandler;
+
+  function toggleSelection() {
+    paintingsStore.update((current) =>
+      current.map((painting: PaintingWrapper) =>
+        painting.id === id
+          ? { ...painting, selected: selected } // Create a new object to trigger reactivity
+          : painting,
+      ),
+    );
+  }
 </script>
 
 <div class="actions">
   <div class="first">
-    <Wiwicheckbox bind:checked={selected} />
+    <Wiwicheckbox bind:checked={selected} onclick={toggleSelection} />
   </div>
 
   <div>

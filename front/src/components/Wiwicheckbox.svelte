@@ -2,6 +2,7 @@
   import { CheckIcon, XIcon } from "svelte-feather-icons";
 
   export let checked: boolean;
+  export let onclick: () => void;
 
   function toggle() {
     checked = !checked;
@@ -10,7 +11,10 @@
 
 <div
   class="checkbox-container"
-  onclick={toggle}
+  onclick={() => {
+    toggle();
+    onclick();
+  }}
   onkeydown={() => {}}
   tabindex="0"
   aria-label="Checkbox"
