@@ -123,6 +123,7 @@
     <div class="transformation">
       <PaintingActions
         bind:selected={wrapper.selected}
+        id={wrapper.id}
         {rotateClockwise}
         {rotateAnticlockwise}
         {clone}
