@@ -5,14 +5,7 @@
   import HelpUsingPaintingsTool from "./HelpUsingPaintingsTool.svelte";
   import DropZone from "./DropZone.svelte";
   import PaintingCard from "../PaintingCard.svelte";
-  import {
-    RotateCcwIcon,
-    RotateCwIcon,
-    SquareIcon,
-    Trash2Icon,
-    TypeIcon,
-    UserIcon,
-  } from "svelte-feather-icons";
+  import BulkActions from "../BulkActions.svelte";
 
   export let module: MainModule;
   export let move: (id: string) => void;
@@ -53,11 +46,11 @@
         author: "User",
         originalImageBytes: uint8View,
         cppPainting: painting,
+        selected: false,
+        crop: null,
       },
     ]);
   }
-
-  $: hasSelected = $paintingsStore.some((painting) => painting.selected);
 </script>
 
 <div>
@@ -85,58 +78,8 @@
     </button>
   </center>
 
-  {#if hasSelected}
-    <div id="bulk-tools">
-      <button> <SquareIcon /> </button>
-      <button> <RotateCcwIcon /> </button>
-      <button> <RotateCwIcon /> </button>
-      <button> <UserIcon /> </button>
-      <button> <TypeIcon /> </button>
-      <button class="delete"> <Trash2Icon /> </button>
-    </div>
-  {/if}
+  <BulkActions />
 </div>
 
 <style>
-  #bulk-tools {
-    position: sticky;
-    bottom: 5px;
-    gap: 5px;
-    display: flex;
-    width: 46px;
-    flex-direction: column;
-    padding: 5px;
-    justify-content: center;
-    align-items: center;
-  }
-
-  @media only screen and (min-width: 1200px) {
-    #bulk-tools {
-      transform: translate(-73px, -10px);
-    }
-  }
-  #bulk-tools > button {
-    height: 46px;
-    width: 46px;
-    padding: 0.5em;
-    line-height: 0.9;
-    align-items: center;
-    vertical-align: center;
-  }
-
-  .delete {
-    background-color: #ffcccc;
-    border: 2px solid #ffaaaa;
-  }
-  .delete:hover {
-    border-color: #ff5555;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .delete {
-      background-color: #e21f1f;
-      color: #f4d9d9;
-      border: 2px solid #f4d9d9;
-    }
-  }
 </style>
