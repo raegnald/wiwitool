@@ -1,7 +1,9 @@
 #include "Minecraft_pack.hpp"
 
 #include "util/wiwidebug.hpp"
+#include "Serialiser.hpp"
 
+#include <filesystem>
 #include <fstream>
 #include <print>
 
@@ -89,6 +91,10 @@ void Minecraft_pack::compress_genpath(std::filesystem::path packs_zip) {
 
   zip.write(datapack_zip);
   zip.write(respack_zip);
+
+  // Add import file when it exists
+  if (std::filesystem::exists(genpath / Serialiser::import_filename))
+    zip.write(genpath / Serialiser::import_filename);
 
   zip.save(packs_zip);
 }

@@ -1,7 +1,26 @@
 <script lang="ts">
+  import type { SerialisationModel } from "../../serialisation/models";
   import DropZone from "./DropZone.svelte";
+  import { deserialise } from "../../serialisation/deserialise";
+  import type { MainModule } from "../../bindings/wiwitool";
+  import { INFO, toast, toasts } from "../../stores/toastsStore";
 
+  export let module: MainModule;
   export let move: (id: string) => void;
+
+  async function importPacks(file: File) {
+    toast(INFO, "Importing configuration...");
+
+    const buffer = await file.arrayBuffer();
+    const decoder = new TextDecoder();
+    const model: SerialisationModel = JSON.parse(decoder.decode(buffer));
+
+    deserialise(model, module);
+
+    toasts.set([]);
+    toast(INFO, "Configuration was imported");
+    move("paintings");
+  }
 </script>
 
 <div>
@@ -36,11 +55,11 @@
     <button on:click={() => move("paintings")}>Create a fresh pack</button>
   </center>
 
-  <h2>Option 2: Import an exisinting pack config</h2>
+  <h2>Option 2: Import an existing pack config</h2>
 
-  <DropZone handler={(filename) => console.log(filename)}>
-    <p>Drag and drop an existing configuration</p>
-    <small><i>Dummy drop zone</i></small>
+  <DropZone handler={importPacks}>
+    <p>Drag and drop an existing configuration file</p>
+    <small>(its default name is <code>import.json</code>)</small>
   </DropZone>
 </div>
 

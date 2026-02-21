@@ -33,7 +33,7 @@
   {:else}
     <Tabs>
       <Tab title="Start" id="start" let:move>
-        <StartTab {move} />
+        <StartTab {module} {move} />
       </Tab>
 
       <Tab title="Paintings" id="paintings" let:move>

@@ -15,15 +15,12 @@
   let originalImageCanvas: HTMLCanvasElement;
   let paintingCanvas: HTMLCanvasElement;
 
-  let title = wrapper.title;
-  let author = wrapper.author;
-
   let currentRatio: string;
 
   // Reactive update
   $: if (wrapper.cppPainting) {
-    wrapper.cppPainting.title = title;
-    wrapper.cppPainting.author = author;
+    wrapper.cppPainting.title = wrapper.title;
+    wrapper.cppPainting.author = wrapper.author;
     currentRatio = wrapper.cppPainting.ratio;
   }
 
@@ -130,7 +127,11 @@
         {remove}
       />
       <PaintingCanvas bind:canvas={originalImageCanvas} />
-      <PaintingParams bind:currentRatio bind:title bind:author />
+      <PaintingParams
+        bind:currentRatio
+        bind:title={wrapper.title}
+        bind:author={wrapper.author}
+      />
       <PaintingCanvas bind:canvas={paintingCanvas} />
     </div>
   </div>

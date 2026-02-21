@@ -58,7 +58,11 @@ public:
   [[nodiscard]] Image_data flip_vertically(void) const;
   [[nodiscard]] Image_data flip_horizontally(void) const;
 
-  // Export
+  // Export to data
+
+  [[nodiscard]] std::vector<uint8_t> encode_png(void) const;
+
+  // Export to data in file
 
   // Dispatch between multiple image formats
   void save_as(std::filesystem::path name) const;

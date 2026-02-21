@@ -23,6 +23,18 @@ export function toast(
 ) {
   const id = Date.now() + Math.random(); // Unique ID
 
+  switch (type) {
+    case INFO:
+      console.log(message);
+      break;
+    case WARNING:
+      console.warn(message);
+      break;
+    case ERROR:
+      console.error(message);
+      break;
+  }
+
   toasts.update((all) => [...all, { id, type, message }]);
 
   setTimeout(() => {

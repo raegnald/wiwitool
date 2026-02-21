@@ -5,6 +5,8 @@
     type MainModule,
     type MinecraftPacker,
   } from "../../bindings/wiwitool";
+  import { serialise } from "../../serialisation/serialise";
+  import type { SerialisationModel } from "../../serialisation/models";
 
   // import { INFO, toast } from "../../stores/toastsStore";
 
@@ -15,6 +17,9 @@
 
     if ($paintingsStore.length > 0) addPaintingsPack(packer);
     if ($invisibleItemFramesPack) addInvisibleItemFramesPack(packer);
+
+    let model: SerialisationModel = serialise();
+    module.Serialiser.serialise(JSON.stringify(model));
 
     let zipFilepath = packer.getZip();
     download(zipFilepath);

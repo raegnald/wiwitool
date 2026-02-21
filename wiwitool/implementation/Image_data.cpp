@@ -214,6 +214,23 @@ void Image_data::save_as(std::filesystem::path name) const {
       "Image_data::save_as: invalid image extension (use .jpg/.jpeg or .png)");
 }
 
+static void stbi_write_to_vector(void *context, void *data, int size) {
+  auto *vec = static_cast<std::vector<uint8_t> *>(context);
+  auto *ptr = static_cast<const uint8_t *>(data);
+  vec->insert(vec->end(), ptr, ptr + size);
+}
+
+std::vector<uint8_t> Image_data::encode_png(void) const {
+  std::vector<uint8_t> buffer;
+  const auto stride = width_ * sizeof(Pixel);
+
+  stbi_write_png_to_func(stbi_write_to_vector, &buffer, width_, height_,
+                         channels_, data_.get(), stride);
+
+  return buffer;
+}
+
+
 #ifdef EMSCRIPTEN
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
@@ -272,6 +289,15 @@ EMSCRIPTEN_BINDINGS(image_data) {
     .function("rotateAnticlockwise", &Image_data::rotate_anticlockwise)
     .function("flipVertically", &Image_data::flip_vertically)
     .function("flipHorizontally", &Image_data::flip_horizontally)
+
+    // Export to memory buffer
+    .function("encodePng", optional_override([](const Image_data& self) {
+      std::vector<uint8_t> buffer = self.encode_png();
+      // Safely copy the WASM vector into a JS Uint8Array
+      return val::global("Uint8Array").new_(
+          typed_memory_view(buffer.size(), buffer.data())
+      );
+    }))
 
     // Export (Wrappers for std::string)
     .function("saveAs", optional_override([](const Image_data& self, std::string path) {
