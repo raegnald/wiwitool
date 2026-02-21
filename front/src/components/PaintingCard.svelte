@@ -145,7 +145,6 @@
     gap: 1rem;
     flex-wrap: nowrap;
     justify-content: space-between;
-    overflow: scroll;
     padding: 0;
   }
 
@@ -155,6 +154,7 @@
     padding: 15px;
     transition: 100ms;
     border-radius: 11px;
+    overflow: scroll;
   }
 
   .card-padding.selected {
