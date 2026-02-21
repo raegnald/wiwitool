@@ -5,7 +5,7 @@
     RotateCcwIcon,
     RotateCwIcon,
     Trash2Icon,
-  } from "svelte-feather-icons";
+  } from "@lucide/svelte";
 
   import Wiwicheckbox from "../Wiwicheckbox.svelte";
   import {

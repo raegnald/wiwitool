@@ -1,12 +1,12 @@
 <script lang="ts">
   import {
-    SquareIcon,
+    ProportionsIcon,
     RotateCcwIcon,
     RotateCwIcon,
     UserIcon,
-    TypeIcon,
+    TextCursorIcon,
     Trash2Icon,
-  } from "svelte-feather-icons";
+  } from "@lucide/svelte";
   import { paintingsStore } from "../stores/paintingsStore";
   import RatioSelect from "./PaintingCard/RatioSelect.svelte";
 
@@ -98,7 +98,7 @@
       onclick={() => openModal("aspect ratio")}
       title="Set aspect ratio for selected paintings"
     >
-      <SquareIcon />
+      <ProportionsIcon />
     </button>
     <button
       onclick={rotateSelectedCCW}
@@ -122,7 +122,7 @@
       onclick={() => openModal("title")}
       title="Set title for selected paintings"
     >
-      <TypeIcon />
+      <TextCursorIcon />
     </button>
     <button
       class="delete"

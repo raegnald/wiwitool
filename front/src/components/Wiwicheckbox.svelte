@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { CheckIcon, XIcon } from "svelte-feather-icons";
+  import { CheckIcon, XIcon } from "@lucide/svelte";
 
   export let checked: boolean;
   export let onclick: () => void;

@@ -1,22 +1,28 @@
 <script lang="ts">
+  import { ProportionsIcon, TextCursorIcon, UserIcon } from "@lucide/svelte";
   import RatioSelect from "./RatioSelect.svelte";
 
   export let currentRatio: string, title: string, author: string;
 </script>
 
 <div class="transformation-ratio-selection">
-  <div>
-    <span>Aspect ratio&nbsp; </span>
-    <RatioSelect bind:value={currentRatio} />
+  <div class="inputs">
+    <label>
+      <ProportionsIcon />
+      <span> Aspect ratio&nbsp; </span>
+      <RatioSelect bind:value={currentRatio} />
+    </label>
   </div>
   <img class="rightarrow" src="rightarrow.svg" alt="Right arrow" />
 
   <div class="inputs">
     <label>
-      <span>Title </span><input type="text" bind:value={title} />
+      <TextCursorIcon />
+      <span> Title </span><input type="text" bind:value={title} />
     </label>
     <label>
-      <span>Author </span><input type="text" bind:value={author} />
+      <UserIcon />
+      <span> Author </span><input type="text" bind:value={author} />
     </label>
   </div>
 </div>
@@ -39,6 +45,7 @@
   .inputs label {
     display: flex;
     align-items: center;
+    gap: 5px;
   }
   .inputs label input {
     max-width: 200px;
