@@ -64,7 +64,8 @@ table td:nth-child(odd) {
 }
 
 .app-card,
-#bulk-tools {
+#bulk-tools,
+dialog {
   border: 1px solid #ccc;
   background: white;
   border-radius: 12px;
@@ -138,7 +139,8 @@ input {
   }
 
   .app-card,
-  #bulk-tools {
+  #bulk-tools,
+  dialog {
     background-color: #292929;
     border-color: #666;
   }
