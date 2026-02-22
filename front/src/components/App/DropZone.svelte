@@ -45,7 +45,7 @@
   ondragleave={handleDragLeave}
 >
   {#if totalFiles - loadedFiles > 0}
-    <p>Loaded {loadedFiles} of {totalFiles}</p>
+    <span>Loaded {loadedFiles} of {totalFiles}</span>
   {:else}
     <slot />
   {/if}

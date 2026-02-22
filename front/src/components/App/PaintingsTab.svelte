@@ -59,7 +59,7 @@
   <h2>1. Load your images</h2>
 
   <DropZone handler={handleImageDrop}>
-    <p>Drag and drop images here</p>
+    <span>Drag and drop images here</span>
   </DropZone>
 
   {#if $paintingsStore.length > 0}
