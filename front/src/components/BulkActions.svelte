@@ -41,10 +41,12 @@
   }
 
   let dialog: HTMLDialogElement;
-  let editMode: "title" | "author" | "aspect ratio";
+  let editMode: "title" | "author" | "aspect ratio" | "delete selected";
   let bulkInput = "";
 
-  function openModal(mode: "title" | "author" | "aspect ratio") {
+  function openModal(
+    mode: "title" | "author" | "aspect ratio" | "delete selected",
+  ) {
     editMode = mode;
     bulkInput = ""; // clear previous input
     dialog.showModal();
@@ -72,24 +74,43 @@
 </script>
 
 <dialog bind:this={dialog}>
-  <div class="modal-content">
-    <span>Set {editMode} for selected paintings</span>
+  {#if editMode == "delete selected"}
+    <div class="modal-content">
+      <span>Are you sure you want to delete the selected paintings?</span>
 
-    {#if editMode == "aspect ratio"}
-      <RatioSelect bind:value={bulkInput} />
-    {:else}
-      <input
-        type="text"
-        bind:value={bulkInput}
-        placeholder="Enter new {editMode}..."
-      />
-    {/if}
-
-    <div class="modal-actions">
-      <button class="secondary" onclick={() => dialog.close()}>Cancel</button>
-      <button class="primary" onclick={applyBulkEdit}>Apply</button>
+      <div class="modal-actions">
+        <button class="secondary" onclick={() => dialog.close()}>Cancel</button>
+        <button
+          class="primary"
+          onclick={() => {
+            deleteSelected();
+            dialog.close();
+          }}
+        >
+          Delete selected
+        </button>
+      </div>
     </div>
-  </div>
+  {:else}
+    <div class="modal-content">
+      <span>Set {editMode} for selected paintings</span>
+
+      {#if editMode == "aspect ratio"}
+        <RatioSelect bind:value={bulkInput} />
+      {:else}
+        <input
+          type="text"
+          bind:value={bulkInput}
+          placeholder="Enter new {editMode}..."
+        />
+      {/if}
+
+      <div class="modal-actions">
+        <button class="secondary" onclick={() => dialog.close()}>Cancel</button>
+        <button class="primary" onclick={applyBulkEdit}>Apply</button>
+      </div>
+    </div>
+  {/if}
 </dialog>
 
 {#if hasSelected}
@@ -126,7 +147,7 @@
     </button>
     <button
       class="delete"
-      onclick={deleteSelected}
+      onclick={() => openModal("delete selected")}
       title="Delete selected paintings"
     >
       <Trash2Icon />
