@@ -156,26 +156,6 @@
 {/if}
 
 <style>
-  dialog {
-    border: none;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
-  dialog::backdrop {
-    background: rgba(0, 0, 0, 0.5);
-  }
-  .modal-content {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-  }
-
   #bulk-tools {
     position: sticky;
     bottom: 5px;

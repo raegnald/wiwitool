@@ -44,7 +44,7 @@
         <MiscTab {move} />
       </Tab>
 
-      <Tab title="Generate" id="generate">
+      <Tab hidden title="Generate" id="generate">
         <GenerateTab {module} />
       </Tab>
     </Tabs>

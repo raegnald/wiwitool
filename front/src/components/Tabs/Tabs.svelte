@@ -3,10 +3,13 @@
   import { writable, type Writable } from "svelte/store";
   import { TABS_KEY } from "../../key.js";
   import type { TabInfo } from "./types";
+  import { DownloadIcon, HouseIcon } from "@lucide/svelte";
 
   // Stores for state management
   const selectedTab = writable(null);
   const tabs: Writable<TabInfo[]> = writable([]);
+
+  let homeDialog: HTMLDialogElement;
 
   // Context object to share with children
   const context = {
@@ -33,19 +36,58 @@
   setContext(TABS_KEY, context);
 </script>
 
+<dialog bind:this={homeDialog}>
+  <div class="modal-content">
+    <span>You will lose all your progress</span>
+
+    <div class="modal-actions">
+      <button class="secondary" onclick={() => homeDialog.close()}>
+        Cancel
+      </button>
+      <button
+        class="primary"
+        onclick={() => {
+          homeDialog.close();
+          context.selectTab("start");
+        }}
+      >
+        Ok
+      </button>
+    </div>
+  </div>
+</dialog>
+
 <div class="tabs-container">
   {#if $selectedTab != "start"}
     <div class="tabs-header">
-      {#each $tabs as tab}
-        {#if !tab.hidden}
-          <button
-            class:active={$selectedTab === tab.id}
-            on:click={() => context.selectTab(tab.id)}
-          >
-            {tab.title}
-          </button>
-        {/if}
-      {/each}
+      <button
+        class:active={$selectedTab === "start"}
+        class="icon-tab"
+        onclick={() => homeDialog.showModal()}
+      >
+        <HouseIcon size="1.2em" />
+      </button>
+
+      <div class="normal-tabs-container">
+        {#each $tabs as tab}
+          {#if !tab.hidden}
+            <button
+              class:active={$selectedTab === tab.id}
+              onclick={() => context.selectTab(tab.id)}
+            >
+              {tab.title}
+            </button>
+          {/if}
+        {/each}
+      </div>
+
+      <button
+        class:active={$selectedTab === "generate"}
+        class="icon-tab"
+        onclick={() => context.selectTab("generate")}
+      >
+        <DownloadIcon size="1.2em" />
+      </button>
     </div>
   {/if}
 
@@ -61,8 +103,14 @@
     background-color: #ffff80;
     display: flex;
     justify-content: center;
+    /*align-items: center;*/
     border-bottom: 1px solid #ccc;
     margin-bottom: 1rem;
+  }
+  .normal-tabs-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
   }
   button {
     padding: 10px 20px;
