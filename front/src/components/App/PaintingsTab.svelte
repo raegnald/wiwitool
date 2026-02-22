@@ -1,17 +1,28 @@
 <script lang="ts">
-  import { paintingsStore } from "../../stores/paintingsStore";
+  import {
+    paintingsStore,
+    type PaintingWrapper,
+  } from "../../stores/paintingsStore";
   import type { MainModule } from "../../bindings/wiwitool";
 
   import HelpUsingPaintingsTool from "./HelpUsingPaintingsTool.svelte";
   import DropZone from "./DropZone.svelte";
   import PaintingCard from "../PaintingCard.svelte";
   import BulkActions from "../BulkActions.svelte";
-  import { InfoIcon } from "@lucide/svelte";
+  import {
+    CheckCheck,
+    CircleCheck,
+    CircleMinusIcon,
+    InfoIcon,
+    MinusIcon,
+  } from "@lucide/svelte";
 
   export let module: MainModule;
   export let move: (id: string) => void;
 
   $: showingInfo = false;
+
+  $: allSelected = $paintingsStore.every((painting) => painting.selected);
 
   async function handleImageDrop(file: File) {
     if (!module) return;
@@ -54,14 +65,21 @@
       },
     ]);
   }
+
+  function toggleSelectAll() {
+    $paintingsStore.forEach((painting) => {
+      painting.selected = !allSelected;
+    });
+    paintingsStore.update((paintings) => paintings);
+  }
 </script>
 
 <div>
   <div class="title-component">
     <h2>Load your images</h2>
     <button onclick={() => (showingInfo = !showingInfo)}>
-      Information <InfoIcon size="1em" /></button
-    >
+      Information <InfoIcon size="1em" />
+    </button>
   </div>
   <div class="infoContainer app-card" class:showingInfo>
     <HelpUsingPaintingsTool />
@@ -71,7 +89,16 @@
   </DropZone>
 
   {#if $paintingsStore.length > 0}
-    <h2>Customise your paintings</h2>
+    <div class="title-component">
+      <h2>Customise your paintings</h2>
+      <button onclick={toggleSelectAll}>
+        {#if allSelected}
+          Deselect all <CircleMinusIcon size="1.1em" />
+        {:else}
+          Select all <CircleCheck size="1.1em" />
+        {/if}
+      </button>
+    </div>
 
     <div class="list">
       {#each [...$paintingsStore].reverse() as wrapper (wrapper.id)}
