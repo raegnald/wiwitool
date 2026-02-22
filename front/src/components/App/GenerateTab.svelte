@@ -70,8 +70,6 @@
 </script>
 
 <div>
-  <p>Extra configs and download packs</p>
-
   <p>Your pack will contain:</p>
   <ul>
     <li>
@@ -84,5 +82,5 @@
     {/if}
   </ul>
 
-  <button onclick={generatePacks}>Generate pack</button>
+  <button onclick={generatePacks}>Download pack</button>
 </div>
