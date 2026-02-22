@@ -6,9 +6,12 @@
   import DropZone from "./DropZone.svelte";
   import PaintingCard from "../PaintingCard.svelte";
   import BulkActions from "../BulkActions.svelte";
+  import { InfoIcon } from "@lucide/svelte";
 
   export let module: MainModule;
   export let move: (id: string) => void;
+
+  $: showingInfo = false;
 
   async function handleImageDrop(file: File) {
     if (!module) return;
@@ -54,16 +57,21 @@
 </script>
 
 <div>
-  <HelpUsingPaintingsTool />
-
-  <h2>1. Load your images</h2>
-
+  <div class="title-component">
+    <h2>Load your images</h2>
+    <button onclick={() => (showingInfo = !showingInfo)}>
+      Information <InfoIcon size="1em" /></button
+    >
+  </div>
+  <div class="infoContainer app-card" class:showingInfo>
+    <HelpUsingPaintingsTool />
+  </div>
   <DropZone handler={handleImageDrop}>
     <span>Drag and drop images here</span>
   </DropZone>
 
   {#if $paintingsStore.length > 0}
-    <h2>2. Customise your paintings</h2>
+    <h2>Customise your paintings</h2>
 
     <div class="list">
       {#each [...$paintingsStore].reverse() as wrapper (wrapper.id)}
@@ -82,4 +90,17 @@
 </div>
 
 <style>
+  .infoContainer {
+    display: none;
+  }
+
+  .infoContainer.showingInfo {
+    display: block;
+  }
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
 </style>

@@ -1,5 +1,4 @@
-<details class="app-card help-card">
-  <summary>Information about this tool</summary>
+<div>
   <p>
     This is a web tool for creating <b
       >custom painting items in Minecraft out of your own images</b
@@ -80,7 +79,7 @@
       alt="Transforming any painting into a custom painting"
     />
   </center>
-</details>
+</div>
 
 <style>
   .fill-space {
@@ -90,5 +89,9 @@
   }
   .wiwitool-text {
     font-size: 150%;
+  }
+
+  p:first-child {
+    margin-top: 0;
   }
 </style>
