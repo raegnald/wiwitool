@@ -39,9 +39,9 @@
   </div>
 
   <div>
-    <button onclick={() => alert("Crop!")} title="Crop image"
+    <!-- <button onclick={() => alert("Crop!")} title="Crop image"
       ><CropIcon /></button
-    >
+    > -->
 
     <div class="actions-pack">
       <button onclick={rotateClockwise} title="Rotate clockwise"
@@ -62,13 +62,12 @@
 <style>
   .actions {
     display: flex;
-    height: 100%;
     flex-direction: column;
     justify-content: space-between;
   }
 
   .actions .first {
-    min-height: 70px;
+    flex: 1;
   }
 
   .actions > div {

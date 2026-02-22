@@ -163,9 +163,7 @@
 
   .transformation {
     display: flex;
-    align-items: center;
-    gap: 10px;
     align-items: stretch;
-    align-items: center;
+    gap: 10px;
   }
 </style>
