@@ -3,6 +3,7 @@ import type { Writable } from "svelte/store";
 export interface TabInfo {
   id: string;
   title: string;
+  hidden: boolean;
 }
 
 export interface TabsContext {

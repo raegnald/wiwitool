@@ -3,7 +3,6 @@
   import { writable, type Writable } from "svelte/store";
   import { TABS_KEY } from "../../key.js";
   import type { TabInfo } from "./types";
-  import StartTab from "../App/StartTab.svelte";
 
   // Stores for state management
   const selectedTab = writable(null);
@@ -38,12 +37,14 @@
   {#if $selectedTab != "start"}
     <div class="tabs-header">
       {#each $tabs as tab}
-        <button
-          class:active={$selectedTab === tab.id}
-          on:click={() => context.selectTab(tab.id)}
-        >
-          {tab.title}
-        </button>
+        {#if !tab.hidden}
+          <button
+            class:active={$selectedTab === tab.id}
+            on:click={() => context.selectTab(tab.id)}
+          >
+            {tab.title}
+          </button>
+        {/if}
       {/each}
     </div>
   {/if}

@@ -4,6 +4,7 @@
   import type { TabInfo, TabsContext } from "./types";
 
   export let title: string;
+  export let hidden: boolean = false;
   // Optional: Allow user to set a custom ID, otherwise use title
   export let id = title;
 
@@ -11,7 +12,7 @@
     TABS_KEY,
   ) as TabsContext;
 
-  const tab: TabInfo = { id, title };
+  const tab: TabInfo = { id, title, hidden };
 
   onMount(() => {
     registerTab(tab);

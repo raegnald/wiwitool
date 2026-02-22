@@ -32,7 +32,7 @@
     </center>
   {:else}
     <Tabs>
-      <Tab title="Start" id="start" let:move>
+      <Tab hidden title="Start" id="start" let:move>
         <StartTab {module} {move} />
       </Tab>
 
