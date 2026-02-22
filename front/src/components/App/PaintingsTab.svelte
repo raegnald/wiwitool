@@ -131,6 +131,7 @@
 
   .infoContainer.showingInfo {
     display: block;
+    margin-bottom: 20px;
   }
 
   button {
