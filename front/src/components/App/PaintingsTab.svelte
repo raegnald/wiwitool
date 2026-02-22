@@ -16,13 +16,21 @@
     InfoIcon,
     MinusIcon,
   } from "@lucide/svelte";
+  import { onMount } from "svelte";
 
   export let module: MainModule;
   export let move: (id: string) => void;
 
   $: showingInfo = false;
-
   $: allSelected = $paintingsStore.every((painting) => painting.selected);
+
+  onMount(() => {
+    // Ask the user for confirmation when reloading the page
+    window.addEventListener("beforeunload", (event: Event) => {
+      event.preventDefault();
+      event.returnValue = false;
+    });
+  });
 
   async function handleImageDrop(file: File) {
     if (!module) return;
