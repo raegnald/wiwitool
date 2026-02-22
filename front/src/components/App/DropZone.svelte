@@ -72,7 +72,7 @@
       background-color: #f0f8ff;
     }
     .drop-zone {
-      background-color: #ffff99;
+      background-color: #f1f1f1;
     }
   }
 </style>
