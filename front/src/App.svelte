@@ -61,7 +61,6 @@
   #wiwi-logo-wide {
     display: flex;
     justify-content: center;
-    margin-bottom: 25px;
   }
 
   #wiwi-logo-wide img {
