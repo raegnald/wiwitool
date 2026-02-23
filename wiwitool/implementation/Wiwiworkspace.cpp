@@ -38,7 +38,7 @@ bool Wiwiworkspace::get_invisible_item_frames(void) const {
   return invisible_item_frames;
 }
 
-std::string Wiwiworkspace::serialise(void) const {
+std::vector<uint8_t> Wiwiworkspace::serialise(void) const {
   json j;
 
   j["invisible_item_frames"] = invisible_item_frames;
@@ -49,12 +49,12 @@ std::string Wiwiworkspace::serialise(void) const {
 
   j["paintings"] = flat_paintings;
 
-  return j.dump(-1);
+  return nlohmann::json::to_msgpack(j);
 }
 
-void Wiwiworkspace::deserialise(const std::string &json_string) {
+void Wiwiworkspace::deserialise(const std::vector<uint8_t> &binary_msgpack) {
   paintings.clear();
-  json j = json::parse(json_string);
+  json j = nlohmann::json::from_msgpack(binary_msgpack);
 
   invisible_item_frames = j.value("invisible_item_frames", false);
 
@@ -116,7 +116,12 @@ EMSCRIPTEN_BINDINGS(wiwiworkspace) {
                 &Wiwiworkspace::set_invisible_item_frames)
 
       .function("serialise", &Wiwiworkspace::serialise)
-      .function("deserialise", &Wiwiworkspace::deserialise)
+      .function(
+          "deserialise",
+          optional_override([](Wiwiworkspace &self,
+                               const std::vector<uint8_t> &binary_msgpack) {
+            self.deserialise(binary_msgpack);
+          }))
 
       .function("generateZip", optional_override([](Wiwiworkspace &self) {
                   return std::string{self.generate_zip()};

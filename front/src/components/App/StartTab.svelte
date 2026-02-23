@@ -10,15 +10,24 @@
 
   export let move: (id: string) => void;
 
+  export let module: MainModule;
+
   $: showDropZone = false;
 
   async function importPacks(file: File) {
     toast(INFO, "Importing configuration...");
 
     const buffer = await file.arrayBuffer();
-    const jsonString = new TextDecoder().decode(buffer);
+    const uint8View = new Uint8Array(buffer);
 
-    $workspace.deserialise(jsonString);
+    const vec = new module.PaintingBufferVector();
+    for (let i = 0; i < uint8View.length; i++) {
+      vec.push_back(uint8View[i]);
+    }
+
+    $workspace.deserialise(vec);
+    vec.delete();
+
     retrievePaintings();
 
     toasts.set([]);
@@ -62,7 +71,9 @@
   <div class:showDropZone class="dropZoneContainer">
     <DropZone handler={importPacks}>
       <span>Drag and drop an existing configuration file</span><br />
-      <small>(its default name is <code>import.json</code>)</small>
+      <small>
+        (its default name is <code>wiwitool.data</code>)
+      </small>
     </DropZone>
   </div>
 

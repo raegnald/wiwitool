@@ -27,8 +27,8 @@ public:
 
   // Serialisation and generation
 
-  std::string serialise(void) const;
-  void deserialise(const std::string &json_string);
+  std::vector<uint8_t> serialise(void) const;
+  void deserialise(const std::vector<uint8_t> &binary_msgpack);
 
   std::filesystem::path generate_zip(void);
 
