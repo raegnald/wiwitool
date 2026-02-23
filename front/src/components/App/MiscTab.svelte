@@ -27,7 +27,7 @@
   <div class="pagination">
     <button class="secondary" onclick={() => move("paintings")}>Previous</button
     >
-    <button onclick={() => move("generate")}>Next</button>
+    <button onclick={() => move("music")}>Next</button>
   </div>
 </div>
 

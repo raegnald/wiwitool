@@ -13,6 +13,7 @@
   import { INFO, toast } from "./stores/toastsStore";
   import GenerateTab from "./components/App/GenerateTab.svelte";
   import StartTab from "./components/App/StartTab.svelte";
+  import MusicTab from "./components/App/MusicTab.svelte";
 
   let module: MainModule | null = null;
 
@@ -42,6 +43,10 @@
 
       <Tab title="Miscellaneous" id="misc" let:move>
         <MiscTab {move} />
+      </Tab>
+
+      <Tab title="Music (WIP)" id="music" let:move>
+        <MusicTab {move} />
       </Tab>
 
       <Tab hidden title="Generate" id="generate">
