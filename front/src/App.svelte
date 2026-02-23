@@ -14,8 +14,15 @@
   import { INFO, toast } from "./stores/toastsStore";
   import GenerateTab from "./components/App/GenerateTab.svelte";
   import StartTab from "./components/App/StartTab.svelte";
+  import { paintingsStore } from "./stores/paintingsStore";
 
   let module: MainModule | null = null;
+
+  function resetApp() {
+    paintingsStore.set([]);
+    $workspace.delete();
+    $workspace = new module.Wiwiworkspace();
+  }
 
   onMount(async () => {
     module = await getWasmModule();
@@ -33,7 +40,7 @@
       <p>Loading webassembly module...</p>
     </center>
   {:else}
-    <Tabs>
+    <Tabs {resetApp}>
       <Tab hidden title="Start" id="start" let:move>
         <StartTab {module} {move} />
       </Tab>
