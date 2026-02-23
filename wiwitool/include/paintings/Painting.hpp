@@ -7,9 +7,11 @@
 #include "Image_data.hpp"
 #include "paintings/Painting_ratio.hpp"
 
+#include "nlohmann/json.hpp"
+
 class Painting {
 public:
-  Painting(void) = delete;
+  Painting(void);
 
   // Copy
   Painting(const Painting &) = default;
@@ -51,6 +53,9 @@ public:
   void rotate_clockwise(void);
   void rotate_anticlockwise(void);
 
+  friend void to_json(nlohmann::json &j, const Painting &p);
+  friend void from_json(const nlohmann::json &j, Painting &p);
+
 private:
   static inline unsigned int next_painting_id{0};
 
@@ -71,3 +76,6 @@ private:
       refresh();
   }
 };
+
+void to_json(nlohmann::json &j, const Painting &p);
+void from_json(const nlohmann::json &j, Painting &p);

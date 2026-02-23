@@ -10,6 +10,8 @@
 #include <stdexcept>
 #include <utility>
 
+#include "nlohmann/json.hpp"
+
 std::array<Painting_ratio, 12> all_ratios(void) noexcept {
   return {ONE_ONE,   ONE_TWO,     TWO_ONE,    TWO_TWO,  TWO_THREE,  TWO_FOUR,
           THREE_TWO, THREE_THREE, THREE_FOUR, FOUR_TWO, FOUR_THREE, FOUR_FOUR};
@@ -83,4 +85,12 @@ Painting_ratio ratio_of_string(std::string s) {
 Painting_ratio opposite_ratio(Painting_ratio r) noexcept {
   const auto [w, h] = ratio_sizes(r);
   return static_cast<Painting_ratio>((h << 8) | w);
+}
+
+void to_json(nlohmann::json &j, const Painting_ratio &r) {
+    j = string_of_ratio(r);
+}
+
+void from_json(const nlohmann::json &j, Painting_ratio &r) {
+  r = ratio_of_string(j.get<std::string>());
 }

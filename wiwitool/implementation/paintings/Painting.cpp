@@ -2,10 +2,14 @@
 
 #include <print>
 
+#include "nlohmann/json.hpp"
+
 #include "paintings/Painting_converter.hpp"
 
 #include "paintings/Painting_ratio.hpp"
 #include "util/wiwidebug.hpp"
+
+Painting::Painting(void) : painting_id{next_painting_id++} {}
 
 Painting::Painting(std::filesystem::path image_path)
     : Painting{Image_data{image_path}} {}
@@ -23,8 +27,6 @@ Painting::Painting(Image_data image_data)
 
   refresh();
 }
-
-// Painting::Painting(const Painting &other) : Painting{other.original_image} {}
 
 std::shared_ptr<Painting> Painting::clone(void) const {
   auto cloned = std::make_shared<Painting>(*this);
@@ -52,7 +54,6 @@ void Painting::refresh(void) const {
   wiwidebug std::println("Painting and icon image data computed!");
 }
 
-
 void Painting::rotate_clockwise(void) {
   original_image = original_image.rotate_clockwise();
   conversion_ratio = opposite_ratio(conversion_ratio);
@@ -65,6 +66,24 @@ void Painting::rotate_anticlockwise(void) {
   conversion_ratio = opposite_ratio(conversion_ratio);
 
   refresh();
+}
+
+void to_json(nlohmann::json &j, const Painting &p) {
+  j = nlohmann::json{{"id", p.painting_id},
+                     {"title", p.title},
+                     {"author", p.author},
+                     {"ratio", p.conversion_ratio},
+                     {"sourceImage", p.original_image}};
+}
+
+void from_json(const nlohmann::json &j, Painting &p) {
+  j.at("id").get_to(p.painting_id);
+  j.at("title").get_to(p.title);
+  j.at("author").get_to(p.author);
+  j.at("ratio").get_to(p.conversion_ratio);
+  j.at("sourceImage").get_to(p.original_image);
+
+  p.refresh();
 }
 
 
