@@ -38,7 +38,10 @@
 
 <dialog bind:this={homeDialog}>
   <div class="modal-content">
-    <span>You will lose all your progress</span>
+    <span
+      >Are you sure you want to go back to the start?<br /> You will lose all of your
+      progress.</span
+    >
 
     <div class="modal-actions">
       <button class="secondary" onclick={() => homeDialog.close()}>
@@ -51,7 +54,7 @@
           context.selectTab("start");
         }}
       >
-        Ok
+        Start over
       </button>
     </div>
   </div>
@@ -62,7 +65,7 @@
     <div class="tabs-header">
       <button
         class:active={$selectedTab === "start"}
-        class="icon-tab"
+        class="icon-tab tab-button"
         onclick={() => homeDialog.showModal()}
       >
         <HouseIcon size="1.2em" />
@@ -72,6 +75,7 @@
         {#each $tabs as tab}
           {#if !tab.hidden}
             <button
+              class="tab-button"
               class:active={$selectedTab === tab.id}
               onclick={() => context.selectTab(tab.id)}
             >
@@ -83,7 +87,7 @@
 
       <button
         class:active={$selectedTab === "generate"}
-        class="icon-tab"
+        class="icon-tab tab-button"
         onclick={() => context.selectTab("generate")}
       >
         <DownloadIcon size="1.2em" />
@@ -112,7 +116,7 @@
     display: flex;
     justify-content: center;
   }
-  button {
+  .tab-button {
     padding: 10px 20px;
     background: transparent;
     border: none;
@@ -121,7 +125,7 @@
     border-bottom: 2px solid transparent;
     opacity: 0.8;
   }
-  button.active {
+  .tab-button.active {
     /*font-weight: bold;*/
     border-color: #646cff;
     opacity: 1;
