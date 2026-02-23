@@ -5,6 +5,8 @@
   import type { TabInfo } from "./types";
   import { DownloadIcon, HouseIcon } from "@lucide/svelte";
 
+  export let resetApp: () => void;
+
   // Stores for state management
   const selectedTab = writable(null);
   const tabs: Writable<TabInfo[]> = writable([]);
@@ -48,6 +50,7 @@
         class="primary"
         onclick={() => {
           homeDialog.close();
+          resetApp();
           context.selectTab("start");
         }}
       >

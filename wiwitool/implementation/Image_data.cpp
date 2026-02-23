@@ -10,6 +10,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include "nlohmann/json.hpp"
+
 #include "stb_image.h"
 #include "stb_image_write.h"
 
@@ -228,6 +230,15 @@ std::vector<uint8_t> Image_data::encode_png(void) const {
                          channels_, data_.get(), stride);
 
   return buffer;
+}
+
+void to_json(nlohmann::json &j, const Image_data &image) {
+  j = nlohmann::json{{"image_data", image.encode_png()}};
+}
+
+void from_json(const nlohmann::json &j, Image_data &image) {
+  auto encoded_data = j.at("image_data").get<std::vector<uint8_t>>();
+  image = Image_data{encoded_data};
 }
 
 

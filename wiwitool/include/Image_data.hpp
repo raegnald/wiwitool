@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "nlohmann/json_fwd.hpp"
 #include <cstddef>
 #include <filesystem>
 #include <memory>
@@ -80,3 +81,7 @@ private:
   using Stb_image = std::unique_ptr<Pixel, void (*)(void *)>;
   Stb_image data_{nullptr, [](void *) {}};
 };
+
+// JSON serialisation for Image_data
+void to_json(nlohmann::json &j, const Image_data &p);
+void from_json(const nlohmann::json &j, Image_data &p);

@@ -1,28 +1,18 @@
 <script lang="ts">
-  import { invisibleItemFramesPack } from "../../stores/invisibleItemFrameStore";
   import { paintingsStore } from "../../stores/paintingsStore";
   import {
     type MainModule,
     type MinecraftPacker,
   } from "../../bindings/wiwitool";
-  import { serialise } from "../../serialisation/serialise";
-  import type { SerialisationModel } from "../../serialisation/models";
-
-  // import { INFO, toast } from "../../stores/toastsStore";
+  import { workspace } from "../../stores/workspaceStore";
 
   export let module: MainModule;
 
   function generatePacks() {
-    let packer: MinecraftPacker = new module.MinecraftPacker();
+    if (!$workspace) return;
 
-    if ($paintingsStore.length > 0) addPaintingsPack(packer);
-    if ($invisibleItemFramesPack) addInvisibleItemFramesPack(packer);
-
-    let model: SerialisationModel = serialise();
-    module.Serialiser.serialise(JSON.stringify(model));
-
-    let zipFilepath = packer.getZip();
-    download(zipFilepath);
+    const zipPath = $workspace.generateZip();
+    download(zipPath);
   }
 
   function addPaintingsPack(packer: MinecraftPacker) {
@@ -77,7 +67,7 @@
       painting{$paintingsStore.length != 1 ? "s" : ""}
     </li>
 
-    {#if $invisibleItemFramesPack}
+    {#if $workspace && $workspace.invisibleItemFrames}
       <li>Invisible item frames (normal and glow variants)</li>
     {/if}
   </ul>

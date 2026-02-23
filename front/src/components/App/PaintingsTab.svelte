@@ -4,6 +4,7 @@
     type PaintingWrapper,
   } from "../../stores/paintingsStore";
   import type { MainModule } from "../../bindings/wiwitool";
+  import { workspace } from "../../stores/workspaceStore";
 
   import HelpUsingPaintingsTool from "./HelpUsingPaintingsTool.svelte";
   import DropZone from "./DropZone.svelte";
@@ -33,44 +34,27 @@
   });
 
   async function handleImageDrop(file: File) {
-    if (!module) return;
+    if (!module || !$workspace) return;
 
     const buffer = await file.arrayBuffer();
     const uint8View = new Uint8Array(buffer);
 
-    // 1. Allocate memory in WASM for the vector
-    // You registered 'PaintingBufferVector' in bindings
     const vec = new module.PaintingBufferVector();
+    for (let i = 0; i < uint8View.length; i++) vec.push_back(uint8View[i]);
 
-    // Push data into the vector
-    for (let i = 0; i < uint8View.length; i++) {
-      vec.push_back(uint8View[i]);
-    }
-
-    // 2. Create the Painting C++ object
-    // The binding: .constructor(optional_override([](std::vector<uint8_t> data)...
-    const painting = new module.Painting(vec);
-
-    // Clean up the temporary vector
+    const cppPainting = new module.Painting(vec);
     vec.delete();
 
-    // 3. Set default metadata
-    const name = file.name.split(".")[0];
-    painting.title = name;
-    painting.author = "User";
+    cppPainting.title = file.name.split(".")[0];
+    cppPainting.author = "";
 
-    // 4. Add to store
+    // Add to C++ workspace
+    $workspace.addPainting(cppPainting);
+
+    // Add to Svelte store
     paintingsStore.update((current) => [
       ...current,
-      {
-        id: Math.random(), // Simple ID for UI keys
-        title: name,
-        author: "User",
-        originalImageBytes: uint8View,
-        cppPainting: painting,
-        selected: false,
-        crop: null,
-      },
+      { cppPainting, selected: false },
     ]);
   }
 
@@ -109,7 +93,7 @@
     </div>
 
     <div class="list">
-      {#each [...$paintingsStore].reverse() as wrapper (wrapper.id)}
+      {#each [...$paintingsStore].reverse() as wrapper (wrapper.cppPainting.stringId())}
         <PaintingCard {wrapper} />
       {/each}
     </div>

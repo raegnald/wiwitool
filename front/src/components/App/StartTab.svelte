@@ -1,12 +1,16 @@
 <script lang="ts">
-  import type { SerialisationModel } from "../../serialisation/models";
   import DropZone from "./DropZone.svelte";
-  import { deserialise } from "../../serialisation/deserialise";
   import type { MainModule } from "../../bindings/wiwitool";
   import { INFO, toast, toasts } from "../../stores/toastsStore";
+  import { workspace } from "../../stores/workspaceStore";
+  import {
+    paintingsStore,
+    type PaintingWrapper,
+  } from "../../stores/paintingsStore";
+
+  export let move: (id: string) => void;
 
   export let module: MainModule;
-  export let move: (id: string) => void;
 
   $: showDropZone = false;
 
@@ -14,14 +18,37 @@
     toast(INFO, "Importing configuration...");
 
     const buffer = await file.arrayBuffer();
-    const decoder = new TextDecoder();
-    const model: SerialisationModel = JSON.parse(decoder.decode(buffer));
+    const uint8View = new Uint8Array(buffer);
 
-    deserialise(model, module);
+    const vec = new module.PaintingBufferVector();
+    for (let i = 0; i < uint8View.length; i++) {
+      vec.push_back(uint8View[i]);
+    }
+
+    $workspace.deserialise(vec);
+    vec.delete();
+
+    retrievePaintings();
 
     toasts.set([]);
     toast(INFO, "Configuration was imported");
     move("paintings");
+  }
+
+  function retrievePaintings() {
+    const cppPaintingsVector = $workspace.getPaintings();
+
+    const newWrappers: PaintingWrapper[] = [];
+
+    for (let i = 0; i < cppPaintingsVector.size(); i++) {
+      newWrappers.push({
+        cppPainting: cppPaintingsVector.get(i),
+        selected: false,
+      });
+    }
+    cppPaintingsVector.delete();
+
+    paintingsStore.set(newWrappers);
   }
 </script>
 
@@ -44,7 +71,9 @@
   <div class:showDropZone class="dropZoneContainer">
     <DropZone handler={importPacks}>
       <span>Drag and drop an existing configuration file</span><br />
-      <small>(its default name is <code>import.json</code>)</small>
+      <small>
+        (its default name is <code>wiwitool.data</code>)
+      </small>
     </DropZone>
   </div>
 
