@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { getWasmModule, wasmReady } from "./stores/wasmStore";
+  import { workspace } from "./stores/workspaceStore";
   import type { MainModule } from "./bindings/wiwitool";
 
   import Tabs from "./components/Tabs/Tabs.svelte";
@@ -18,6 +19,7 @@
 
   onMount(async () => {
     module = await getWasmModule();
+    $workspace = new module.Wiwiworkspace();
   });
 </script>
 

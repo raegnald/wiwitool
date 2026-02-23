@@ -15,7 +15,7 @@
 
   type ButtonClickHandler = () => void;
 
-  export let id: number;
+  export let id: string;
   export let selected: boolean;
   export let rotateClockwise: ButtonClickHandler;
   export let rotateAnticlockwise: ButtonClickHandler;
@@ -25,7 +25,7 @@
   function toggleSelection() {
     paintingsStore.update((current) =>
       current.map((painting: PaintingWrapper) =>
-        painting.id === id
+        painting.cppPainting.stringId() === id
           ? { ...painting, selected: selected } // Create a new object to trigger reactivity
           : painting,
       ),
@@ -39,23 +39,29 @@
   </div>
 
   <div>
-    <!-- <button onclick={() => alert("Crop!")} title="Crop image"
-      ><CropIcon /></button
-    > -->
+    <!--
+    <button onclick={() => alert("Crop!")} title="Crop image">
+      <CropIcon />
+    </button>
+    -->
 
     <div class="actions-pack">
-      <button onclick={rotateClockwise} title="Rotate clockwise"
-        ><RotateCwIcon /></button
-      >
-      <button onclick={rotateAnticlockwise} title="Rotate anticlockwise"
-        ><RotateCcwIcon /></button
-      >
+      <button onclick={rotateClockwise} title="Rotate clockwise">
+        <RotateCwIcon />
+      </button>
+
+      <button onclick={rotateAnticlockwise} title="Rotate anticlockwise">
+        <RotateCcwIcon />
+      </button>
     </div>
 
-    <button onclick={clone} title="Clone image"><CopyIcon /></button>
-    <button onclick={remove} class="delete" title="Delete painting"
-      ><Trash2Icon /></button
-    >
+    <button onclick={clone} title="Clone image">
+      <CopyIcon />
+    </button>
+
+    <button onclick={remove} class="delete" title="Delete painting">
+      <Trash2Icon />
+    </button>
   </div>
 </div>
 

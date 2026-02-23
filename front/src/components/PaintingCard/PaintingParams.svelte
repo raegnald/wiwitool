@@ -3,6 +3,9 @@
   import RatioSelect from "./RatioSelect.svelte";
 
   export let currentRatio: string, title: string, author: string;
+
+  export let oninput: (e?: Event) => void = () => {};
+  export let onchange: (e?: Event) => void = () => {};
 </script>
 
 <div class="transformation-ratio-selection">
@@ -10,7 +13,7 @@
     <label>
       <ProportionsIcon />
       <span> Aspect ratio&nbsp; </span>
-      <RatioSelect bind:value={currentRatio} />
+      <RatioSelect bind:value={currentRatio} {oninput} {onchange} />
     </label>
   </div>
   <img class="rightarrow" src="rightarrow.svg" alt="Right arrow" />

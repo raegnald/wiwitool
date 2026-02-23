@@ -1,11 +1,13 @@
 <script lang="ts">
-  import type { SerialisationModel } from "../../serialisation/models";
   import DropZone from "./DropZone.svelte";
-  import { deserialise } from "../../serialisation/deserialise";
   import type { MainModule } from "../../bindings/wiwitool";
   import { INFO, toast, toasts } from "../../stores/toastsStore";
+  import { workspace } from "../../stores/workspaceStore";
+  import {
+    paintingsStore,
+    type PaintingWrapper,
+  } from "../../stores/paintingsStore";
 
-  export let module: MainModule;
   export let move: (id: string) => void;
 
   $: showDropZone = false;
@@ -14,14 +16,30 @@
     toast(INFO, "Importing configuration...");
 
     const buffer = await file.arrayBuffer();
-    const decoder = new TextDecoder();
-    const model: SerialisationModel = JSON.parse(decoder.decode(buffer));
+    const jsonString = new TextDecoder().decode(buffer);
 
-    deserialise(model, module);
+    $workspace.deserialise(jsonString);
+    retrievePaintings();
 
     toasts.set([]);
     toast(INFO, "Configuration was imported");
     move("paintings");
+  }
+
+  function retrievePaintings() {
+    const cppPaintingsVector = $workspace.getPaintings();
+
+    const newWrappers: PaintingWrapper[] = [];
+
+    for (let i = 0; i < cppPaintingsVector.size(); i++) {
+      newWrappers.push({
+        cppPainting: cppPaintingsVector.get(i),
+        selected: false,
+      });
+    }
+    cppPaintingsVector.delete();
+
+    paintingsStore.set(newWrappers);
   }
 </script>
 

@@ -4,6 +4,7 @@
     paintingsStore,
     type PaintingWrapper,
   } from "../stores/paintingsStore";
+  import { workspace } from "../stores/workspaceStore";
 
   import PaintingActions from "./PaintingCard/PaintingActions.svelte";
   import PaintingCanvas from "./PaintingCard/PaintingCanvas.svelte";
@@ -15,17 +16,27 @@
   let originalImageCanvas: HTMLCanvasElement;
   let paintingCanvas: HTMLCanvasElement;
 
+  // Local UI state
+  let title: string;
+  let author: string;
   let currentRatio: string;
 
-  // Reactive update
-  $: if (wrapper.cppPainting) {
-    wrapper.cppPainting.title = wrapper.title;
-    wrapper.cppPainting.author = wrapper.author;
+  // External changes that modify local UI state
+  $: if (wrapper && wrapper.cppPainting) {
+    title = wrapper.cppPainting.title;
+    author = wrapper.cppPainting.author;
     currentRatio = wrapper.cppPainting.ratio;
+
+    refresh();
   }
 
-  $: if (wrapper.cppPainting && currentRatio) {
+  function syncToCpp() {
+    if (!wrapper.cppPainting) return;
+
+    wrapper.cppPainting.title = title;
+    wrapper.cppPainting.author = author;
     wrapper.cppPainting.ratio = currentRatio;
+
     refresh();
   }
 
@@ -80,28 +91,32 @@
   }
 
   function remove() {
+    const idToRemove = wrapper.cppPainting.stringId();
+
+    $workspace.removePainting(idToRemove);
+
+    paintingsStore.update((list) => list.filter((p) => p !== wrapper));
+
     wrapper.cppPainting.delete();
-    paintingsStore.update((list) => list.filter((p) => p.id !== wrapper.id));
   }
 
   function clone() {
     const newCppPainting = wrapper.cppPainting.clone();
+    newCppPainting.title = title + " (copy)";
 
-    const newWrapper: PaintingWrapper = {
-      id: Math.random(),
-      title: wrapper.title + " (copy)",
-      author: wrapper.author,
-      cppPainting: newCppPainting,
-      originalImageBytes: wrapper.originalImageBytes,
-      selected: false,
-      crop: null,
-    };
+    $workspace.addPainting(newCppPainting);
 
-    // 3. Add to store immediately after the current item
     paintingsStore.update((list) => {
-      const index = list.findIndex((p) => p.id === wrapper.id);
+      const index = list.findIndex(
+        (p) => p.cppPainting.stringId() === wrapper.cppPainting.stringId(),
+      );
+
       const newList = [...list];
-      newList.splice(index + 1, 0, newWrapper);
+      newList.splice(index + 1, 0, {
+        cppPainting: newCppPainting,
+        selected: false,
+      });
+
       return newList;
     });
   }
@@ -120,7 +135,7 @@
     <div class="transformation">
       <PaintingActions
         bind:selected={wrapper.selected}
-        id={wrapper.id}
+        id={wrapper.cppPainting.stringId()}
         {rotateClockwise}
         {rotateAnticlockwise}
         {clone}
@@ -129,8 +144,10 @@
       <PaintingCanvas bind:canvas={originalImageCanvas} />
       <PaintingParams
         bind:currentRatio
-        bind:title={wrapper.title}
-        bind:author={wrapper.author}
+        bind:title
+        bind:author
+        oninput={syncToCpp}
+        onchange={syncToCpp}
       />
       <PaintingCanvas bind:canvas={paintingCanvas} />
     </div>

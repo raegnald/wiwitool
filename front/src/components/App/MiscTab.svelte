@@ -1,16 +1,23 @@
 <script lang="ts">
   import { InfoIcon } from "@lucide/svelte";
-  import { invisibleItemFramesPack } from "../../stores/invisibleItemFrameStore";
   import Wiwicheckbox from "../Wiwicheckbox.svelte";
+  import { workspace } from "../../stores/workspaceStore";
 
   export let move: (id: string) => void;
-  $: showingInfoIIF = false;
+
+  let iifEnabled = $workspace ? $workspace.invisibleItemFrames : false;
+
+  $: if ($workspace) {
+    $workspace.invisibleItemFrames = iifEnabled;
+  }
+
+  let showingInfoIIF = false;
 </script>
 
 <div>
   <div class="app-card">
     <div class="check-option title-component">
-      <Wiwicheckbox bind:checked={$invisibleItemFramesPack}>
+      <Wiwicheckbox bind:checked={iifEnabled}>
         Invisible item frames can be crafted as recipes
       </Wiwicheckbox>
       <button onclick={() => (showingInfoIIF = !showingInfoIIF)}>
