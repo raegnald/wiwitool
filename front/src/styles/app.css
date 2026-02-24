@@ -106,6 +106,22 @@ button {
   border: 1px solid #ccc;
 }
 
+button.delete {
+  background-color: #ffcccc;
+  border: 2px solid #ffaaaa;
+}
+button.delete:hover {
+  border-color: #ff5555;
+}
+
+@media (prefers-color-scheme: dark) {
+  button.delete {
+    background-color: #e21f1f;
+    color: #f4d9d9;
+    border: 2px solid #f4d9d9;
+  }
+}
+
 button.secondary {
   background: transparent;
 }
