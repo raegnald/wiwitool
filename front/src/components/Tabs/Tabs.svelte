@@ -48,7 +48,7 @@
         Cancel
       </button>
       <button
-        class="primary"
+        class="primary delete"
         onclick={() => {
           homeDialog.close();
           context.selectTab("start");
