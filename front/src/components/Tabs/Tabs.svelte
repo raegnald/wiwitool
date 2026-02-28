@@ -4,6 +4,7 @@
   import { TABS_KEY } from "../../key.js";
   import type { TabInfo } from "./types";
   import { DownloadIcon, HouseIcon } from "@lucide/svelte";
+  import Button from "../Button.svelte";
 
   export let resetApp: () => void;
 
@@ -40,22 +41,23 @@
 
 <dialog bind:this={homeDialog}>
   <div class="modal-content">
-    <span>You will lose all your progress</span>
+    <span>
+      Are you sure you want to go back to the start page? <br />
+      You will lose all of your progress.
+    </span>
 
     <div class="modal-actions">
-      <button class="secondary" onclick={() => homeDialog.close()}>
-        Cancel
-      </button>
-      <button
-        class="primary"
+      <Button transparent onclick={() => homeDialog.close()}>Cancel</Button>
+      <Button
+        destructive
         onclick={() => {
           homeDialog.close();
           resetApp();
           context.selectTab("start");
         }}
       >
-        Ok
-      </button>
+        Start over
+      </Button>
     </div>
   </div>
 </dialog>

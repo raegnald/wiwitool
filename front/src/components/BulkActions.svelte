@@ -9,6 +9,7 @@
   } from "@lucide/svelte";
   import { paintingsStore } from "../stores/paintingsStore";
   import RatioSelect from "./PaintingCard/RatioSelect.svelte";
+  import Button from "./Button.svelte";
 
   $: hasSelected = $paintingsStore.some((painting) => painting.selected);
 
@@ -76,19 +77,22 @@
 <dialog bind:this={dialog}>
   {#if editMode == "delete selected"}
     <div class="modal-content">
-      <span>Are you sure you want to delete the selected paintings?</span>
+      <span>
+        Are you sure you want to delete the selected paintings? <br />
+        This action cannot be undone.
+      </span>
 
       <div class="modal-actions">
-        <button class="secondary" onclick={() => dialog.close()}>Cancel</button>
-        <button
-          class="primary"
+        <Button transparent onclick={() => dialog.close()}>Cancel</Button>
+        <Button
+          destructive
           onclick={() => {
             deleteSelected();
             dialog.close();
           }}
         >
           Delete selected
-        </button>
+        </Button>
       </div>
     </div>
   {:else}
@@ -106,8 +110,8 @@
       {/if}
 
       <div class="modal-actions">
-        <button class="secondary" onclick={() => dialog.close()}>Cancel</button>
-        <button class="primary" onclick={applyBulkEdit}>Apply</button>
+        <Button transparent onclick={() => dialog.close()}>Cancel</Button>
+        <Button onclick={applyBulkEdit}>Apply</Button>
       </div>
     </div>
   {/if}
