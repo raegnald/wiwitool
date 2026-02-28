@@ -73,5 +73,12 @@
     {/if}
   </ul>
 
-  <Button large onclick={generatePacks} icon="Download">Download pack</Button>
+  <Button
+    large
+    disabled={$paintingsStore.length == 0 && !$workspace.invisibleItemFrames}
+    onclick={generatePacks}
+    icon="Download"
+  >
+    Download pack
+  </Button>
 </div>
