@@ -8,6 +8,9 @@
     Space,
   } from "../ComparisonList/ComparisonList.svelte";
   import Info from "../ComparisonList/Info.svelte";
+  import Wiwicheckbox from "../Wiwicheckbox.svelte";
+
+  let clickMeButtonDisabled = $state(false);
 </script>
 
 <div id="main">
@@ -34,7 +37,9 @@
       </Showcase>
 
       <Info>
-        Buttons are implicitly <code>primary</code> and <code>enabled</code> by default.
+        Buttons are implicitly <code>primary</code> and enabled by default. To
+        disable a button, use the <code>disabled</code> property. Disabled
+        buttons do not execute the <code>onclick</code> callback.
       </Info>
 
       <Showcase>
@@ -107,10 +112,17 @@
         <Button
           large
           icon="MousePointer"
+          disabled={clickMeButtonDisabled}
           onclick={() => alert("You touch my talala!")}
         >
           Click me
         </Button>
+
+        <div style="width: 100%"></div>
+
+        <Wiwicheckbox bind:checked={clickMeButtonDisabled}>
+          Disable button above to prevent clicking
+        </Wiwicheckbox>
       </Showcase>
 
       <No>
@@ -118,10 +130,6 @@
       </No>
 
       <No>Buttons must not change themselves on click.</No>
-
-      <Info>
-        Disabled buttons do not execute the <code>onclick</code> callback.
-      </Info>
     </ComparisonList>
   </div>
   <!-- end buttons showcase -->
