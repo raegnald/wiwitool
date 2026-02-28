@@ -32,6 +32,8 @@
     display: flex;
     align-items: center;
     gap: 0.5em;
+    cursor: pointer;
+    user-select: none;
   }
 
   button {

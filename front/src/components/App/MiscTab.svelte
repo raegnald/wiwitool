@@ -40,7 +40,6 @@
 
 <style>
   .check-option {
-    user-select: none;
     font-size: 120%;
   }
 
