@@ -18,6 +18,7 @@
     MinusIcon,
   } from "@lucide/svelte";
   import { onMount } from "svelte";
+  import Button from "../Button.svelte";
 
   export let module: MainModule;
   export let move: (id: string) => void;
@@ -69,9 +70,9 @@
 <div>
   <div class="title-component">
     <h2>Load your images</h2>
-    <button onclick={() => (showingInfo = !showingInfo)}>
+    <Button onclick={() => (showingInfo = !showingInfo)}>
       Information <InfoIcon size="1em" />
-    </button>
+    </Button>
   </div>
   <div class="infoContainer app-card" class:showingInfo>
     <HelpUsingPaintingsTool />
@@ -83,13 +84,21 @@
   {#if $paintingsStore.length > 0}
     <div class="title-component">
       <h2>Customise your paintings</h2>
-      <button onclick={toggleSelectAll}>
+
+      <Button
+        onclick={toggleSelectAll}
+        icon={allSelected ? "CircleMinus" : "CircleCheck"}
+      >
+        {allSelected ? "Deselect" : "Select"} all
+      </Button>
+
+      <!-- <button onclick={toggleSelectAll}>
         {#if allSelected}
           Deselect all <CircleMinusIcon size="1.1em" />
         {:else}
           Select all <CircleCheck size="1.1em" />
         {/if}
-      </button>
+      </button> -->
     </div>
 
     <div class="list">
@@ -100,9 +109,9 @@
   {/if}
 
   <center>
-    <button onclick={() => move("misc")}>
+    <Button onclick={() => move("misc")} icon="ArrowRight">
       {$paintingsStore.length > 0 ? "Next" : "Skip"}
-    </button>
+    </Button>
   </center>
 
   <BulkActions />

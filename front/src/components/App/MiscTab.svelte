@@ -2,6 +2,7 @@
   import { InfoIcon } from "@lucide/svelte";
   import Wiwicheckbox from "../Wiwicheckbox.svelte";
   import { workspace } from "../../stores/workspaceStore";
+  import Button from "../Button.svelte";
 
   export let move: (id: string) => void;
 
@@ -20,10 +21,14 @@
       <Wiwicheckbox bind:checked={iifEnabled}>
         Invisible item frames can be crafted as recipes
       </Wiwicheckbox>
-      <button onclick={() => (showingInfoIIF = !showingInfoIIF)}>
-        <InfoIcon />
-      </button>
+
+      <Button
+        transparent
+        onclick={() => (showingInfoIIF = !showingInfoIIF)}
+        icon="Info"
+      />
     </div>
+
     <div class="hidden" class:showingInfoIIF>
       Adds two simple item recipes that allow you to shapelessly craft invisible
       item frames and glow item frames using glass panes, fermented spider eyes
@@ -32,9 +37,14 @@
   </div>
 
   <div class="pagination">
-    <button class="secondary" onclick={() => move("paintings")}>Previous</button
+    <Button
+      class="secondary"
+      onclick={() => move("paintings")}
+      icon="ArrowLeft"
     >
-    <button onclick={() => move("generate")}>Next</button>
+      Previous
+    </Button>
+    <Button onclick={() => move("generate")} icon="ArrowRight">Next</Button>
   </div>
 </div>
 
@@ -48,13 +58,6 @@
     display: flex;
     justify-content: center;
     gap: 10px;
-  }
-
-  .title-component > button {
-    display: flex;
-    padding: 0.5em;
-    font-size: 24px;
-    align-items: center;
   }
 
   .hidden {

@@ -15,6 +15,7 @@
   import GenerateTab from "./components/App/GenerateTab.svelte";
   import StartTab from "./components/App/StartTab.svelte";
   import { paintingsStore } from "./stores/paintingsStore";
+  import ComponentsShowcaseTab from "./components/App/ComponentsShowcaseTab.svelte";
 
   let module: MainModule | null = null;
 
@@ -41,6 +42,10 @@
     </center>
   {:else}
     <Tabs {resetApp}>
+      <Tab title="Components showcase" id="dummy">
+        <ComponentsShowcaseTab />
+      </Tab>
+
       <Tab hidden title="Start" id="start" let:move>
         <StartTab {module} {move} />
       </Tab>

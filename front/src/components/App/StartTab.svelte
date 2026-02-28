@@ -7,6 +7,7 @@
     paintingsStore,
     type PaintingWrapper,
   } from "../../stores/paintingsStore";
+  import Button from "../Button.svelte";
 
   export let move: (id: string) => void;
 
@@ -62,11 +63,11 @@
   </p>
 
   <div id="center">
-    <button on:click={() => move("paintings")}>Create a new pack</button>
+    <Button onclick={() => move("paintings")}>Create a new pack</Button>
 
-    <button on:click={() => (showDropZone = true)}
-      >Import an existing pack</button
-    >
+    <Button onclick={() => (showDropZone = true)}>
+      Import an existing pack
+    </Button>
   </div>
   <div class:showDropZone class="dropZoneContainer">
     <DropZone handler={importPacks}>

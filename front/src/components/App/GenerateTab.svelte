@@ -5,6 +5,7 @@
     type MinecraftPacker,
   } from "../../bindings/wiwitool";
   import { workspace } from "../../stores/workspaceStore";
+  import Button from "../Button.svelte";
 
   export let module: MainModule;
 
@@ -72,5 +73,5 @@
     {/if}
   </ul>
 
-  <button onclick={generatePacks}>Download pack</button>
+  <Button large onclick={generatePacks} icon="Download">Download pack</Button>
 </div>

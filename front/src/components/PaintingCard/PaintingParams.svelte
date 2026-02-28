@@ -21,11 +21,13 @@
   <div class="inputs">
     <label>
       <TextCursorIcon />
-      <span> Title </span><input type="text" bind:value={title} />
+      <span> Title </span>
+      <input type="text" bind:value={title} {oninput} {onchange} />
     </label>
     <label>
       <UserIcon />
-      <span> Author </span><input type="text" bind:value={author} />
+      <span> Author </span>
+      <input type="text" bind:value={author} {oninput} {onchange} />
     </label>
   </div>
 </div>
