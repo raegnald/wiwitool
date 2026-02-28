@@ -119,43 +119,42 @@
 
 {#if hasSelected}
   <div id="bulk-tools">
-    <button
+    <Button
       onclick={() => openModal("aspect ratio")}
       title="Set aspect ratio for selected paintings"
-    >
-      <ProportionsIcon />
-    </button>
-    <button
+      icon="Proportions"
+    />
+
+    <Button
       onclick={rotateSelectedCCW}
       title="Rotate selected paintings counterclockwise"
-    >
-      <RotateCcwIcon />
-    </button>
-    <button
+      icon="RotateCcw"
+    />
+
+    <Button
       onclick={rotateSelectedCW}
       title="Rotate selected paintings clockwise"
-    >
-      <RotateCwIcon />
-    </button>
-    <button
+      icon="RotateCw"
+    />
+
+    <Button
       onclick={() => openModal("author")}
       title="Set author for selected paintings"
-    >
-      <UserIcon />
-    </button>
-    <button
+      icon="User"
+    />
+
+    <Button
       onclick={() => openModal("title")}
       title="Set title for selected paintings"
-    >
-      <TextCursorIcon />
-    </button>
-    <button
-      class="delete"
+      icon="TextCursor"
+    />
+
+    <Button
+      destructive
       onclick={() => openModal("delete selected")}
       title="Delete selected paintings"
-    >
-      <Trash2Icon />
-    </button>
+      icon="Trash2"
+    />
   </div>
 {/if}
 
