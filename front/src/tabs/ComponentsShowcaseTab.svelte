@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { CheckIcon, XIcon } from "@lucide/svelte";
-  import Button from "../Button.svelte";
   import ComparisonList, {
     No,
     Yes,
+    Info,
     Showcase,
     Space,
-  } from "../ComparisonList/ComparisonList.svelte";
-  import Info from "../ComparisonList/Info.svelte";
-  import Wiwicheckbox from "../Wiwicheckbox.svelte";
+  } from "../components/comparison-list/ComparisonList.svelte";
+
+  import Button from "../components/Button.svelte";
+  import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
 
   let clickMeButtonDisabled = $state(false);
 </script>

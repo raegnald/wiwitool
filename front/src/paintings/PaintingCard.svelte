@@ -6,11 +6,11 @@
   } from "../stores/paintingsStore";
   import { workspace } from "../stores/workspaceStore";
 
-  import PaintingActions from "./PaintingCard/PaintingActions.svelte";
-  import PaintingCanvas from "./PaintingCard/PaintingCanvas.svelte";
-  import PaintingParams from "./PaintingCard/PaintingParams.svelte";
+  import PaintingActions from "./PaintingActions.svelte";
+  import PaintingCanvas from "./PaintingCanvas.svelte";
+  import PaintingParams from "./PaintingParams.svelte";
   import type { ImageData } from "../bindings/wiwitool";
-  import Wiwicheckbox from "./Wiwicheckbox.svelte";
+  import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
 
   export let wrapper: PaintingWrapper;
 

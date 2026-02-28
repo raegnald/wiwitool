@@ -7,12 +7,12 @@
     Trash2Icon,
   } from "@lucide/svelte";
 
-  import Wiwicheckbox from "../Wiwicheckbox.svelte";
+  import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
   import {
     paintingsStore,
     type PaintingWrapper,
-  } from "../../stores/paintingsStore";
-  import Button from "../Button.svelte";
+  } from "../stores/paintingsStore";
+  import Button from "../components/Button.svelte";
 
   type ButtonClickHandler = () => void;
 

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { InfoIcon } from "@lucide/svelte";
-  import Wiwicheckbox from "../Wiwicheckbox.svelte";
-  import { workspace } from "../../stores/workspaceStore";
-  import Button from "../Button.svelte";
+  import { workspace } from "../stores/workspaceStore";
+
+  import Button from "../components/Button.svelte";
+  import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
 
   export let move: (id: string) => void;
 

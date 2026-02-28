@@ -1,11 +1,8 @@
 <script lang="ts">
-  import { paintingsStore } from "../../stores/paintingsStore";
-  import {
-    type MainModule,
-    type MinecraftPacker,
-  } from "../../bindings/wiwitool";
-  import { workspace } from "../../stores/workspaceStore";
-  import Button from "../Button.svelte";
+  import { paintingsStore } from "../stores/paintingsStore";
+  import { type MainModule, type MinecraftPacker } from "../bindings/wiwitool";
+  import { workspace } from "../stores/workspaceStore";
+  import Button from "../components/Button.svelte";
 
   export let module: MainModule;
 

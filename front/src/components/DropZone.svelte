@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ERROR, toast } from "../../stores/toastsStore";
+  import { ERROR, toast } from "../stores/toastsStore";
 
   let { handler, children, class: className, ...other } = $props();
 

@@ -1,13 +1,13 @@
 <script lang="ts">
-  import DropZone from "./DropZone.svelte";
-  import type { MainModule } from "../../bindings/wiwitool";
-  import { INFO, toast, toasts } from "../../stores/toastsStore";
-  import { workspace } from "../../stores/workspaceStore";
+  import DropZone from "../components/DropZone.svelte";
+  import type { MainModule } from "../bindings/wiwitool";
+  import { INFO, toast, toasts } from "../stores/toastsStore";
+  import { workspace } from "../stores/workspaceStore";
   import {
     paintingsStore,
     type PaintingWrapper,
-  } from "../../stores/paintingsStore";
-  import Button from "../Button.svelte";
+  } from "../stores/paintingsStore";
+  import Button from "../components/Button.svelte";
 
   export let move: (id: string) => void;
 

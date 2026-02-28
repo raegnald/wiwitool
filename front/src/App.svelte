@@ -4,18 +4,18 @@
   import { workspace } from "./stores/workspaceStore";
   import type { MainModule } from "./bindings/wiwitool";
 
-  import Tabs from "./components/Tabs/Tabs.svelte";
-  import Tab from "./components/Tabs/Tab.svelte";
-
-  import PaintingsTab from "./components/App/PaintingsTab.svelte";
-  import MiscTab from "./components/App/MiscTab.svelte";
-
   import Toasts from "./components/Toasts.svelte";
-  import { INFO, toast } from "./stores/toastsStore";
-  import GenerateTab from "./components/App/GenerateTab.svelte";
-  import StartTab from "./components/App/StartTab.svelte";
+
+  import Tabs from "./components/tabs/Tabs.svelte";
+  import Tab from "./components/tabs/Tab.svelte";
+
+  import PaintingsTab from "./tabs/PaintingsTab.svelte";
+  import MiscTab from "./tabs/MiscTab.svelte";
+  import GenerateTab from "./tabs/GenerateTab.svelte";
+  import StartTab from "./tabs/StartTab.svelte";
+  import ComponentsShowcaseTab from "./tabs/ComponentsShowcaseTab.svelte";
+
   import { paintingsStore } from "./stores/paintingsStore";
-  import ComponentsShowcaseTab from "./components/App/ComponentsShowcaseTab.svelte";
 
   let module: MainModule | null = null;
 

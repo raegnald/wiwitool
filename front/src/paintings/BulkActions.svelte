@@ -8,8 +8,8 @@
     Trash2Icon,
   } from "@lucide/svelte";
   import { paintingsStore } from "../stores/paintingsStore";
-  import RatioSelect from "./PaintingCard/RatioSelect.svelte";
-  import Button from "./Button.svelte";
+  import RatioSelect from "./RatioSelect.svelte";
+  import Button from "../components/Button.svelte";
 
   $: hasSelected = $paintingsStore.some((painting) => painting.selected);
 

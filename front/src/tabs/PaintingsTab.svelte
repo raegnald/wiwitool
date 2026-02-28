@@ -1,24 +1,15 @@
 <script lang="ts">
-  import {
-    paintingsStore,
-    type PaintingWrapper,
-  } from "../../stores/paintingsStore";
-  import type { MainModule } from "../../bindings/wiwitool";
-  import { workspace } from "../../stores/workspaceStore";
+  import { paintingsStore } from "../stores/paintingsStore";
+  import type { MainModule } from "../bindings/wiwitool";
+  import { workspace } from "../stores/workspaceStore";
 
-  import HelpUsingPaintingsTool from "./HelpUsingPaintingsTool.svelte";
-  import DropZone from "./DropZone.svelte";
-  import PaintingCard from "../PaintingCard.svelte";
-  import BulkActions from "../BulkActions.svelte";
-  import {
-    CheckCheck,
-    CircleCheck,
-    CircleMinusIcon,
-    InfoIcon,
-    MinusIcon,
-  } from "@lucide/svelte";
+  import HelpUsingPaintingsTool from "../paintings/HelpUsingPaintingsTool.svelte";
+  import DropZone from "../components/DropZone.svelte";
+  import PaintingCard from "../paintings/PaintingCard.svelte";
+  import BulkActions from "../paintings/BulkActions.svelte";
+  import { InfoIcon } from "@lucide/svelte";
   import { onMount } from "svelte";
-  import Button from "../Button.svelte";
+  import Button from "../components/Button.svelte";
 
   export let module: MainModule;
   export let move: (id: string) => void;
