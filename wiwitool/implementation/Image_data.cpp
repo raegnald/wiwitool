@@ -57,6 +57,10 @@ Image_data::Image_data(size_t w, size_t h) : width_{w}, height_{h} {
   const size_t size = width_ * height_ * sizeof(Pixel);
   data_ = Stb_image{reinterpret_cast<Pixel *>(malloc(size)), free};
   if (not data_) throw std::runtime_error("Allocation failed");
+
+  for (size_t y = 0; y < height_; y++)
+    for (size_t x = 0; x < width_; x++)
+      at(x, y) = Pixel{0, 0, 0, 0};
 }
 
 // Copy ctor
@@ -65,10 +69,14 @@ Image_data::Image_data(const Image_data &other)
 
   const auto size = width_ * height_ * sizeof(Pixel);
 
-  data_ = Stb_image{reinterpret_cast<Pixel *>(malloc(size)), free};
-  if (not data_) throw std::runtime_error("Image_data: allocation failed during copy");
+  if (size > 0) {
+    data_ = Stb_image{reinterpret_cast<Pixel *>(malloc(size)), free};
+    if (not data_) throw std::runtime_error("Image_data: allocation failed during copy");
 
-  memcpy(this->data_.get(), other.data_.get(), size);
+    memcpy(this->data_.get(), other.data_.get(), size);
+  } else {
+    data_ = Stb_image{nullptr, [](void *) {}};
+  }
 }
 
 // Copy assignment
@@ -82,10 +90,14 @@ Image_data &Image_data::operator=(const Image_data &other) {
 
     const auto size = width_ * height_ * sizeof(Pixel);
 
-    data_ = Stb_image{reinterpret_cast<Pixel *>(malloc(size)), free};
-    if (not data_) throw std::runtime_error("Image_data: allocation failed during copy");
+    if (size > 0 and data_) {
+      data_ = Stb_image{reinterpret_cast<Pixel *>(malloc(size)), free};
+      if (not data_) throw std::runtime_error("Image_data: allocation failed during copy");
 
-    memcpy(this->data_.get(), other.data_.get(), size);
+      memcpy(this->data_.get(), other.data_.get(), size);
+    } else {
+      data_ = Stb_image{nullptr, [](void *) {}};
+    }
   }
 
   return *this;

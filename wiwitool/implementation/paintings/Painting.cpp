@@ -6,6 +6,7 @@
 
 #include "paintings/Painting_converter.hpp"
 
+#include "paintings/Painting_frame_generator.hpp"
 #include "paintings/Painting_ratio.hpp"
 #include "util/wiwidebug.hpp"
 
@@ -31,6 +32,15 @@ Painting::Painting(Image_data image_data)
 std::shared_ptr<Painting> Painting::clone(void) const {
   auto cloned = std::make_shared<Painting>(*this);
   cloned->painting_id = next_painting_id++;
+
+  wiwidebug {
+    auto [ow, oh] = ratio_sizes(this->get_ratio());
+    auto [w, h] = ratio_sizes(cloned->get_ratio());
+
+    std::println("Cloned painting with ratio {}x{}, while original has {}x{}",
+                 w, h, ow, oh);
+  }
+
   return cloned;
 }
 
@@ -48,7 +58,7 @@ const Image_data Painting::icon_data(void) const {
 
 void Painting::refresh(void) const {
   auto converter = Painting_converter{original_image};
-  painting = converter.convert(conversion_ratio);
+  painting = converter.convert(frame_generator, conversion_ratio);
   icon = converter.miniatureise();
 
   wiwidebug std::println("Painting and icon image data computed!");
@@ -67,6 +77,25 @@ void Painting::rotate_anticlockwise(void) {
 
   refresh();
 }
+
+void Painting::use_default_frame(void) {
+  frame_generator = Minecraft_default_frame_generator{};
+  refresh();
+}
+
+void Painting::use_procedural_frame() {
+  frame_generator = Procedural_frame_generator{};
+  refresh();
+}
+
+Procedural_frame_generator *Painting::get_procedural_settings(void) {
+  return std::get_if<Procedural_frame_generator>(&frame_generator);
+}
+
+bool Painting::is_frame_procedural(void) const {
+  return std::holds_alternative<Procedural_frame_generator>(frame_generator);
+}
+
 
 void to_json(nlohmann::json &j, const Painting &p) {
   j = nlohmann::json{{"id", p.painting_id},
@@ -100,8 +129,8 @@ EMSCRIPTEN_BINDINGS(painting) {
   // the Painting constructor
   register_vector<uint8_t>("PaintingBufferVector");
 
-  // We bind Painting as a smart_ptr to handle the move-only nature of
-  // the class safely in Javascript
+  // We bind Painting as a smart_ptr to handle the shared reference
+  // nature of the class safely in Javascript
   class_<Painting>("Painting")
       .smart_ptr<std::shared_ptr<Painting>>("Painting")
 
@@ -145,7 +174,14 @@ EMSCRIPTEN_BINDINGS(painting) {
 
       // Transformations
       .function("rotateClockwise", &Painting::rotate_clockwise)
-      .function("rotateAnticlockwise", &Painting::rotate_anticlockwise);
+      .function("rotateAnticlockwise", &Painting::rotate_anticlockwise)
 
+      .function("useDefaultFrame", &Painting::use_default_frame)
+      .function("useProceduralFrame", &Painting::use_procedural_frame)
+      .function("getProceduralSettings", &Painting::get_procedural_settings,
+                allow_raw_pointers())
+      .function("isFrameProcedural", &Painting::is_frame_procedural)
+
+      .function("refresh", &Painting::refresh);
 }
 #endif

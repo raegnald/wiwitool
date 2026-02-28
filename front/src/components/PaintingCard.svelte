@@ -10,6 +10,7 @@
   import PaintingCanvas from "./PaintingCard/PaintingCanvas.svelte";
   import PaintingParams from "./PaintingCard/PaintingParams.svelte";
   import type { ImageData } from "../bindings/wiwitool";
+  import Wiwicheckbox from "./Wiwicheckbox.svelte";
 
   export let wrapper: PaintingWrapper;
 
@@ -21,11 +22,24 @@
   let author: string;
   let currentRatio: string;
 
+  let proceduralFrame = wrapper.cppPainting.isFrameProcedural();
+  let frameTint: string;
+  let frameSeed: string;
+
   // External changes that modify local UI state
   $: if (wrapper && wrapper.cppPainting) {
     title = wrapper.cppPainting.title;
     author = wrapper.cppPainting.author;
     currentRatio = wrapper.cppPainting.ratio;
+
+    const settings = wrapper.cppPainting.getProceduralSettings();
+    if (settings) {
+      frameSeed = String(settings.seed);
+      frameTint = settings.tintHex;
+
+      wrapper = wrapper;
+      refresh();
+    }
 
     refresh();
   }
@@ -37,7 +51,12 @@
     wrapper.cppPainting.author = author;
     wrapper.cppPainting.ratio = currentRatio;
 
-    refresh();
+    const settings = wrapper.cppPainting.getProceduralSettings();
+    if (settings) {
+      console.warn("Modifying frame cpp state from svelte");
+      settings.seed = BigInt(frameSeed);
+      settings.tintHex = frameTint;
+    }
   }
 
   function scalePixelCanvas(c: HTMLCanvasElement, imgW: number, imgH: number) {
@@ -90,6 +109,15 @@
     paintingsStore.update((items) => items); // trigger Svelte update
   }
 
+  function toggleFrameType() {
+    if (proceduralFrame) {
+      wrapper.cppPainting.useProceduralFrame();
+    } else {
+      wrapper.cppPainting.useDefaultFrame();
+    }
+    refresh();
+  }
+
   function remove() {
     const idToRemove = wrapper.cppPainting.stringId();
 
@@ -122,8 +150,11 @@
   }
 
   function refresh() {
+    wrapper.cppPainting.refresh();
+
     renderPainting();
     renderOriginalImage();
+
     wrapper.cppPainting.ratio = currentRatio;
   }
 
@@ -146,11 +177,45 @@
         bind:currentRatio
         bind:title
         bind:author
-        oninput={syncToCpp}
         onchange={syncToCpp}
       />
       <PaintingCanvas bind:canvas={paintingCanvas} />
     </div>
+
+    <details>
+      <summary>More options for this painting</summary>
+      <div class="procedural-frame-card">
+        <Wiwicheckbox bind:checked={proceduralFrame} onclick={toggleFrameType}>
+          Use procedurally generated frames
+        </Wiwicheckbox>
+
+        {#if proceduralFrame}
+          <div class="procedural-frame-params">
+            <span>
+              <label for="frame-colour">Frame colour</label>
+              <input
+                name="frame-colour"
+                type="color"
+                bind:value={frameTint}
+                oninput={syncToCpp}
+                onchange={syncToCpp}
+              />
+            </span>
+
+            <span>
+              <label for="frame-seed">Frame seed</label>
+              <input
+                name="frame-seed"
+                type="number"
+                bind:value={frameSeed}
+                oninput={syncToCpp}
+                onchange={syncToCpp}
+              />
+            </span>
+          </div>
+        {/if}
+      </div>
+    </details>
   </div>
 </div>
 
@@ -182,5 +247,40 @@
     display: flex;
     align-items: stretch;
     gap: 10px;
+  }
+
+  details {
+    margin-top: 20px;
+    opacity: 0.7;
+  }
+
+  summary {
+    margin-bottom: 10px;
+  }
+
+  .procedural-frame-card {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+  }
+
+  .procedural-frame-params {
+    display: flex;
+    gap: 25px;
+    font-size: 90%;
+  }
+
+  .procedural-frame-params > span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  input[type="color"] {
+    padding: 0;
+    border: 0;
+    border-radius: 100%;
+    width: 40px;
+    height: 40px;
   }
 </style>

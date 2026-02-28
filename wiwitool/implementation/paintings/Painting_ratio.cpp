@@ -38,19 +38,6 @@ Painting_ratio nearest_ratio(int width, int height) noexcept {
   return *it;
 }
 
-Image_data load_frame(Painting_ratio ratio) {
-  if (ratio == Nearest)
-    throw std::invalid_argument("load_frame: Nearest ratio is not valid");
-
-  if (ratio == ICON_RATIO)
-    return Image_data{frames_directory / "painting.png"};
-
-  const auto [width, height] = ratio_sizes(ratio);
-  const auto frame_file = std::format("{}{}.png", width, height);
-
-  return Image_data{frames_directory / frame_file};
-}
-
 std::string string_of_ratio(Painting_ratio r) {
   if (r == Painting_ratio::Nearest) return "nearest";
 
@@ -60,7 +47,9 @@ std::string string_of_ratio(Painting_ratio r) {
     case 2: return "TWO";
     case 3: return "THREE";
     case 4: return "FOUR";
-    default: throw std::invalid_argument("string_of_ratio: digit");
+    default:
+      throw std::invalid_argument(
+          std::format("string_of_ratio: digit {} is invalid", i));
     }
   };
 
