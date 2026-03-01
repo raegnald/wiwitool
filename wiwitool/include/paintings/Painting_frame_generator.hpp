@@ -7,13 +7,20 @@
 #include <cstdint>
 #include <variant>
 
+#include "nlohmann/json.hpp"
+
 struct Minecraft_default_frame_generator {
   Image_data get(Painting_ratio) const;
+
+  friend void to_json(nlohmann::json &j,
+                      const Minecraft_default_frame_generator &g);
+  friend void from_json(const nlohmann::json &j,
+                        Minecraft_default_frame_generator &g);
 };
 
 class Procedural_frame_generator {
 public:
-  Procedural_frame_generator(void);
+  Procedural_frame_generator(void) = default;
 
   void set_seed(std::uint64_t s) { seed = s; }
   std::uint64_t get_seed(void) const { return seed; }
@@ -23,7 +30,8 @@ public:
 
   Image_data get(Painting_ratio) const;
 
-  // from_json, to_json...
+  friend void to_json(nlohmann::json &j, const Procedural_frame_generator &g);
+  friend void from_json(const nlohmann::json &j, Procedural_frame_generator &g);
 
 private:
   std::uint64_t seed{0};

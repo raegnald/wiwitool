@@ -28,8 +28,6 @@ Image_data Minecraft_default_frame_generator::get(Painting_ratio ratio) const {
   return Image_data{frames_directory / frame_file};
 }
 
-Procedural_frame_generator::Procedural_frame_generator(void) {}
-
 Image_data Procedural_frame_generator::get(Painting_ratio ratio) const {
   // Block size
   const auto [bw, bh] = ratio_sizes(ratio);
@@ -65,6 +63,34 @@ Image_data Procedural_frame_generator::get(Painting_ratio ratio) const {
 
   return im;
 };
+
+// JSON serialisation
+
+void to_json(nlohmann::json &j, const Minecraft_default_frame_generator &g) {
+  j = nlohmann::json{{"type", "default"}};
+}
+
+void from_json(const nlohmann::json &j, Minecraft_default_frame_generator &g) {
+  return;
+}
+
+void to_json(nlohmann::json &j, const Procedural_frame_generator &g) {
+  auto tint = g.get_tint();
+
+  j = nlohmann::json{{"type", "procedural"},
+                     {"seed", g.get_seed()},
+                     {"tint", {tint.r, tint.g, tint.b, tint.a}}};
+}
+
+void from_json(const nlohmann::json &j, Procedural_frame_generator &g) {
+  if (j.contains("seed"))
+    g.set_seed(j.at("seed").get<std::uint64_t>());
+
+  if (j.contains("tint")) {
+    auto tint_arr = j.at("tint").get<std::array<unsigned char, 4>>();
+    g.set_tint({tint_arr[0], tint_arr[1], tint_arr[2], tint_arr[3]});
+  }
+}
 
 
 #ifdef EMSCRIPTEN
