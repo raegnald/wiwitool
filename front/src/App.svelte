@@ -42,9 +42,11 @@
     </center>
   {:else}
     <Tabs {resetApp}>
-      <Tab title="Components showcase" id="dummy">
-        <ComponentsShowcaseTab />
-      </Tab>
+      {#if import.meta.env.DEV}
+        <Tab title="Components showcase" id="dummy">
+          <ComponentsShowcaseTab />
+        </Tab>
+      {/if}
 
       <Tab hidden title="Start" id="start" let:move>
         <StartTab {module} {move} />
