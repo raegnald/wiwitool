@@ -1,7 +1,7 @@
 <script lang="ts">
   import { ERROR, toast } from "../stores/toastsStore";
 
-  let { handler, children, class: className, ...other } = $props();
+  let { handler, children, ...other } = $props();
 
   let isDragOver = $state(false);
 
@@ -38,7 +38,7 @@
 </script>
 
 <button
-  class="drop-zone {className}"
+  class="drop-zone"
   class:hover={isDragOver}
   ondrop={handleDrop}
   ondragover={handleDragOver}
