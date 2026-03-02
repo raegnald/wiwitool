@@ -10,7 +10,6 @@
   import Button from "../components/Button.svelte";
 
   export let move: (id: string) => void;
-
   export let module: MainModule;
 
   $: showDropZone = false;
@@ -93,6 +92,10 @@
       You can manipulate and preview how your image will be seen in Minecraft.
     </li>
   </ul>
+
+  <div class="version">
+    Wiwitool version {__GIT_TAG__} (commit {__GIT_COMMIT__})
+  </div>
 </div>
 
 <style>
