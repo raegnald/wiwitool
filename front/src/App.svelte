@@ -6,8 +6,8 @@
 
   import Toasts from "./components/Toasts.svelte";
 
-  import Tabs from "./components/tabs/Tabs.svelte";
-  import Tab from "./components/tabs/Tab.svelte";
+  import Tabs from "./components/tabs-component/Tabs.svelte";
+  import Tab from "./components/tabs-component/Tab.svelte";
 
   import PaintingsTab from "./tabs/PaintingsTab.svelte";
   import MiscTab from "./tabs/MiscTab.svelte";

@@ -5,8 +5,14 @@
   import type { TabInfo } from "./types";
   import { DownloadIcon, HouseIcon } from "@lucide/svelte";
   import Button from "../Button.svelte";
+  import { paintingsStore } from "../../stores/paintingsStore.js";
+  import { workspace } from "../../stores/workspaceStore.js";
 
   export let resetApp: () => void;
+
+  $: validGeneratableConfig =
+    $workspace &&
+    ($paintingsStore.length > 0 || $workspace.invisibleItemFrames);
 
   // Stores for state management
   const selectedTab = writable(null);
@@ -86,6 +92,7 @@
         {/each}
       </div>
 
+      <!--
       <button
         class:active={$selectedTab === "generate"}
         class="icon-tab"
@@ -93,6 +100,16 @@
       >
         <DownloadIcon size="1.2em" />
       </button>
+      -->
+
+      <Button
+        transparent
+        disabled={!validGeneratableConfig}
+        onclick={() => {}}
+        icon="Download"
+      >
+        Download pack
+      </Button>
     </div>
   {/if}
 
@@ -105,10 +122,10 @@
   .tabs-header {
     position: sticky;
     top: 0;
+    z-index: 100;
     background-color: #ffff80;
     display: flex;
     justify-content: center;
-    /*align-items: center;*/
     border-bottom: 1px solid #ccc;
     margin-bottom: 1rem;
   }
