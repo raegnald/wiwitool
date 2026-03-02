@@ -6,9 +6,12 @@ CXX_WASM   := em++
 AR_NATIVE  := ar
 AR_WASM    := emar
 
+DEBUG_FLAG ?= -DWIWIDEBUG
+BUILD_FLAGS ?= -g
+
 # Flags common to all build targets
-CPPFLAGS := -Iinclude -Iexternal/json/include -Iexternal/stb -Iexternal/miniz_cpp -DWIWIDEBUG
-CXXFLAGS := -Wall -std=c++23 -g $(CPPFLAGS)
+CPPFLAGS := -Iinclude -Iexternal/json/include -Iexternal/stb -Iexternal/miniz_cpp $(DEBUG_FLAG)
+CXXFLAGS := -Wall -std=c++23 $(BUILD_FLAGS) $(CPPFLAGS)
 
 # Directories
 SRC_DIR   := implementation
@@ -115,5 +118,4 @@ $(WASM_TARGET): $(WASM_OBJS)
 
 clean:
 	rm -rf $(BUILD_DIR)
-	rm -f compile_flags.txt
 	$(MAKE) -C external clean
