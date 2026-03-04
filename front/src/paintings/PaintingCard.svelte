@@ -14,6 +14,8 @@
 
   export let wrapper: PaintingWrapper;
 
+  let showFrameOptions = false;
+
   let originalImageCanvas: HTMLCanvasElement;
   let paintingCanvas: HTMLCanvasElement;
 
@@ -38,7 +40,6 @@
       frameTint = settings.tintHex;
 
       wrapper = wrapper;
-      refresh();
     }
 
     refresh();
@@ -53,7 +54,6 @@
 
     const settings = wrapper.cppPainting.getProceduralSettings();
     if (settings) {
-      console.warn("Modifying frame cpp state from svelte");
       settings.seed = BigInt(frameSeed);
       settings.tintHex = frameTint;
     }
@@ -177,13 +177,13 @@
         bind:currentRatio
         bind:title
         bind:author
+        bind:showFrameOptions
         onchange={syncToCpp}
       />
       <PaintingCanvas bind:canvas={paintingCanvas} />
     </div>
 
-    <details>
-      <summary>More options for this painting</summary>
+    <div style={`display: ${showFrameOptions ? "block" : "none"}`}>
       <div class="procedural-frame-card">
         <Wiwicheckbox bind:checked={proceduralFrame} onclick={toggleFrameType}>
           Use procedurally generated frames
@@ -215,7 +215,7 @@
           </div>
         {/if}
       </div>
-    </details>
+    </div>
   </div>
 </div>
 
@@ -249,19 +249,20 @@
     gap: 10px;
   }
 
-  details {
-    margin-top: 20px;
-    opacity: 0.7;
-  }
-
-  summary {
-    margin-bottom: 10px;
-  }
-
   .procedural-frame-card {
     display: flex;
     align-items: stretch;
     justify-content: space-between;
+
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #ccc;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .procedural-frame-card {
+      border-top: 1px solid #555;
+    }
   }
 
   .procedural-frame-params {
