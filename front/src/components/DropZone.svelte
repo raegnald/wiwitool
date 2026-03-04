@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { ERROR, toast } from "../../stores/toastsStore";
+  import { ERROR, toast } from "../stores/toastsStore";
 
-  let { handler } = $props();
+  let { handler, children, ...other } = $props();
 
   let isDragOver = $state(false);
 
@@ -43,11 +43,12 @@
   ondrop={handleDrop}
   ondragover={handleDragOver}
   ondragleave={handleDragLeave}
+  {...other}
 >
   {#if totalFiles - loadedFiles > 0}
     <span>Loaded {loadedFiles} of {totalFiles}</span>
   {:else}
-    <slot />
+    {@render children()}
   {/if}
 </button>
 

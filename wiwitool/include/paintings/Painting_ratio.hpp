@@ -7,6 +7,8 @@
 
 #include "Image_data.hpp"
 
+#include "nlohmann/json.hpp"
+
 const inline std::filesystem::path frames_directory{"frames/"};
 
 enum Painting_ratio {
@@ -37,7 +39,8 @@ Painting_ratio nearest_ratio(int width, int height) noexcept;
 
 Painting_ratio opposite_ratio(Painting_ratio) noexcept;
 
-Image_data load_frame(Painting_ratio ratio);
-
 std::string string_of_ratio(Painting_ratio r);
 Painting_ratio ratio_of_string(std::string s);
+
+void to_json(nlohmann::json &j, const Painting_ratio &r);
+void from_json(const nlohmann::json &j, Painting_ratio &r);

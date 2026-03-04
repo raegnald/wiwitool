@@ -3,14 +3,17 @@
 
 #pragma once
 
+#include "nlohmann/json_fwd.hpp"
 #include <cstddef>
 #include <filesystem>
 #include <memory>
 #include <vector>
 
+#include "colour.hpp"
+
 class Image_data {
 public:
-  struct Pixel { unsigned char r, g, b, a; };
+  using Pixel = rgba;
 
   Image_data(void) = default; // empty image (width == 0 and height == 0)
   Image_data(size_t w, size_t h);
@@ -80,3 +83,7 @@ private:
   using Stb_image = std::unique_ptr<Pixel, void (*)(void *)>;
   Stb_image data_{nullptr, [](void *) {}};
 };
+
+// JSON serialisation for Image_data
+void to_json(nlohmann::json &j, const Image_data &p);
+void from_json(const nlohmann::json &j, Image_data &p);

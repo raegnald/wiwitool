@@ -1,8 +1,8 @@
 <script lang="ts">
   import { CheckIcon, XIcon } from "@lucide/svelte";
 
-  export let checked: boolean;
-  export let onclick: () => void;
+  export let checked: boolean = false;
+  export let onclick: () => any = () => {};
 
   function toggle() {
     checked = !checked;
@@ -32,6 +32,8 @@
     display: flex;
     align-items: center;
     gap: 0.5em;
+    cursor: pointer;
+    user-select: none;
   }
 
   button {

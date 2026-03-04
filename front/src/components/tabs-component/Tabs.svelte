@@ -1,33 +1,31 @@
 <script lang="ts">
-  import { setContext, onMount } from "svelte";
+  import { setContext } from "svelte";
   import { writable, type Writable } from "svelte/store";
-  import { TABS_KEY } from "../../key.js";
+  import { TABS_KEY } from "./key.js";
   import type { TabInfo } from "./types";
   import { DownloadIcon, HouseIcon } from "@lucide/svelte";
+  import Button from "../Button.svelte";
 
-  // Stores for state management
+  export let resetApp: () => void;
+
   const selectedTab = writable(null);
   const tabs: Writable<TabInfo[]> = writable([]);
 
   let homeDialog: HTMLDialogElement;
 
-  // Context object to share with children
+  // Object shared with children
   const context = {
     selectedTab,
-    // Function for children to register themselves
+
     registerTab: (tab: TabInfo) => {
       tabs.update((current) => [...current, tab]);
-
-      // Select the first tab automatically if none is selected
-      if ($selectedTab === null) {
-        $selectedTab = tab.id;
-      }
+      if ($selectedTab === null) $selectedTab = tab.id;
     },
-    // Function for children to remove themselves
+
     unregisterTab: (tab: TabInfo) => {
       tabs.update((current) => current.filter((t) => t.id !== tab.id));
     },
-    // The main function to switch tabs
+
     selectTab: (id: string) => {
       selectedTab.set(id);
     },
@@ -38,27 +36,29 @@
 
 <dialog bind:this={homeDialog}>
   <div class="modal-content">
-    <span>You will lose all your progress</span>
+    <span>
+      Are you sure you want to go back to the start page? <br />
+      You will lose all of your progress.
+    </span>
 
     <div class="modal-actions">
-      <button class="secondary" onclick={() => homeDialog.close()}>
-        Cancel
-      </button>
-      <button
-        class="primary"
+      <Button transparent onclick={() => homeDialog.close()}>Cancel</Button>
+      <Button
+        destructive
         onclick={() => {
           homeDialog.close();
+          resetApp();
           context.selectTab("start");
         }}
       >
-        Ok
-      </button>
+        Start over
+      </Button>
     </div>
   </div>
 </dialog>
 
 <div class="tabs-container">
-  {#if $selectedTab != "start"}
+  {#if $tabs.find((tab) => tab.id == $selectedTab && !tab.hidden)}
     <div class="tabs-header">
       <button
         class:active={$selectedTab === "start"}
@@ -100,10 +100,10 @@
   .tabs-header {
     position: sticky;
     top: 0;
+    z-index: 100;
     background-color: #ffff80;
     display: flex;
     justify-content: center;
-    /*align-items: center;*/
     border-bottom: 1px solid #ccc;
     margin-bottom: 1rem;
   }
@@ -122,7 +122,6 @@
     opacity: 0.8;
   }
   button.active {
-    /*font-weight: bold;*/
     border-color: #646cff;
     opacity: 1;
   }

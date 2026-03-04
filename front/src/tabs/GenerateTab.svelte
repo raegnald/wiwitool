@@ -1,28 +1,19 @@
 <script lang="ts">
-  import { invisibleItemFramesPack } from "../../stores/invisibleItemFrameStore";
-  import { paintingsStore } from "../../stores/paintingsStore";
-  import {
-    type MainModule,
-    type MinecraftPacker,
-  } from "../../bindings/wiwitool";
-  import { serialise } from "../../serialisation/serialise";
-  import type { SerialisationModel } from "../../serialisation/models";
-
-  // import { INFO, toast } from "../../stores/toastsStore";
+  import { paintingsStore } from "../stores/paintingsStore";
+  import { type MainModule, type MinecraftPacker } from "../bindings/wiwitool";
+  import { workspace } from "../stores/workspaceStore";
+  import Button from "../components/Button.svelte";
 
   export let module: MainModule;
 
+  $: validGeneratableConfig =
+    $paintingsStore.length > 0 || $workspace.invisibleItemFrames;
+
   function generatePacks() {
-    let packer: MinecraftPacker = new module.MinecraftPacker();
+    if (!$workspace) return;
 
-    if ($paintingsStore.length > 0) addPaintingsPack(packer);
-    if ($invisibleItemFramesPack) addInvisibleItemFramesPack(packer);
-
-    let model: SerialisationModel = serialise();
-    module.Serialiser.serialise(JSON.stringify(model));
-
-    let zipFilepath = packer.getZip();
-    download(zipFilepath);
+    const zipPath = $workspace.generateZip();
+    download(zipPath);
   }
 
   function addPaintingsPack(packer: MinecraftPacker) {
@@ -70,17 +61,39 @@
 </script>
 
 <div>
-  <p>Your pack will contain:</p>
-  <ul>
-    <li>
-      {$paintingsStore.length > 0 ? $paintingsStore.length : "No"}
-      painting{$paintingsStore.length != 1 ? "s" : ""}
-    </li>
+  {#if validGeneratableConfig}
+    <h3>Summary of your pack</h3>
+    <ul>
+      {#if $paintingsStore.length > 0}
+        <li>
+          {$paintingsStore.length}
+          painting{$paintingsStore.length != 1 ? "s" : ""}
+        </li>
+      {/if}
 
-    {#if $invisibleItemFramesPack}
-      <li>Invisible item frames (normal and glow variants)</li>
-    {/if}
-  </ul>
+      {#if $workspace && $workspace.invisibleItemFrames}
+        <li>Invisible item frames (normal and glow variants)</li>
+      {/if}
+    </ul>
+  {:else}
+    <p>Configure at least one pack to download.</p>
+  {/if}
 
-  <button onclick={generatePacks}>Download pack</button>
+  <Button
+    large
+    disabled={!validGeneratableConfig}
+    onclick={generatePacks}
+    icon="Download"
+  >
+    Download pack
+  </Button>
 </div>
+
+<style>
+  h3 {
+    margin-bottom: 0;
+  }
+  ul {
+    margin-top: 8px;
+  }
+</style>

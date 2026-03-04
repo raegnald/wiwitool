@@ -1,12 +1,11 @@
 <script lang="ts">
   import { getContext, onMount, onDestroy } from "svelte";
-  import { TABS_KEY } from "../../key.js";
+  import { TABS_KEY } from "./key.js";
   import type { TabInfo, TabsContext } from "./types";
 
   export let title: string;
-  export let hidden: boolean = false;
-  // Optional: Allow user to set a custom ID, otherwise use title
   export let id = title;
+  export let hidden: boolean = false;
 
   const { registerTab, unregisterTab, selectedTab, selectTab } = getContext(
     TABS_KEY,

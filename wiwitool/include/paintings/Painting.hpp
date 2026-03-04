@@ -2,14 +2,18 @@
 
 #include <filesystem>
 #include <format>
+#include <memory>
 #include <vector>
 
 #include "Image_data.hpp"
+#include "paintings/Painting_frame_generator.hpp"
 #include "paintings/Painting_ratio.hpp"
+
+#include "nlohmann/json.hpp"
 
 class Painting {
 public:
-  Painting(void) = delete;
+  Painting(void);
 
   // Copy
   Painting(const Painting &) = default;
@@ -46,10 +50,26 @@ public:
     return std::format("painting_{}", painting_id);
   }
 
+  // Compute painting and icon based on the original_image
+  void refresh(void) const;
+
   // Transformations on paintings
 
   void rotate_clockwise(void);
   void rotate_anticlockwise(void);
+
+  // Painting frames
+
+  void use_default_frame(void);
+  void use_procedural_frame(void);
+
+  Procedural_frame_generator *get_procedural_settings(void);
+  bool is_frame_procedural(void) const;
+
+  // Serialisation
+
+  friend void to_json(nlohmann::json &j, const Painting &p);
+  friend void from_json(const nlohmann::json &j, Painting &p);
 
 private:
   static inline unsigned int next_painting_id{0};
@@ -61,13 +81,16 @@ private:
   Image_data original_image;
   mutable Image_data painting, icon;
 
+  Painting_frame_generator frame_generator =
+      Minecraft_default_frame_generator{};
+
   Painting_ratio conversion_ratio{Nearest};
 
-  // Compute painting and icon based on the original_image
-  void refresh(void) const;
-
   inline void compute_painting_and_icon_if_necessary(void) const {
-    if (not original_image.empty() and (painting.empty() or icon.empty()))
-      refresh();
+    // if (not original_image.empty() and (painting.empty() or icon.empty()))
+    refresh();
   }
 };
+
+void to_json(nlohmann::json &j, const Painting &p);
+void from_json(const nlohmann::json &j, Painting &p);

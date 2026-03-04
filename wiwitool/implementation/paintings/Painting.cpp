@@ -2,10 +2,15 @@
 
 #include <print>
 
+#include "nlohmann/json.hpp"
+
 #include "paintings/Painting_converter.hpp"
 
+#include "paintings/Painting_frame_generator.hpp"
 #include "paintings/Painting_ratio.hpp"
 #include "util/wiwidebug.hpp"
+
+Painting::Painting(void) : painting_id{next_painting_id++} {}
 
 Painting::Painting(std::filesystem::path image_path)
     : Painting{Image_data{image_path}} {}
@@ -24,11 +29,18 @@ Painting::Painting(Image_data image_data)
   refresh();
 }
 
-// Painting::Painting(const Painting &other) : Painting{other.original_image} {}
-
 std::shared_ptr<Painting> Painting::clone(void) const {
   auto cloned = std::make_shared<Painting>(*this);
   cloned->painting_id = next_painting_id++;
+
+  wiwidebug {
+    auto [ow, oh] = ratio_sizes(this->get_ratio());
+    auto [w, h] = ratio_sizes(cloned->get_ratio());
+
+    std::println("Cloned painting with ratio {}x{}, while original has {}x{}",
+                 w, h, ow, oh);
+  }
+
   return cloned;
 }
 
@@ -46,12 +58,11 @@ const Image_data Painting::icon_data(void) const {
 
 void Painting::refresh(void) const {
   auto converter = Painting_converter{original_image};
-  painting = converter.convert(conversion_ratio);
+  painting = converter.convert(frame_generator, conversion_ratio);
   icon = converter.miniatureise();
 
   wiwidebug std::println("Painting and icon image data computed!");
 }
-
 
 void Painting::rotate_clockwise(void) {
   original_image = original_image.rotate_clockwise();
@@ -65,6 +76,59 @@ void Painting::rotate_anticlockwise(void) {
   conversion_ratio = opposite_ratio(conversion_ratio);
 
   refresh();
+}
+
+void Painting::use_default_frame(void) {
+  frame_generator = Minecraft_default_frame_generator{};
+  refresh();
+}
+
+void Painting::use_procedural_frame() {
+  frame_generator = Procedural_frame_generator{};
+  refresh();
+}
+
+Procedural_frame_generator *Painting::get_procedural_settings(void) {
+  return std::get_if<Procedural_frame_generator>(&frame_generator);
+}
+
+bool Painting::is_frame_procedural(void) const {
+  return std::holds_alternative<Procedural_frame_generator>(frame_generator);
+}
+
+
+void to_json(nlohmann::json &j, const Painting &p) {
+  j = nlohmann::json{{"id", p.painting_id},
+                     {"title", p.title},
+                     {"author", p.author},
+                     {"ratio", p.conversion_ratio},
+                     {"sourceImage", p.original_image}};
+
+  std::visit([&j](const auto &gen) { j["frame_generator"] = gen; },
+             p.frame_generator);
+}
+
+void from_json(const nlohmann::json &j, Painting &p) {
+  j.at("id").get_to(p.painting_id);
+  j.at("title").get_to(p.title);
+  j.at("author").get_to(p.author);
+  j.at("ratio").get_to(p.conversion_ratio);
+  j.at("sourceImage").get_to(p.original_image);
+
+  if (j.contains("frame_generator")) {
+    const auto &j_gen = j.at("frame_generator");
+
+    if (j_gen.value("type", "default") == "procedural") {
+      p.frame_generator = j_gen.get<Procedural_frame_generator>();
+    } else {
+      p.frame_generator = Minecraft_default_frame_generator{};
+    }
+
+  } else {
+    p.frame_generator = Minecraft_default_frame_generator{};
+  }
+
+  p.refresh();
 }
 
 
@@ -81,8 +145,8 @@ EMSCRIPTEN_BINDINGS(painting) {
   // the Painting constructor
   register_vector<uint8_t>("PaintingBufferVector");
 
-  // We bind Painting as a smart_ptr to handle the move-only nature of
-  // the class safely in Javascript
+  // We bind Painting as a smart_ptr to handle the shared reference
+  // nature of the class safely in Javascript
   class_<Painting>("Painting")
       .smart_ptr<std::shared_ptr<Painting>>("Painting")
 
@@ -126,7 +190,14 @@ EMSCRIPTEN_BINDINGS(painting) {
 
       // Transformations
       .function("rotateClockwise", &Painting::rotate_clockwise)
-      .function("rotateAnticlockwise", &Painting::rotate_anticlockwise);
+      .function("rotateAnticlockwise", &Painting::rotate_anticlockwise)
 
+      .function("useDefaultFrame", &Painting::use_default_frame)
+      .function("useProceduralFrame", &Painting::use_procedural_frame)
+      .function("getProceduralSettings", &Painting::get_procedural_settings,
+                allow_raw_pointers())
+      .function("isFrameProcedural", &Painting::is_frame_procedural)
+
+      .function("refresh", &Painting::refresh);
 }
 #endif

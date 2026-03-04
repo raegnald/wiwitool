@@ -1,12 +1,12 @@
 // A serialiser/deserialiser that exports a file to genpath/import.json
 
 #include <filesystem>
-#include <string>
+#include <vector>
 
 class Serialiser {
 public:
-  static void serialise(std::string);
-  static std::string deserialise(void);
+  static void serialise(std::vector<uint8_t>);
+  static std::vector<uint8_t> deserialise(void);
 
-  static inline auto import_filename = std::filesystem::path{"import.json"};
+  static inline auto import_filename = std::filesystem::path{"wiwitool.data"};
 };

@@ -1,8 +1,11 @@
 <script lang="ts">
   export let value: string;
+
+  export let oninput: (e?: Event) => void = () => {};
+  export let onchange: (e?: Event) => void = () => {};
 </script>
 
-<select id="painting-ratio" bind:value>
+<select id="painting-ratio" bind:value {oninput} {onchange}>
   <optgroup label="Square">
     <option value="ONE_ONE">1:1</option>
     <option value="TWO_TWO">2:2</option>

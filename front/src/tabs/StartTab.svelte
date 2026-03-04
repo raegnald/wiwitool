@@ -1,12 +1,16 @@
 <script lang="ts">
-  import type { SerialisationModel } from "../../serialisation/models";
-  import DropZone from "./DropZone.svelte";
-  import { deserialise } from "../../serialisation/deserialise";
-  import type { MainModule } from "../../bindings/wiwitool";
-  import { INFO, toast, toasts } from "../../stores/toastsStore";
+  import DropZone from "../components/DropZone.svelte";
+  import type { MainModule } from "../bindings/wiwitool";
+  import { INFO, toast, toasts } from "../stores/toastsStore";
+  import { workspace } from "../stores/workspaceStore";
+  import {
+    paintingsStore,
+    type PaintingWrapper,
+  } from "../stores/paintingsStore";
+  import Button from "../components/Button.svelte";
 
-  export let module: MainModule;
   export let move: (id: string) => void;
+  export let module: MainModule;
 
   $: showDropZone = false;
 
@@ -14,14 +18,37 @@
     toast(INFO, "Importing configuration...");
 
     const buffer = await file.arrayBuffer();
-    const decoder = new TextDecoder();
-    const model: SerialisationModel = JSON.parse(decoder.decode(buffer));
+    const uint8View = new Uint8Array(buffer);
 
-    deserialise(model, module);
+    const vec = new module.PaintingBufferVector();
+    for (let i = 0; i < uint8View.length; i++) {
+      vec.push_back(uint8View[i]);
+    }
+
+    $workspace.deserialise(vec);
+    vec.delete();
+
+    retrievePaintings();
 
     toasts.set([]);
     toast(INFO, "Configuration was imported");
     move("paintings");
+  }
+
+  function retrievePaintings() {
+    const cppPaintingsVector = $workspace.getPaintings();
+
+    const newWrappers: PaintingWrapper[] = [];
+
+    for (let i = 0; i < cppPaintingsVector.size(); i++) {
+      newWrappers.push({
+        cppPainting: cppPaintingsVector.get(i),
+        selected: false,
+      });
+    }
+    cppPaintingsVector.delete();
+
+    paintingsStore.set(newWrappers);
   }
 </script>
 
@@ -35,16 +62,18 @@
   </p>
 
   <div id="center">
-    <button on:click={() => move("paintings")}>Create a new pack</button>
+    <Button onclick={() => move("paintings")}>Create a new pack</Button>
 
-    <button on:click={() => (showDropZone = true)}
-      >Import an existing pack</button
-    >
+    <Button onclick={() => (showDropZone = true)}>
+      Import an existing pack
+    </Button>
   </div>
   <div class:showDropZone class="dropZoneContainer">
     <DropZone handler={importPacks}>
       <span>Drag and drop an existing configuration file</span><br />
-      <small>(its default name is <code>import.json</code>)</small>
+      <small>
+        (its default name is <code>wiwitool.data</code>)
+      </small>
     </DropZone>
   </div>
 
@@ -63,6 +92,11 @@
       You can manipulate and preview how your image will be seen in Minecraft.
     </li>
   </ul>
+
+  <div class="version">
+    Wiwitool version {__GIT_TAG__} (commit {__GIT_COMMIT__})
+    <Button secondary onclick={() => move("changelog")}>Changelog</Button>
+  </div>
 </div>
 
 <style>
@@ -95,5 +129,13 @@
 
   .app-card p:first-child {
     margin-top: 0;
+  }
+
+  .version {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
   }
 </style>

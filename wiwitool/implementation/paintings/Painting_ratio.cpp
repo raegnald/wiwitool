@@ -10,6 +10,8 @@
 #include <stdexcept>
 #include <utility>
 
+#include "nlohmann/json.hpp"
+
 std::array<Painting_ratio, 12> all_ratios(void) noexcept {
   return {ONE_ONE,   ONE_TWO,     TWO_ONE,    TWO_TWO,  TWO_THREE,  TWO_FOUR,
           THREE_TWO, THREE_THREE, THREE_FOUR, FOUR_TWO, FOUR_THREE, FOUR_FOUR};
@@ -36,19 +38,6 @@ Painting_ratio nearest_ratio(int width, int height) noexcept {
   return *it;
 }
 
-Image_data load_frame(Painting_ratio ratio) {
-  if (ratio == Nearest)
-    throw std::invalid_argument("load_frame: Nearest ratio is not valid");
-
-  if (ratio == ICON_RATIO)
-    return Image_data{frames_directory / "painting.png"};
-
-  const auto [width, height] = ratio_sizes(ratio);
-  const auto frame_file = std::format("{}{}.png", width, height);
-
-  return Image_data{frames_directory / frame_file};
-}
-
 std::string string_of_ratio(Painting_ratio r) {
   if (r == Painting_ratio::Nearest) return "nearest";
 
@@ -58,7 +47,9 @@ std::string string_of_ratio(Painting_ratio r) {
     case 2: return "TWO";
     case 3: return "THREE";
     case 4: return "FOUR";
-    default: throw std::invalid_argument("string_of_ratio: digit");
+    default:
+      throw std::invalid_argument(
+          std::format("string_of_ratio: digit {} is invalid", i));
     }
   };
 
@@ -83,4 +74,12 @@ Painting_ratio ratio_of_string(std::string s) {
 Painting_ratio opposite_ratio(Painting_ratio r) noexcept {
   const auto [w, h] = ratio_sizes(r);
   return static_cast<Painting_ratio>((h << 8) | w);
+}
+
+void to_json(nlohmann::json &j, const Painting_ratio &r) {
+    j = string_of_ratio(r);
+}
+
+void from_json(const nlohmann::json &j, Painting_ratio &r) {
+  r = ratio_of_string(j.get<std::string>());
 }

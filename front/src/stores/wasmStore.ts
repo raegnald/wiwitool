@@ -17,7 +17,7 @@ declare global {
 export async function getWasmModule(): Promise<MainModule> {
   if (wasmModule) return wasmModule;
 
-  // Load the script if it's not already there
+  // First time loading the webassembly module script
   if (!window.createWiwitoolModule) {
     await new Promise((resolve, reject) => {
       const script = document.createElement("script");

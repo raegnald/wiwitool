@@ -1,23 +1,34 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { getWasmModule, wasmReady } from "./stores/wasmStore";
+  import { workspace } from "./stores/workspaceStore";
   import type { MainModule } from "./bindings/wiwitool";
 
-  import Tabs from "./components/Tabs/Tabs.svelte";
-  import Tab from "./components/Tabs/Tab.svelte";
-
-  import PaintingsTab from "./components/App/PaintingsTab.svelte";
-  import MiscTab from "./components/App/MiscTab.svelte";
-
   import Toasts from "./components/Toasts.svelte";
-  import { INFO, toast } from "./stores/toastsStore";
-  import GenerateTab from "./components/App/GenerateTab.svelte";
-  import StartTab from "./components/App/StartTab.svelte";
+
+  import Tabs from "./components/tabs-component/Tabs.svelte";
+  import Tab from "./components/tabs-component/Tab.svelte";
+
+  import PaintingsTab from "./tabs/PaintingsTab.svelte";
+  import MiscTab from "./tabs/MiscTab.svelte";
+  import GenerateTab from "./tabs/GenerateTab.svelte";
+  import StartTab from "./tabs/StartTab.svelte";
+  import ComponentsShowcaseTab from "./tabs/ComponentsShowcaseTab.svelte";
+
+  import { paintingsStore } from "./stores/paintingsStore";
+  import ChangelogTab from "./tabs/ChangelogTab.svelte";
 
   let module: MainModule | null = null;
 
+  function resetApp() {
+    paintingsStore.set([]);
+    $workspace.delete();
+    $workspace = new module.Wiwiworkspace();
+  }
+
   onMount(async () => {
     module = await getWasmModule();
+    $workspace = new module.Wiwiworkspace();
   });
 </script>
 
@@ -31,9 +42,19 @@
       <p>Loading webassembly module...</p>
     </center>
   {:else}
-    <Tabs>
+    <Tabs {resetApp}>
       <Tab hidden title="Start" id="start" let:move>
         <StartTab {module} {move} />
+      </Tab>
+
+      {#if import.meta.env.DEV}
+        <Tab title="Components showcase (dev)" id="dummy">
+          <ComponentsShowcaseTab />
+        </Tab>
+      {/if}
+
+      <Tab hidden title="Changelog" id="changelog" let:move>
+        <ChangelogTab {move} />
       </Tab>
 
       <Tab title="Paintings" id="paintings" let:move>

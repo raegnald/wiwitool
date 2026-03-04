@@ -1,5 +1,6 @@
 #include "paintings/Painting_converter.hpp"
 
+#include "paintings/Painting_frame_generator.hpp"
 #include "paintings/Painting_ratio.hpp"
 
 #include <print>
@@ -39,8 +40,9 @@ Image_data downscale(Image_data image, Painting_ratio ratio, int scale = 16) {
   return image.scale(rw * scale, rh * scale);
 }
 
-Image_data frame(Image_data image, Painting_ratio ratio) {
-  const auto frame_data = load_frame(ratio);
+Image_data frame(const Painting_frame_generator &frame_generator,
+                 Image_data image, Painting_ratio ratio) {
+  const auto frame_data = get_frame(frame_generator, ratio);
 
   if (frame_data.width() != image.width() or
       frame_data.height() != image.height())
@@ -58,7 +60,7 @@ Image_data frame(Image_data image, Painting_ratio ratio) {
 }
 
 Image_data miniature_frame(Image_data image) {
-  auto frame_data = load_frame(ICON_RATIO);
+  auto frame_data = Minecraft_default_frame_generator{}.get(ICON_RATIO);
   constexpr auto x0 = 3, y0 = 5;
 
   if (frame_data.width() != 16 or frame_data.height() != 16)
@@ -79,12 +81,14 @@ Image_data Painting_converter::miniatureise(void) {
   return miniaturised;
 }
 
-Image_data Painting_converter::convert(Painting_ratio ratio) {
+Image_data
+Painting_converter::convert(const Painting_frame_generator &frame_generator,
+                            Painting_ratio ratio) {
   if (ratio == Nearest) ratio = nearest_ratio(image.width(), image.height());
 
   auto cropped = crop(image, ratio);
   auto downscaled = downscale(std::move(cropped), ratio);
-  auto framed = frame(std::move(downscaled), ratio);
+  auto framed = frame(frame_generator, std::move(downscaled), ratio);
 
   return framed;
 }
