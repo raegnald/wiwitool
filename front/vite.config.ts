@@ -6,7 +6,7 @@ const commitHash = execSync("git rev-parse --short HEAD").toString().trim();
 
 let gitTag = "";
 try {
-  gitTag = execSync("git describe --tags --abbrev=0").toString().trim();
+  gitTag = execSync("git describe --tags").toString().trim();
 } catch (error) {
   gitTag = "v0.0.0";
 }

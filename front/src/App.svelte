@@ -16,6 +16,7 @@
   import ComponentsShowcaseTab from "./tabs/ComponentsShowcaseTab.svelte";
 
   import { paintingsStore } from "./stores/paintingsStore";
+  import ChangelogTab from "./tabs/ChangelogTab.svelte";
 
   let module: MainModule | null = null;
 
@@ -42,14 +43,18 @@
     </center>
   {:else}
     <Tabs {resetApp}>
+      <Tab hidden title="Start" id="start" let:move>
+        <StartTab {module} {move} />
+      </Tab>
+
       {#if import.meta.env.DEV}
-        <Tab title="Components showcase" id="dummy">
+        <Tab title="Components showcase (dev)" id="dummy">
           <ComponentsShowcaseTab />
         </Tab>
       {/if}
 
-      <Tab hidden title="Start" id="start" let:move>
-        <StartTab {module} {move} />
+      <Tab hidden title="Changelog" id="changelog" let:move>
+        <ChangelogTab {move} />
       </Tab>
 
       <Tab title="Paintings" id="paintings" let:move>

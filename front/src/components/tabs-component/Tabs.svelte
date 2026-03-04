@@ -58,7 +58,7 @@
 </dialog>
 
 <div class="tabs-container">
-  {#if $selectedTab != "start"}
+  {#if $tabs.find((tab) => tab.id == $selectedTab && !tab.hidden)}
     <div class="tabs-header">
       <button
         class:active={$selectedTab === "start"}

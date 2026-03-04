@@ -95,6 +95,7 @@
 
   <div class="version">
     Wiwitool version {__GIT_TAG__} (commit {__GIT_COMMIT__})
+    <Button secondary onclick={() => move("changelog")}>Changelog</Button>
   </div>
 </div>
 
@@ -128,5 +129,13 @@
 
   .app-card p:first-child {
     margin-top: 0;
+  }
+
+  .version {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
   }
 </style>
