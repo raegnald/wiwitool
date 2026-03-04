@@ -101,12 +101,12 @@
 
   function rotateClockwise() {
     wrapper.cppPainting.rotateClockwise();
-    paintingsStore.update((items) => items);
+    paintingsStore.set($paintingsStore);
   }
 
   function rotateAnticlockwise() {
     wrapper.cppPainting.rotateAnticlockwise();
-    paintingsStore.update((items) => items); // trigger Svelte update
+    paintingsStore.set($paintingsStore);
   }
 
   function toggleFrameType() {
