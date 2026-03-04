@@ -1,12 +1,14 @@
 #include "paintings/Painting_frame_generator.hpp"
 
 #include "Image_data.hpp"
+#include "colour.hpp"
 #include "paintings/Painting_ratio.hpp"
-#include "util/wiwidebug.hpp"
 
+#include "stb_perlin.h"
+
+#include <cstdlib>
 #include <filesystem>
 #include <format>
-#include <utility>
 #include <variant>
 
 Image_data get_frame(Painting_frame_generator frame_generator,
@@ -37,32 +39,37 @@ Image_data Procedural_frame_generator::get(Painting_ratio ratio) const {
 
   Image_data im{pw, ph};
 
-  srand(seed);
+  const hsv base{tint};
 
   for (size_t y = 0; y < ph; y++) {
     for (size_t x = 0; x < pw; x++) {
+
       if (y != 0 and y != ph - 1 and x != 0)
         x = pw - 1;
 
-      auto colour = tint;
+      constexpr float A = 0.25;
+      constexpr auto power = 4;
 
-      {
-        colour.r += rand() % 50;
-        colour.r = (colour.r > 255) ? 255 : colour.r;
+      const auto px = (float) (power * x) / pw;
+      const auto py = (float) (power * y) / ph;
+      const auto pz = 0;
 
-        colour.g += rand() % 50;
-        colour.g = (colour.g > 255) ? 255 : colour.g;
+      const auto noise_wrap = std::pow(2, power);
 
-        colour.b += rand() % 50;
-        colour.b = (colour.b > 255) ? 255 : colour.b;
-      }
+      auto tinted = base;
+      const auto delta = A * stb_perlin_noise3_seed(px, py, pz, noise_wrap,
+                                                    noise_wrap, 0, seed);
 
-      im.at(x, y) = colour;
+      tinted.v += delta;
+      if (tinted.v < 0) tinted.v = 0;
+      if (tinted.v > 1) tinted.v = 1;
+
+      im.at(x, y) = tinted;
     }
   }
 
   return im;
-};
+}
 
 // JSON serialisation
 

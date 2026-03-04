@@ -35,12 +35,10 @@ public:
 
 private:
   std::uint64_t seed{0};
-  Image_data::Pixel tint{99, 72, 39, 255};
+  rgba tint{144, 70, 0, 255};
 };
 
 using Painting_frame_generator =
     std::variant<Minecraft_default_frame_generator, Procedural_frame_generator>;
 
 Image_data get_frame(Painting_frame_generator, Painting_ratio);
-
-// Painting_frame_generator from_json(), to_json(Painting_frame_generator)...
