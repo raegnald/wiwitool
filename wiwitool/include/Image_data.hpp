@@ -9,9 +9,11 @@
 #include <memory>
 #include <vector>
 
+#include "colour.hpp"
+
 class Image_data {
 public:
-  struct Pixel { unsigned char r, g, b, a; };
+  using Pixel = rgba;
 
   Image_data(void) = default; // empty image (width == 0 and height == 0)
   Image_data(size_t w, size_t h);
