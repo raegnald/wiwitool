@@ -1,7 +1,7 @@
 <script lang="ts">
   import { setContext, onMount } from "svelte";
   import { writable, type Writable } from "svelte/store";
-  import { TABS_KEY } from "../../key.js";
+  import { TABS_KEY } from "./key.js";
   import type { TabInfo } from "./types";
   import { DownloadIcon, HouseIcon } from "@lucide/svelte";
   import Button from "../Button.svelte";

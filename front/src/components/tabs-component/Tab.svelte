@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getContext, onMount, onDestroy } from "svelte";
-  import { TABS_KEY } from "../../key.js";
+  import { TABS_KEY } from "./key.js";
   import type { TabInfo, TabsContext } from "./types";
 
   export let title: string;
