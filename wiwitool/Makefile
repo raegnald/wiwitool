@@ -23,9 +23,10 @@ BUILD_DIR := build
 SRCS      := $(shell find $(SRC_DIR) -type file -name '*.cpp')
 
 # External object files
-EXT_OBJS  := external/json/json.o            \
-             external/stb/stb_image.o        \
-             external/stb/stb_image_write.o
+EXT_OBJS  := external/json/json.o           \
+             external/stb/stb_image.o       \
+             external/stb/stb_image_write.o \
+             external/stb/stb_perlin.o
 
 # --- Targets ---
 
