@@ -58,10 +58,8 @@
       paintings.forEach((p) => {
         if (p.selected) {
           if (editMode === "title") {
-            p.title = bulkInput;
             p.cppPainting.title = bulkInput;
           } else if (editMode == "author") {
-            p.author = bulkInput;
             p.cppPainting.author = bulkInput;
           } else if (editMode == "aspect ratio") {
             p.cppPainting.ratio = bulkInput;
@@ -175,30 +173,6 @@
   @media only screen and (min-width: 1200px) {
     #bulk-tools {
       transform: translate(-73px, -10px);
-    }
-  }
-  #bulk-tools > button {
-    height: 46px;
-    width: 46px;
-    padding: 0.5em;
-    line-height: 0.9;
-    align-items: center;
-    vertical-align: center;
-  }
-
-  .delete {
-    background-color: #ffcccc;
-    border: 2px solid #ffaaaa;
-  }
-  .delete:hover {
-    border-color: #ff5555;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .delete {
-      background-color: #e21f1f;
-      color: #f4d9d9;
-      border: 2px solid #f4d9d9;
     }
   }
 </style>

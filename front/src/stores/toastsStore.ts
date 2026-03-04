@@ -21,7 +21,7 @@ export function toast(
   message: string,
   duration: number = 3000,
 ) {
-  const id = Date.now() + Math.random(); // Unique ID
+  const id = Date.now() + Math.random(); // "unique" id
 
   switch (type) {
     case INFO:

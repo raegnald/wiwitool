@@ -128,12 +128,16 @@
     cursor: not-allowed;
   }
 
+  /* Primary buttons */
+
   button.primary {
   }
 
   button.secondary {
     background-color: transparent;
   }
+
+  /* Transparent buttons */
 
   button.transparent {
     background-color: rgba(127, 127, 127, 0);

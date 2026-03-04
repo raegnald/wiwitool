@@ -1,12 +1,4 @@
 <script lang="ts">
-  import {
-    CopyIcon,
-    CropIcon,
-    RotateCcwIcon,
-    RotateCwIcon,
-    Trash2Icon,
-  } from "@lucide/svelte";
-
   import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
   import {
     paintingsStore,
@@ -24,10 +16,10 @@
   export let remove: ButtonClickHandler;
 
   function toggleSelection() {
-    paintingsStore.update((current) =>
-      current.map((painting: PaintingWrapper) =>
+    paintingsStore.update((paintings) =>
+      paintings.map((painting: PaintingWrapper) =>
         painting.cppPainting.stringId() === id
-          ? { ...painting, selected: selected } // Create a new object to trigger reactivity
+          ? { ...painting, selected: selected } // creating a new object triggers reactivity
           : painting,
       ),
     );

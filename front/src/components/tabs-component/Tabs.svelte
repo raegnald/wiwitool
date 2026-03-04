@@ -1,42 +1,31 @@
 <script lang="ts">
-  import { setContext, onMount } from "svelte";
+  import { setContext } from "svelte";
   import { writable, type Writable } from "svelte/store";
   import { TABS_KEY } from "./key.js";
   import type { TabInfo } from "./types";
   import { DownloadIcon, HouseIcon } from "@lucide/svelte";
   import Button from "../Button.svelte";
-  import { paintingsStore } from "../../stores/paintingsStore.js";
-  import { workspace } from "../../stores/workspaceStore.js";
 
   export let resetApp: () => void;
 
-  $: validGeneratableConfig =
-    $workspace &&
-    ($paintingsStore.length > 0 || $workspace.invisibleItemFrames);
-
-  // Stores for state management
   const selectedTab = writable(null);
   const tabs: Writable<TabInfo[]> = writable([]);
 
   let homeDialog: HTMLDialogElement;
 
-  // Context object to share with children
+  // Object shared with children
   const context = {
     selectedTab,
-    // Function for children to register themselves
+
     registerTab: (tab: TabInfo) => {
       tabs.update((current) => [...current, tab]);
-
-      // Select the first tab automatically if none is selected
-      if ($selectedTab === null) {
-        $selectedTab = tab.id;
-      }
+      if ($selectedTab === null) $selectedTab = tab.id;
     },
-    // Function for children to remove themselves
+
     unregisterTab: (tab: TabInfo) => {
       tabs.update((current) => current.filter((t) => t.id !== tab.id));
     },
-    // The main function to switch tabs
+
     selectTab: (id: string) => {
       selectedTab.set(id);
     },
@@ -92,7 +81,6 @@
         {/each}
       </div>
 
-      <!--
       <button
         class:active={$selectedTab === "generate"}
         class="icon-tab"
@@ -100,16 +88,6 @@
       >
         <DownloadIcon size="1.2em" />
       </button>
-      -->
-
-      <Button
-        transparent
-        disabled={!validGeneratableConfig}
-        onclick={() => {}}
-        icon="Download"
-      >
-        Download pack
-      </Button>
     </div>
   {/if}
 
@@ -144,7 +122,6 @@
     opacity: 0.8;
   }
   button.active {
-    /*font-weight: bold;*/
     border-color: #646cff;
     opacity: 1;
   }
