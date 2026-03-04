@@ -6,6 +6,9 @@
 
   export let module: MainModule;
 
+  $: validGeneratableConfig =
+    $paintingsStore.length > 0 || $workspace.invisibleItemFrames;
+
   function generatePacks() {
     if (!$workspace) return;
 
@@ -58,24 +61,39 @@
 </script>
 
 <div>
-  <p>Your pack will contain:</p>
-  <ul>
-    <li>
-      {$paintingsStore.length > 0 ? $paintingsStore.length : "No"}
-      painting{$paintingsStore.length != 1 ? "s" : ""}
-    </li>
+  {#if validGeneratableConfig}
+    <h3>Summary of your pack</h3>
+    <ul>
+      {#if $paintingsStore.length > 0}
+        <li>
+          {$paintingsStore.length}
+          painting{$paintingsStore.length != 1 ? "s" : ""}
+        </li>
+      {/if}
 
-    {#if $workspace && $workspace.invisibleItemFrames}
-      <li>Invisible item frames (normal and glow variants)</li>
-    {/if}
-  </ul>
+      {#if $workspace && $workspace.invisibleItemFrames}
+        <li>Invisible item frames (normal and glow variants)</li>
+      {/if}
+    </ul>
+  {:else}
+    <p>Configure at least one pack to download.</p>
+  {/if}
 
   <Button
     large
-    disabled={$paintingsStore.length == 0 && !$workspace.invisibleItemFrames}
+    disabled={!validGeneratableConfig}
     onclick={generatePacks}
     icon="Download"
   >
     Download pack
   </Button>
 </div>
+
+<style>
+  h3 {
+    margin-bottom: 0;
+  }
+  ul {
+    margin-top: 8px;
+  }
+</style>
