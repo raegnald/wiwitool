@@ -11,6 +11,8 @@
   import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
 
   let clickMeButtonDisabled = $state(false);
+
+  let buttonToggle = $state(true);
 </script>
 
 <div id="main">
@@ -130,6 +132,33 @@
       </No>
 
       <No>Buttons must not change themselves on click.</No>
+
+      <Info>
+        If, perhaps, you want a button that «changes» «state», you can use a
+        reactive variable and the <code>hugeBorder</code> property. We use a
+        reactive variable defined <i>outside</i> the button component, and
+        assign the <code>hugeBorder</code> property and the <code>onclick</code> callback
+        to that variable and a toggle function for that variable.
+      </Info>
+
+      <Showcase>
+        <Button
+          hugeBorder={buttonToggle}
+          icon={buttonToggle ? "Check" : "X"}
+          onclick={() => (buttonToggle = !buttonToggle)}
+        >
+          {buttonToggle ? "Activado" : "Desactivado"}
+        </Button>
+
+        <Button
+          transparent
+          hugeBorder={buttonToggle}
+          icon={buttonToggle ? "Check" : "X"}
+          onclick={() => (buttonToggle = !buttonToggle)}
+        >
+          {buttonToggle ? "Activado" : "Desactivado"}
+        </Button>
+      </Showcase>
     </ComparisonList>
   </div>
   <!-- end buttons showcase -->

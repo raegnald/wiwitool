@@ -17,6 +17,8 @@
 
     grow = false,
 
+    hugeBorder = false,
+
     onclick = (_: MouseEvent) => {},
     children = undefined,
     ...props
@@ -63,6 +65,7 @@
 <button
   class="{buttonType} {buttonShape} {buttonSize}"
   class:grow
+  class:hugeBorder
   {disabled}
   onclick={performAction}
   {...props}
@@ -133,6 +136,15 @@
   button.primary {
   }
 
+  /* Huge border for all button types */
+
+  button.hugeBorder {
+    border-color: #646cff;
+    box-shadow: 0 0 0 2px #646cff inset;
+  }
+
+  /* Secondary buttons */
+
   button.secondary {
     background-color: transparent;
   }
@@ -147,6 +159,17 @@
   button:not(disabled).transparent:hover {
     background-color: rgba(127, 127, 127, 0.1);
     border-color: transparent;
+  }
+
+  /* Huge border for transparent buttons */
+
+  button.transparent.hugeBorder {
+    background-color: rgba(127, 127, 127, 0.05);
+    border-color: #646cff;
+  }
+
+  button.transparent.hugeBorder:hover {
+    border-color: #646cff;
   }
 
   /* Destructive buttons */
