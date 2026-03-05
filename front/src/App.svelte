@@ -17,6 +17,7 @@
 
   import { paintingsStore } from "./stores/paintingsStore";
   import ChangelogTab from "./tabs/ChangelogTab.svelte";
+  import FfmpegTest from "./tabs/FfmpegTest.svelte";
 
   let module: MainModule | null = null;
 
@@ -46,6 +47,12 @@
       <Tab hidden title="Start" id="start" let:move>
         <StartTab {module} {move} />
       </Tab>
+
+      {#if import.meta.env.DEV}
+        <Tab title="Testing ffmpeg.wasm (dev)" id="ffmpeg-test">
+          <FfmpegTest />
+        </Tab>
+      {/if}
 
       {#if import.meta.env.DEV}
         <Tab title="Components showcase (dev)" id="dummy">
