@@ -11,6 +11,7 @@
   import PaintingParams from "./PaintingParams.svelte";
   import type { ImageData } from "../bindings/wiwitool";
   import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
+  import SelectableCard from "../components/SelectableCard.svelte";
 
   export let wrapper: PaintingWrapper;
 
@@ -161,88 +162,56 @@
   onMount(refresh);
 </script>
 
-<div class="app-card card">
-  <div class="card-padding" class:selected={wrapper.selected}>
-    <div class="transformation">
-      <PaintingActions
-        bind:selected={wrapper.selected}
-        id={wrapper.cppPainting.stringId()}
-        {rotateClockwise}
-        {rotateAnticlockwise}
-        {clone}
-        {remove}
-      />
-      <PaintingCanvas bind:canvas={originalImageCanvas} />
-      <PaintingParams
-        bind:currentRatio
-        bind:title
-        bind:author
-        bind:showFrameOptions
-        onchange={syncToCpp}
-      />
-      <PaintingCanvas bind:canvas={paintingCanvas} />
-    </div>
+<SelectableCard bind:selected={wrapper.selected}>
+  <div class="transformation">
+    <PaintingActions {rotateClockwise} {rotateAnticlockwise} {clone} {remove} />
+    <PaintingCanvas bind:canvas={originalImageCanvas} />
+    <PaintingParams
+      bind:currentRatio
+      bind:title
+      bind:author
+      bind:showFrameOptions
+      onchange={syncToCpp}
+    />
+    <PaintingCanvas bind:canvas={paintingCanvas} />
+  </div>
 
-    <div style={`display: ${showFrameOptions ? "block" : "none"}`}>
-      <div class="procedural-frame-card">
-        <Wiwicheckbox bind:checked={proceduralFrame} onclick={toggleFrameType}>
-          Use procedurally generated frames
-        </Wiwicheckbox>
+  <div style={`display: ${showFrameOptions ? "block" : "none"}`}>
+    <div class="procedural-frame-card">
+      <Wiwicheckbox bind:checked={proceduralFrame} onclick={toggleFrameType}>
+        Use procedurally generated frames
+      </Wiwicheckbox>
 
-        {#if proceduralFrame}
-          <div class="procedural-frame-params">
-            <span>
-              <label for="frame-colour">Frame colour</label>
-              <input
-                name="frame-colour"
-                type="color"
-                bind:value={frameTint}
-                oninput={syncToCpp}
-                onchange={syncToCpp}
-              />
-            </span>
+      {#if proceduralFrame}
+        <div class="procedural-frame-params">
+          <span>
+            <label for="frame-colour">Frame colour</label>
+            <input
+              name="frame-colour"
+              type="color"
+              bind:value={frameTint}
+              oninput={syncToCpp}
+              onchange={syncToCpp}
+            />
+          </span>
 
-            <span>
-              <label for="frame-seed">Frame seed</label>
-              <input
-                name="frame-seed"
-                type="number"
-                bind:value={frameSeed}
-                oninput={syncToCpp}
-                onchange={syncToCpp}
-              />
-            </span>
-          </div>
-        {/if}
-      </div>
+          <span>
+            <label for="frame-seed">Frame seed</label>
+            <input
+              name="frame-seed"
+              type="number"
+              bind:value={frameSeed}
+              oninput={syncToCpp}
+              onchange={syncToCpp}
+            />
+          </span>
+        </div>
+      {/if}
     </div>
   </div>
-</div>
+</SelectableCard>
 
 <style>
-  .card {
-    margin: 20px 0px;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    padding: 0;
-  }
-
-  .card-padding {
-    width: 100%;
-    border: 5px solid transparent;
-    padding: 15px;
-    transition: 100ms;
-    border-radius: 11px;
-    overflow: scroll;
-  }
-
-  .card-padding.selected {
-    border-color: #646cff;
-  }
-
   .transformation {
     display: flex;
     align-items: stretch;
