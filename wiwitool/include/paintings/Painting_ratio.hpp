@@ -16,13 +16,20 @@ enum Painting_ratio {
 
   ONE_ONE     = 0x01'01, // 1:1
   ONE_TWO     = 0x01'02, // 1:2
+  ONE_THREE   = 0x01'03, // 1:3
+  ONE_FOUR    = 0x01'04, // 1:4
+
   TWO_ONE     = 0x02'01, // 2:1
   TWO_TWO     = 0x02'02, // 2:2
   TWO_THREE   = 0x02'03, // 2:3
   TWO_FOUR    = 0x02'04, // 2:4
+
+  THREE_ONE   = 0x03'01, // 3:1
   THREE_TWO   = 0x03'02, // 3:2
   THREE_THREE = 0x03'03, // 3:3
   THREE_FOUR  = 0x03'04, // 3:4
+
+  FOUR_ONE    = 0x04'01, // 4:1
   FOUR_TWO    = 0x04'02, // 4:2
   FOUR_THREE  = 0x04'03, // 4:3
   FOUR_FOUR   = 0x04'04, // 4:4
@@ -30,7 +37,7 @@ enum Painting_ratio {
   ICON_RATIO  = 0x0B'08, // 11:8
 };
 
-std::array<Painting_ratio, 12> all_ratios(void) noexcept;
+std::array<Painting_ratio, 16> all_ratios(void) noexcept;
 
 std::pair<int, int> ratio_sizes(Painting_ratio r) noexcept;
 double ratio_value(Painting_ratio r) noexcept;
