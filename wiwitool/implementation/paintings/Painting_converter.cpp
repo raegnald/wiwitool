@@ -60,7 +60,7 @@ Image_data frame(const Painting_frame_generator &frame_generator,
 }
 
 Image_data miniature_frame(Image_data image) {
-  auto frame_data = Minecraft_default_frame_generator{}.get(ICON_RATIO);
+  auto frame_data = Image_data{frames_directory / "painting.png"};
   constexpr auto x0 = 3, y0 = 5;
 
   if (frame_data.width() != 16 or frame_data.height() != 16)

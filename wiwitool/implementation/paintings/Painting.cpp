@@ -78,11 +78,6 @@ void Painting::rotate_anticlockwise(void) {
   refresh();
 }
 
-void Painting::use_default_frame(void) {
-  frame_generator = Minecraft_default_frame_generator{};
-  refresh();
-}
-
 void Painting::use_procedural_frame() {
   frame_generator = Procedural_frame_generator{};
   refresh();
@@ -120,12 +115,11 @@ void from_json(const nlohmann::json &j, Painting &p) {
 
     if (j_gen.value("type", "default") == "procedural") {
       p.frame_generator = j_gen.get<Procedural_frame_generator>();
-    } else {
-      p.frame_generator = Minecraft_default_frame_generator{};
     }
 
   } else {
-    p.frame_generator = Minecraft_default_frame_generator{};
+    wiwidebug std::println("No frame_generator found whilst importing");
+    p.frame_generator = {};
   }
 
   p.refresh();
@@ -192,7 +186,6 @@ EMSCRIPTEN_BINDINGS(painting) {
       .function("rotateClockwise", &Painting::rotate_clockwise)
       .function("rotateAnticlockwise", &Painting::rotate_anticlockwise)
 
-      .function("useDefaultFrame", &Painting::use_default_frame)
       .function("useProceduralFrame", &Painting::use_procedural_frame)
       .function("getProceduralSettings", &Painting::get_procedural_settings,
                 allow_raw_pointers())
