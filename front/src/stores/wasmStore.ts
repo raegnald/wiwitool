@@ -47,5 +47,7 @@ export async function getWasmModule(): Promise<MainModule> {
   });
 
   wasmReady.set(true);
+  toast(INFO, "Wiwitool engine loaded");
+
   return wasmModule;
 }

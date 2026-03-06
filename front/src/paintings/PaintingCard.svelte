@@ -12,10 +12,12 @@
   import type { ImageData } from "../bindings/wiwitool";
   import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
   import SelectableCard from "../components/SelectableCard.svelte";
+  import Button from "../components/Button.svelte";
 
   export let wrapper: PaintingWrapper;
 
   let showFrameOptions = false;
+  let colourPicker: HTMLInputElement;
 
   let originalImageCanvas: HTMLCanvasElement;
   let paintingCanvas: HTMLCanvasElement;
@@ -110,15 +112,6 @@
     paintingsStore.set($paintingsStore);
   }
 
-  function toggleFrameType() {
-    if (proceduralFrame) {
-      wrapper.cppPainting.useProceduralFrame();
-    } else {
-      wrapper.cppPainting.useDefaultFrame();
-    }
-    refresh();
-  }
-
   function remove() {
     const idToRemove = wrapper.cppPainting.stringId();
 
@@ -178,35 +171,34 @@
 
   <div style={`display: ${showFrameOptions ? "block" : "none"}`}>
     <div class="procedural-frame-card">
-      <Wiwicheckbox bind:checked={proceduralFrame} onclick={toggleFrameType}>
-        Use procedurally generated frames
-      </Wiwicheckbox>
+      <div class="procedural-frame-params">
+        <Button onclick={() => colourPicker.showPicker()}>
+          Frame colour
+          <div
+            style={`width: 15px; height: 15px; background: ${frameTint}; border-radius: 100%; border: 1px solid #ccc`}
+          ></div>
+        </Button>
 
-      {#if proceduralFrame}
-        <div class="procedural-frame-params">
-          <span>
-            <label for="frame-colour">Frame colour</label>
-            <input
-              name="frame-colour"
-              type="color"
-              bind:value={frameTint}
-              oninput={syncToCpp}
-              onchange={syncToCpp}
-            />
-          </span>
+        <input
+          bind:this={colourPicker}
+          name="frame-colour"
+          type="color"
+          bind:value={frameTint}
+          oninput={syncToCpp}
+          onchange={syncToCpp}
+        />
 
-          <span>
-            <label for="frame-seed">Frame seed</label>
-            <input
-              name="frame-seed"
-              type="number"
-              bind:value={frameSeed}
-              oninput={syncToCpp}
-              onchange={syncToCpp}
-            />
-          </span>
-        </div>
-      {/if}
+        <Button
+          icon="Dices"
+          onclick={() => {
+            frameSeed =
+              "" + Math.floor(Number.MAX_SAFE_INTEGER * Math.random());
+            syncToCpp();
+          }}
+        >
+          Frame seed
+        </Button>
+      </div>
     </div>
   </div>
 </SelectableCard>
@@ -236,14 +228,8 @@
 
   .procedural-frame-params {
     display: flex;
-    gap: 25px;
+    gap: 10px;
     font-size: 90%;
-  }
-
-  .procedural-frame-params > span {
-    display: flex;
-    align-items: center;
-    gap: 8px;
   }
 
   input[type="color"] {
@@ -252,5 +238,6 @@
     border-radius: 100%;
     width: 40px;
     height: 40px;
+    display: none;
   }
 </style>

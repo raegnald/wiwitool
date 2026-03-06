@@ -18,6 +18,7 @@
   import { paintingsStore } from "./stores/paintingsStore";
   import ChangelogTab from "./tabs/ChangelogTab.svelte";
   import FfmpegTest from "./tabs/FfmpegTest.svelte";
+  import SelectableCard from "./components/SelectableCard.svelte";
 
   let module: MainModule | null = null;
 
@@ -31,6 +32,8 @@
     module = await getWasmModule();
     $workspace = new module.Wiwiworkspace();
   });
+
+  let selected = $state(false);
 </script>
 
 <main>
@@ -49,7 +52,7 @@
       </Tab>
 
       {#if import.meta.env.DEV}
-        <Tab title="Testing ffmpeg.wasm (dev)" id="ffmpeg-test">
+        <Tab title="ffmpeg.wasm (dev)" id="ffmpeg-test">
           <FfmpegTest />
         </Tab>
       {/if}
@@ -72,7 +75,7 @@
         <MiscTab {move} />
       </Tab>
 
-      <Tab hidden title="Generate" id="generate">
+      <Tab title="Generate" id="generate">
         <GenerateTab {module} />
       </Tab>
     </Tabs>
