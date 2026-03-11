@@ -20,7 +20,7 @@
         await handler(file);
         loadedFiles++;
       } catch (e) {
-        toast(ERROR, "Could not load image: " + e);
+        toast(ERROR, "Could not load file: " + e);
         totalFiles--;
       }
 

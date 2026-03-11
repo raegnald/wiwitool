@@ -8,6 +8,7 @@
     type PaintingWrapper,
   } from "../stores/paintingsStore";
   import Button from "../components/Button.svelte";
+  import { wasmReady } from "../stores/wasmStore";
 
   export let move: (id: string) => void;
   export let module: MainModule;
@@ -62,9 +63,11 @@
   </p>
 
   <div id="center">
-    <Button onclick={() => move("paintings")}>Create a new pack</Button>
+    <Button disabled={!$wasmReady} onclick={() => move("paintings")}>
+      Create a new pack
+    </Button>
 
-    <Button onclick={() => (showDropZone = true)}>
+    <Button disabled={!$wasmReady} onclick={() => (showDropZone = true)}>
       Import an existing pack
     </Button>
   </div>

@@ -70,7 +70,7 @@
 
       <div class="normal-tabs-container">
         {#each $tabs as tab}
-          {#if !tab.hidden}
+          {#if !tab.hidden && tab.id != "start" && tab.id != "generate"}
             <button
               class:active={$selectedTab === tab.id}
               onclick={() => context.selectTab(tab.id)}
