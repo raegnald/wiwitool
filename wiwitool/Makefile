@@ -13,20 +13,30 @@ BUILD_FLAGS ?= -g
 CPPFLAGS := -Iinclude -Iexternal/json/include -Iexternal/stb -Iexternal/miniz_cpp $(DEBUG_FLAG)
 CXXFLAGS := -Wall -std=c++23 $(BUILD_FLAGS) $(CPPFLAGS)
 
+# Native-specific flags
+# Note: vorbisenc is needed specifically for vorbis_encode_init_vbr
+NATIVE_PKG_FLAGS := $(shell pkg-config --cflags vorbisenc vorbis ogg)
+CXXFLAGS_NATIVE  := $(CXXFLAGS) $(NATIVE_PKG_FLAGS)
+
+# WASM-specific flags (emscripten)
+WASM_PORT_FLAGS := -s USE_VORBIS=1 -s USE_OGG=1
+CXXFLAGS_WASM   := $(CXXFLAGS) $(WASM_PORT_FLAGS) -O3 -flto
+
 # Directories
-SRC_DIR   := implementation
-WASM_SRC  := wasm
+SRC_DIR    := implementation
+WASM_SRC   := wasm
 ASSETS_DIR := assets/
-BUILD_DIR := build
+BUILD_DIR  := build
 
 # Source files
-SRCS      := $(shell find $(SRC_DIR) -type file -name '*.cpp')
+SRCS       := $(shell find $(SRC_DIR) -type file -name '*.cpp')
 
 # External object files
-EXT_OBJS  := external/json/json.o           \
-             external/stb/stb_image.o       \
-             external/stb/stb_image_write.o \
-             external/stb/stb_perlin.o
+EXT_OBJS   := external/json/json.o            \
+              external/stb/stb_image.o        \
+              external/stb/stb_image_write.o  \
+              external/stb/stb_perlin.o       \
+              external/stb/stb_vorbis.o
 
 # --- Targets ---
 
@@ -45,13 +55,12 @@ $(BUILD_DIR)/wasm:
 # FLAGS GENERATION (compile_flags.txt)
 # ==========================================
 
-# We force this to run to ensure the file is always up to date with the Makefile
 flags: compile_flags.txt
 
 compile_flags.txt: Makefile
 	@echo "--- Generating compile_flags.txt ---"
-	@# We use tr to replace spaces with newlines because clangd expects one flag per line
-	@echo "$(CXXFLAGS)" | tr ' ' '\n' > compile_flags.txt
+	@# We use the NATIVE flags here so clangd can find the libvorbis headers on the host machine
+	@echo "$(CXXFLAGS_NATIVE)" | tr ' ' '\n' > compile_flags.txt
 
 # ==========================================
 # NATIVE BUILD (Static Library .a)
@@ -71,7 +80,7 @@ native: $(BUILD_DIR)/native compile_flags.txt
 # Compile native objects
 $(NATIVE_OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX_NATIVE) $(CXXFLAGS) -c $< -o $@
+	$(CXX_NATIVE) $(CXXFLAGS_NATIVE) -c $< -o $@
 
 # Rule to create the static library archive
 $(NATIVE_TARGET): $(NATIVE_OBJS)
@@ -95,11 +104,11 @@ wasm: $(BUILD_DIR)/wasm
 # Compile WASM objects (from implementation/)
 $(WASM_OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX_WASM) $(CXXFLAGS) -c $< -o $@
+	$(CXX_WASM) $(CXXFLAGS_WASM) -c $< -o $@
 
 # Link everything into the final WASM module
 $(WASM_TARGET): $(WASM_OBJS)
-	$(CXX_WASM) $(CXXFLAGS) \
+	$(CXX_WASM) $(CXXFLAGS_WASM) \
 		$(WASM_OBJS) \
 		$(EXT_OBJS) \
 		--bind \
