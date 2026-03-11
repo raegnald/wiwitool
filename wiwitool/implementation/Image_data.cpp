@@ -90,12 +90,13 @@ Image_data &Image_data::operator=(const Image_data &other) {
 
     const auto size = width_ * height_ * sizeof(Pixel);
 
-    if (size > 0 and data_) {
+    if (size > 0) {
       data_ = Stb_image{reinterpret_cast<Pixel *>(malloc(size)), free};
       if (not data_) throw std::runtime_error("Image_data: allocation failed during copy");
 
       memcpy(this->data_.get(), other.data_.get(), size);
-    } else {
+    }
+    else {
       data_ = Stb_image{nullptr, [](void *) {}};
     }
   }
