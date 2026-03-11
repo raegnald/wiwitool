@@ -20,6 +20,8 @@ struct rgba {
   rgba &operator=(rgba &&) = default;
 
   rgba(hsv);
+
+  static rgba blend(rgba, rgba, float t = 0.5);
 };
 
 struct hsv {

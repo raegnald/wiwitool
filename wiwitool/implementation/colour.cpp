@@ -52,3 +52,24 @@ hsv::hsv(rgba rgba) {
 
   a = rgba.a;
 }
+
+rgba rgba::blend(rgba ca, rgba cb, float t) {
+  if (ca.a == 0) {
+    ca.r = cb.r;
+    ca.g = cb.g;
+    ca.b = cb.b;
+  }
+
+  if (cb.a == 0) {
+    cb.r = ca.r;
+    cb.g = ca.g;
+    cb.b = ca.b;
+  }
+
+  const auto r = (unsigned char) std::lerp(ca.r, cb.r, t);
+  const auto g = (unsigned char) std::lerp(ca.g, cb.g, t);
+  const auto b = (unsigned char) std::lerp(ca.b, cb.b, t);
+  const auto a = (unsigned char) std::lerp(ca.a, cb.a, t);
+
+  return rgba{r, g, b, a};
+}
