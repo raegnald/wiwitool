@@ -14,7 +14,7 @@ try {
 export default defineConfig({
   plugins: [svelte()],
   optimizeDeps: {
-    exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util"],
+    exclude: [],
   },
   server: {
     host: "0.0.0.0", // all addresses
