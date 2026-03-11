@@ -61,13 +61,15 @@
 <div>
   <div class="title-component">
     <h2>Load your images</h2>
-    <Button onclick={() => (showingInfo = !showingInfo)}>
-      Information <InfoIcon size="1em" />
+    <Button onclick={() => (showingInfo = !showingInfo)} icon="Info">
+      Information
     </Button>
   </div>
-  <div class="infoContainer app-card" class:showingInfo>
+
+  <div class="app-card" style={`display: ${showingInfo ? "block" : "none"}`}>
     <HelpUsingPaintingsTool />
   </div>
+
   <DropZone handler={handleImageDrop}>
     <span>Drag and drop images here</span>
   </DropZone>
@@ -82,17 +84,9 @@
       >
         {allSelected ? "Deselect" : "Select"} all
       </Button>
-
-      <!-- <button onclick={toggleSelectAll}>
-        {#if allSelected}
-          Deselect all <CircleMinusIcon size="1.1em" />
-        {:else}
-          Select all <CircleCheck size="1.1em" />
-        {/if}
-      </button> -->
     </div>
 
-    <div class="list">
+    <div>
       {#each [...$paintingsStore].reverse() as wrapper (wrapper.cppPainting.stringId())}
         <PaintingCard {wrapper} />
       {/each}
@@ -109,18 +103,4 @@
 </div>
 
 <style>
-  .infoContainer {
-    display: none;
-  }
-
-  .infoContainer.showingInfo {
-    display: block;
-    margin-bottom: 20px;
-  }
-
-  button {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
 </style>

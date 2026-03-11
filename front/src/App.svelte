@@ -18,6 +18,7 @@
   import { paintingsStore } from "./stores/paintingsStore";
   import ChangelogTab from "./tabs/ChangelogTab.svelte";
   import SelectableCard from "./components/SelectableCard.svelte";
+  import MusicDiscsTab from "./tabs/MusicDiscsTab.svelte";
 
   let module: MainModule | null = null;
 
@@ -62,6 +63,10 @@
 
       <Tab title="Paintings" id="paintings" let:move>
         <PaintingsTab {module} {move} />
+      </Tab>
+
+      <Tab title="Music discs" id="discs" let:move>
+        <MusicDiscsTab {module} {move} />
       </Tab>
 
       <Tab title="Miscellaneous" id="misc" let:move>
