@@ -104,7 +104,6 @@ Image_data &Image_data::operator=(const Image_data &other) {
   return *this;
 }
 
-
 Image_data::Pixel &Image_data::at(size_t x, size_t y) {
   if (x >= width_ or y >= height_)
     throw std::invalid_argument(std::format(
@@ -160,6 +159,35 @@ Image_data Image_data::crop(size_t x0, size_t y0, size_t w, size_t h) const {
 
   return out;
 }
+
+Image_data Image_data::crop(size_t rw, size_t rh) const {
+  const auto target_ratio = static_cast<double>(rw) / rh;
+  const auto current_ratio = static_cast<double>(width()) / height();
+
+  // Practically equal, return original
+  if (std::abs(current_ratio - target_ratio) < 0.001)
+    return Image_data{*this};
+
+  int new_w, new_h, x0, y0;
+
+  // Image too wide, crop sides
+  if (current_ratio > target_ratio) {
+    new_h = height();
+    new_w = static_cast<int>(height() * target_ratio);
+    x0 = (width() - new_w) / 2;
+    y0 = 0;
+  }
+  // Image too tall, crop top/bottom
+  else {
+    new_w = width();
+    new_h = static_cast<int>(width() / target_ratio);
+    x0 = 0;
+    y0 = (height() - new_h) / 2;
+  }
+
+  return crop(x0, y0, new_w, new_h);
+}
+
 
 Image_data Image_data::rotate_clockwise(void) const {
   Image_data out{height(), width()};
@@ -308,7 +336,10 @@ EMSCRIPTEN_BINDINGS(image_data) {
     // Manipulation (These return new Image_data objects by value)
     .function("scaleFactor", select_overload<Image_data(float) const>(&Image_data::scale))
     .function("scaleDims", select_overload<Image_data(size_t, size_t) const>(&Image_data::scale))
-    .function("crop", &Image_data::crop)
+
+    .function("crop", select_overload<Image_data(size_t, size_t, size_t, size_t) const>(&Image_data::crop))
+    .function("cropRatio", select_overload<Image_data(size_t, size_t) const>(&Image_data::crop))
+
     .function("rotateClockwise", &Image_data::rotate_clockwise)
     .function("rotateAnticlockwise", &Image_data::rotate_anticlockwise)
     .function("flipVertically", &Image_data::flip_vertically)
