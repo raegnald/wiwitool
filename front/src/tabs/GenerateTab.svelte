@@ -16,28 +16,6 @@
     download(zipPath);
   }
 
-  function addPaintingsPack(packer: MinecraftPacker) {
-    const paintingsPack = new module.PaintingsPack();
-    const paintingVector = new module.PaintingsVector();
-
-    $paintingsStore.forEach((wrapper) => {
-      paintingVector.push_back(wrapper.cppPainting);
-    });
-
-    paintingsPack.setPaintings(paintingVector);
-
-    packer.add(paintingsPack);
-
-    // paintingsPack.delete();
-    // paintingVector.delete();
-  }
-
-  function addInvisibleItemFramesPack(packer: MinecraftPacker) {
-    let invisibleItemFramesPack = new module.InvisibleItemFramePack();
-    packer.add(invisibleItemFramesPack);
-    // invisibleItemFramesPack.delete();
-  }
-
   function download(zipPath: string) {
     if (!module) return;
 
