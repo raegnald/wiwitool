@@ -81,7 +81,9 @@
 
   <div>
     <div class="title-component">
-      <h2>Customise your music discs</h2>
+      {#if $musicDiscsStore.length > 0}
+        <h2>Customise your music discs</h2>
+      {/if}
 
       <!-- <Button
         onclick={toggleSelectAll}

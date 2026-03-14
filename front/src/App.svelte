@@ -39,45 +39,39 @@
     <img src="/logo-wide.svg" alt="Wide logo" />
   </div>
 
-  {#if !$wasmReady}
-    <center>
-      <p>Loading webassembly module...</p>
-    </center>
-  {:else}
-    <Tabs {resetApp}>
-      <Tab hidden title="Start" id="start" let:move>
-        <StartTab {module} {move} />
+  <Tabs {resetApp}>
+    <Tab hidden title="Start" id="start" let:move>
+      <StartTab {module} {move} />
+    </Tab>
+
+    {#if import.meta.env.DEV}
+      <Tab title="Components showcase (dev)" id="dummy">
+        <ComponentsShowcaseTab />
       </Tab>
+    {/if}
 
-      {#if import.meta.env.DEV}
-        <Tab title="Components showcase (dev)" id="dummy">
-          <ComponentsShowcaseTab />
-        </Tab>
-      {/if}
+    <Tab hidden title="Changelog" id="changelog" let:move>
+      <ChangelogTab {move} />
+    </Tab>
 
-      <Tab hidden title="Changelog" id="changelog" let:move>
-        <ChangelogTab {move} />
-      </Tab>
+    <Tab title="Paintings" id="paintings" let:move>
+      <PaintingsTab {module} {move} />
+    </Tab>
 
-      <Tab title="Paintings" id="paintings" let:move>
-        <PaintingsTab {module} {move} />
-      </Tab>
+    <Tab title="Music discs" id="discs" let:move>
+      <MusicDiscsTab {module} {move} />
+    </Tab>
 
-      <Tab title="Music discs" id="discs" let:move>
-        <MusicDiscsTab {module} {move} />
-      </Tab>
+    <Tab title="Miscellaneous" id="misc" let:move>
+      <MiscTab {move} />
+    </Tab>
 
-      <Tab title="Miscellaneous" id="misc" let:move>
-        <MiscTab {move} />
-      </Tab>
+    <Tab title="Generate" id="generate">
+      <GenerateTab {module} />
+    </Tab>
+  </Tabs>
 
-      <Tab title="Generate" id="generate">
-        <GenerateTab {module} />
-      </Tab>
-    </Tabs>
-
-    <Toasts />
-  {/if}
+  <Toasts />
 </main>
 
 <style>

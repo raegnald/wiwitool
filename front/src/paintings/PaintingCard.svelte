@@ -172,21 +172,23 @@
   <div style={`display: ${showFrameOptions ? "block" : "none"}`}>
     <div class="procedural-frame-card">
       <div class="procedural-frame-params">
-        <Button onclick={() => colourPicker.showPicker()}>
-          Frame colour
-          <div
-            style={`width: 15px; height: 15px; background: ${frameTint}; border-radius: 100%; border: 1px solid #ccc`}
-          ></div>
-        </Button>
+        <div class="colour-container">
+          <Button onclick={() => colourPicker.showPicker()}>
+            Frame colour
+            <div
+              style={`width: 15px; height: 15px; background: ${frameTint}; border-radius: 100%; border: 1px solid #ccc`}
+            ></div>
+          </Button>
 
-        <input
-          bind:this={colourPicker}
-          name="frame-colour"
-          type="color"
-          bind:value={frameTint}
-          oninput={syncToCpp}
-          onchange={syncToCpp}
-        />
+          <input
+            bind:this={colourPicker}
+            name="frame-colour"
+            type="color"
+            bind:value={frameTint}
+            oninput={syncToCpp}
+            onchange={syncToCpp}
+          />
+        </div>
 
         <Button
           icon="Dices"
@@ -232,12 +234,19 @@
     font-size: 90%;
   }
 
+  .colour-container {
+    position: relative;
+  }
+
   input[type="color"] {
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
     padding: 0;
     border: 0;
-    border-radius: 100%;
-    width: 40px;
-    height: 40px;
-    display: none;
+    pointer-events: none;
+    z-index: -1;
   }
 </style>
