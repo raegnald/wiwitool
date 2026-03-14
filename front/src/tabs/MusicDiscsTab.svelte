@@ -80,6 +80,17 @@
   <DropZone handler={handleDrop}>Drag and drop audio files here</DropZone>
 
   <div>
+    <div class="title-component">
+      <h2>Customise your music discs</h2>
+
+      <!-- <Button
+        onclick={toggleSelectAll}
+        icon={allSelected ? "CircleMinus" : "CircleCheck"}
+      >
+        {allSelected ? "Deselect" : "Select"} all
+      </Button> -->
+    </div>
+
     {#each [...$musicDiscsStore].reverse() as wrapper (wrapper.cppDisc.stringId())}
       <MusicDiscCard {module} {wrapper} />
     {/each}

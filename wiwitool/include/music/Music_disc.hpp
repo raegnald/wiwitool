@@ -61,8 +61,8 @@ public:
 
   // Serialisation
 
-  // friend void to_json(nlohmann::json &, const Music_disc &);
-  // friend void from_json(const nlohmann::json &, Music_disc &);
+  friend void to_json(nlohmann::json &, const Music_disc &);
+  friend void from_json(const nlohmann::json &, Music_disc &);
 
 #ifdef EMSCRIPTEN
   // Fast-path JS ingest
@@ -95,5 +95,5 @@ private:
                                               unsigned int rate);
 };
 
-// void to_json(nlohmann::json &j, const Music_disc &);
-// void from_json(const nlohmann::json &, Music_disc &);
+void to_json(nlohmann::json &j, const Music_disc &);
+void from_json(const nlohmann::json &, Music_disc &);

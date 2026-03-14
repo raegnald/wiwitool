@@ -9,9 +9,13 @@
 #include <print>
 
 #include <vorbis/vorbisenc.h>
+#include "nlohmann/json_fwd.hpp"
 #include "stb_vorbis.h"
 
 #include "util/wiwidebug.hpp"
+
+#include "nlohmann/json.hpp"
+
 
 Music_disc::Music_disc(void) : disc_id{next_disc_id++} {}
 
@@ -264,6 +268,42 @@ Image_data Music_disc::get_disc_item_image(void) {
   }
 
   return cover_mask;
+}
+
+void to_json(nlohmann::json &j, const Music_disc &d) {
+  j = nlohmann::json{{"id", d.disc_id},
+                     {"title", d.title},
+                     {"artist", d.artist},
+                     {"comparator_output", d.comparator_output},
+                     {"cover", d.cover},
+                     {"ogg_data", d.ogg_data},
+                     {"cached_waveform", d.cached_waveform},
+                     {"sample_rate", d.sample_rate},
+                     {"duration_seconds", d.duration_seconds},
+                     {"trim_start", d.trim_start},
+                     {"trim_end", d.trim_end}};
+}
+
+void from_json(const nlohmann::json &j, Music_disc &d) {
+  j.at("id").get_to(d.disc_id);
+
+  j.at("title").get_to(d.title);
+  j.at("artist").get_to(d.artist);
+  j.at("comparator_output").get_to(d.comparator_output);
+
+  j.at("cover").get_to(d.cover);
+
+  j.at("ogg_data").get_to(d.ogg_data);
+  j.at("cached_waveform").get_to(d.cached_waveform);
+  j.at("sample_rate").get_to(d.sample_rate);
+  j.at("duration_seconds").get_to(d.duration_seconds);
+
+  j.at("trim_start").get_to(d.trim_start);
+  j.at("trim_end").get_to(d.trim_end);
+
+  // Prevent string_id() collisions after loading an existing pack
+  if (d.disc_id >= Music_disc::next_disc_id)
+    Music_disc::next_disc_id = d.disc_id + 1;
 }
 
 

@@ -80,7 +80,7 @@ std::vector<uint8_t> Wiwiworkspace::serialise(void) const {
     for (const auto &disc : discs)
       flat_music_discs.push_back(Music_disc{*disc});
 
-    // j["music_discs"] = flat_music_discs;
+    j["music_discs"] = flat_music_discs;
   }
 
   // Invisible item frames
@@ -91,6 +91,8 @@ std::vector<uint8_t> Wiwiworkspace::serialise(void) const {
 
 void Wiwiworkspace::deserialise(const std::vector<uint8_t> &binary_msgpack) {
   paintings.clear();
+  discs.clear();
+
   json j = nlohmann::json::from_msgpack(binary_msgpack);
 
   // Paintings
@@ -102,14 +104,12 @@ void Wiwiworkspace::deserialise(const std::vector<uint8_t> &binary_msgpack) {
   }
 
   // Music discs
-  /*
   if (j.contains("music_discs")) {
     auto flat_discs = j["music_discs"].get<std::vector<Music_disc>>();
 
     for (auto &d : flat_discs)
       discs.push_back(std::make_shared<Music_disc>(d));
   }
-  */
 
   // Invislbe item frames
   invisible_item_frames = j.value("invisible_item_frames", false);

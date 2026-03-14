@@ -9,6 +9,10 @@
   } from "../stores/paintingsStore";
   import Button from "../components/Button.svelte";
   import { wasmReady } from "../stores/wasmStore";
+  import {
+    musicDiscsStore,
+    type MusicDiscWrapper,
+  } from "../stores/musicDiscsStore";
 
   export let move: (id: string) => void;
   export let module: MainModule;
@@ -16,6 +20,8 @@
   $: showDropZone = false;
 
   async function importPacks(file: File) {
+    if (!module || !$workspace) return;
+
     toast(INFO, "Importing configuration...");
 
     const buffer = await file.arrayBuffer();
@@ -30,6 +36,7 @@
     vec.delete();
 
     retrievePaintings();
+    retrieveMusicDiscs();
 
     toasts.set([]);
     toast(INFO, "Configuration was imported");
@@ -38,7 +45,6 @@
 
   function retrievePaintings() {
     const cppPaintingsVector = $workspace.getPaintings();
-
     const newWrappers: PaintingWrapper[] = [];
 
     for (let i = 0; i < cppPaintingsVector.size(); i++) {
@@ -47,9 +53,26 @@
         selected: false,
       });
     }
+
     cppPaintingsVector.delete();
 
     paintingsStore.set(newWrappers);
+  }
+
+  function retrieveMusicDiscs() {
+    const cppDiscsVector = $workspace.getMusicDiscs();
+    const newWrappers: MusicDiscWrapper[] = [];
+
+    for (let i = 0; i < cppDiscsVector.size(); i++) {
+      newWrappers.push({
+        cppDisc: cppDiscsVector.get(i),
+        selected: false,
+      });
+    }
+
+    cppDiscsVector.delete();
+
+    musicDiscsStore.set(newWrappers);
   }
 </script>
 

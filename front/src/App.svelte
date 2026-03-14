@@ -20,7 +20,7 @@
   import SelectableCard from "./components/SelectableCard.svelte";
   import MusicDiscsTab from "./tabs/MusicDiscsTab.svelte";
 
-  let module: MainModule | null = null;
+  let module: MainModule | null = $state(null);
 
   function resetApp() {
     paintingsStore.set([]);
@@ -32,8 +32,6 @@
     module = await getWasmModule();
     $workspace = new module.Wiwiworkspace();
   });
-
-  let selected = $state(false);
 </script>
 
 <main>

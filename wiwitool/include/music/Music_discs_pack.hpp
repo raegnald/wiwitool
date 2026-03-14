@@ -22,5 +22,18 @@ private:
   std::string music_discs_namespace{default_music_discs_namespace};
   std::vector<Music_disc> discs{};
 
-  // std::vector<std::string> get_disc_ids(void) const;
+  const std::string base_disc_id = "minecraft:music_disc_ward";
+
+  // Data helpers
+  void generate_music_discs_tag_json(std::filesystem::path directory);
+  void generate_jukebox_song_json(Music_disc &disc, std::filesystem::path directory);
+  void generate_recipe_json(Music_disc &disc, std::filesystem::path directory);
+
+  // Resource helpers
+  void generate_sounds_json(std::filesystem::path directory);
+  void generate_item_model_json(Music_disc &disc, std::filesystem::path directory);
+  void generate_vanilla_override_json(std::filesystem::path directory);
+  void export_disc_texture(Music_disc &disc, std::filesystem::path directory);
+  void export_ogg_audio(Music_disc &disc, std::filesystem::path directory);
+
 };
