@@ -62,15 +62,13 @@
     cppDisc.setPcmAudio(leftBytes, rightBytes, audioBuffer.sampleRate);
     console.log("Encoding complete!");
 
+    $workspace.addMusicDisc(cppDisc);
+
     musicDiscsStore.update((current) => [
       ...current,
       { cppDisc, selected: false },
     ]);
   }
-
-  // https://github.com/Borewit/music-metadata
-  // https://audio-tag-analyzer.netlify.app/
-  // https://xiph.org/vorbis/doc/libvorbis/overview.html
 </script>
 
 <main>

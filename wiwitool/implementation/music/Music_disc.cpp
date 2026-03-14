@@ -293,7 +293,10 @@ using namespace emscripten;
 EMSCRIPTEN_BINDINGS(music_disc) {
   class_<Music_disc>("MusicDisc")
       .smart_ptr<std::shared_ptr<Music_disc>>("MusicDisc")
-      .constructor<>()
+
+      .constructor(optional_override([]() {
+        return std::make_shared<Music_disc>();
+      }))
 
       .function("stringId", &Music_disc::string_id)
 
