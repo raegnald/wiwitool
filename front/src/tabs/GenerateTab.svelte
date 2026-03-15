@@ -162,8 +162,7 @@
       <h3>How to install your custom pack</h3>
       <p>
         When you click download, you will get a file named
-        <code>wiwipacks.zip</code>. Unzip this file to find three important
-        files inside:
+        <code>wiwipacks.zip</code>. Unzip this file to find three files inside:
       </p>
 
       <ol>
@@ -175,9 +174,9 @@
         </li>
         <li>
           <strong><code>datapack.zip</code> (Data Pack):</strong> Move this file
-          into the <code>datapacks</code> folder of your specific Minecraft
-          world save. Then, type <code>/reload</code> in the game chat. This adds
-          the actual items (paintings, discs, recipes) into the world.
+          into the <code>datapacks</code> folder of your specific Minecraft world
+          save. Then, exit and re-enter the world. This adds the actual items (paintings,
+          discs, recipes) into the world.
         </li>
         <li>
           <strong>
