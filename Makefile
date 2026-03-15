@@ -12,7 +12,7 @@ clean-library:
 	$(MAKE) -C wiwitool clean
 
 front-dependencies: library
-	mkdir -p front/public/wasm
+	mkdir -p front/public/wasm front/src/bindings
 	cp wiwitool/build/wasm/wiwitool.{js,wasm,data} front/public/wasm/
 	cp wiwitool/build/wasm/*.ts front/src/bindings/
 
