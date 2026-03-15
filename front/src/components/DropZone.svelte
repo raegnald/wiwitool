@@ -103,26 +103,4 @@
     color: #646cff;
     font-weight: 500;
   }
-
-  :global(.spinner) {
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  @media (prefers-color-scheme: light) {
-    .drop-zone.hover {
-      background-color: #f0f8ff;
-    }
-    .drop-zone:not(.processing) {
-      background-color: #f1f1f1;
-    }
-  }
 </style>

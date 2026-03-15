@@ -15,16 +15,23 @@
   export let module: MainModule;
   export let move: (id: string) => void;
 
+  let generating = false;
+
   $: validGeneratableConfig =
     $paintingsStore.length > 0 ||
     $musicDiscsStore.length > 0 ||
     ($workspace && $workspace.invisibleItemFrames);
 
-  function generatePacks() {
-    if (!$workspace) return;
+  async function generatePacks() {
+    generating = true;
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
-    const zipPath = $workspace.generateZip();
-    download(zipPath);
+    try {
+      const zipPath = $workspace.generateZip();
+      download(zipPath);
+    } finally {
+      generating = false;
+    }
   }
 
   function download(zipPath: string) {
@@ -193,6 +200,7 @@
     <center>
       <Button
         large
+        loading={generating}
         disabled={!validGeneratableConfig}
         onclick={generatePacks}
         icon="Download"

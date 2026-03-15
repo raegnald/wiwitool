@@ -86,11 +86,19 @@
   </p>
 
   <div id="center">
-    <Button disabled={!$wasmReady} onclick={() => move("paintings")}>
+    <Button
+      loading={!$wasmReady}
+      icon="BadgePlus"
+      onclick={() => move("paintings")}
+    >
       Create a new pack
     </Button>
 
-    <Button disabled={!$wasmReady} onclick={() => (showDropZone = true)}>
+    <Button
+      loading={!$wasmReady}
+      icon="FileUp"
+      onclick={() => (showDropZone = true)}
+    >
       Import an existing pack
     </Button>
   </div>
