@@ -180,9 +180,11 @@
           the actual items (paintings, discs, recipes) into the world.
         </li>
         <li>
-          <strong><code>wiwitool.data</code> (Project Save):</strong> Keep this
-          file safe! If you ever want to edit these paintings or add more music
-          discs later, simply drag and drop this file into the
+          <strong>
+            <code>Wiwitool Project Save file</code> (Project Save):
+          </strong>
+          Keep this file safe! If you ever want to edit these paintings or add more
+          music discs later, simply drag and drop this file into the
           <i>Import an existing pack</i> option located in the start page of the Wiwitool
           to load your workspace back up.
         </li>

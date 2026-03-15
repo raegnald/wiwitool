@@ -98,7 +98,7 @@
     <DropZone handler={importPacks}>
       <span>Drag and drop an existing configuration file</span><br />
       <small>
-        (its default name is <code>wiwitool.data</code>)
+        (its default name is <code>Wiwitool Project Save file</code>)
       </small>
     </DropZone>
   </div>
