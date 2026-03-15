@@ -72,7 +72,6 @@
     padding: 0 6rem;
     height: 15rem;
     text-align: center;
-    margin-bottom: 2rem;
     transition: 0.2s;
   }
 

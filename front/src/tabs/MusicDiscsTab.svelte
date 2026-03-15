@@ -13,6 +13,8 @@
   export let module: MainModule;
   export let move: (id: string) => void;
 
+  let showingInfo = false;
+
   async function handleDrop(file: File) {
     if (!module || !$workspace) return;
 
@@ -74,24 +76,33 @@
 <main>
   <div class="title-component">
     <h2>Load your songs</h2>
-    <Button icon="Info">Information</Button>
+    <Button onclick={() => (showingInfo = !showingInfo)} icon="Info">
+      Information
+    </Button>
+  </div>
+
+  <div
+    class="app-card help"
+    style={`display: ${showingInfo ? "block" : "none"}`}
+  >
+    Miau
   </div>
 
   <DropZone handler={handleDrop}>Drag and drop audio files here</DropZone>
 
   <div>
-    <div class="title-component">
-      {#if $musicDiscsStore.length > 0}
+    {#if $musicDiscsStore.length > 0}
+      <div class="title-component" style="margin-top: 2em">
         <h2>Customise your music discs</h2>
-      {/if}
 
-      <!-- <Button
+        <!-- <Button
         onclick={toggleSelectAll}
         icon={allSelected ? "CircleMinus" : "CircleCheck"}
       >
         {allSelected ? "Deselect" : "Select"} all
       </Button> -->
-    </div>
+      </div>
+    {/if}
 
     {#each [...$musicDiscsStore].reverse() as wrapper (wrapper.cppDisc.stringId())}
       <MusicDiscCard {module} {wrapper} />
@@ -112,3 +123,9 @@
     </Button>
   </div>
 </main>
+
+<style>
+  .help {
+    margin-bottom: 20px;
+  }
+</style>

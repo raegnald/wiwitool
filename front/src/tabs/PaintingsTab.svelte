@@ -58,7 +58,7 @@
   }
 </script>
 
-<div>
+<main>
   <div class="title-component">
     <h2>Load your images</h2>
     <Button onclick={() => (showingInfo = !showingInfo)} icon="Info">
@@ -66,7 +66,10 @@
     </Button>
   </div>
 
-  <div class="app-card" style={`display: ${showingInfo ? "block" : "none"}`}>
+  <div
+    class="app-card help"
+    style={`display: ${showingInfo ? "block" : "none"}`}
+  >
     <HelpUsingPaintingsTool />
   </div>
 
@@ -75,7 +78,7 @@
   </DropZone>
 
   {#if $paintingsStore.length > 0}
-    <div class="title-component">
+    <div class="title-component" style="margin-top: 2em">
       <h2>Customise your paintings</h2>
 
       <Button
@@ -100,7 +103,10 @@
   </div>
 
   <BulkActions />
-</div>
+</main>
 
 <style>
+  .help {
+    margin-bottom: 20px;
+  }
 </style>
