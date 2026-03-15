@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { TriangleAlert } from "@lucide/svelte";
   import Button from "../components/Button.svelte";
 
   export let move: (id: string) => void;
@@ -15,23 +16,43 @@
 
     <div class="version-header">
       <h2>v0.2</h2>
-      <time datetime=""><span style="color: red">to be determined</span></time>
+      <time datetime="2026-03-15">March 15, 2026</time>
     </div>
 
     <p>
-      This version builds up on v0.1 and tries to make it better. The pack
-      generation and import is now much faster. Also, there is a new option to
-      use procedurally generated frames.
+      Custom music discs are now available. Pack generation and import is now
+      much faster. Now, paintings use procedurally generated frames.
     </p>
 
     <dl>
-      <dt>Updates on painting generation</dt>
+      <dt>New feature: Music discs</dt>
+      <dd>
+        You can load your own songs and customise them:
+        <ul>
+          <li>
+            When you drop an audio file, it appears as a card where you can
+            listen to it.
+          </li>
+          <li>Title and author / description can be changed</li>
+          <li>The audio can optionally be trimmed</li>
+          <li>
+            You can drag and drop an image to be used as a custom cover for the
+            disc.
+          </li>
+        </ul>
+      </dd>
+
+      <dt>Update: Paintings</dt>
       <dd>
         <ul>
-          <li>Painting serialisation and import is now fully done in C++.</li>
           <li>
-            Paintings can now have a custom procedurally generated frame using
+            Paintings now have a custom procedurally generated frame using
             Perlin noise.
+          </li>
+          <li>The colour of the frame is customisable.</li>
+          <li>
+            The frame texture (the seed) can be changed to make the frame, and
+            overall painting, look slightly different.
           </li>
         </ul>
       </dd>
@@ -39,11 +60,15 @@
       <dt>Other improvements</dt>
       <dd>
         <ul>
+          <li>Serialisation and import is now fully done in C++.</li>
           <li>The interface has seen improvements, mostly internally.</li>
         </ul>
       </dd>
 
-      <dt>Incompatibilities</dt>
+      <dt>
+        Incompatibilities
+        <TriangleAlert />
+      </dt>
       <dd>
         Importing a pack created using v0.1 will not work due to the change in
         file format.
@@ -126,6 +151,9 @@
 
   dt {
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 
   dd {
