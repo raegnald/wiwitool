@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { activeDiscId } from "../stores/musicDiscsStore";
   import Button from "../components/Button.svelte";
+  import { formatSeconds } from "./seconds";
 
   // --- Props ---
   export let audioSrc: string;
@@ -19,6 +20,7 @@
   let waveCanvas: HTMLCanvasElement;
   let audioElement: HTMLAudioElement;
   let isPlaying = false;
+  let currentTime = 0;
   let unsubscribeActiveDisc: () => void;
 
   const canvasPadding = 10;
@@ -53,6 +55,12 @@
     } else {
       audioElement.pause();
     }
+  }
+
+  function resetPlayback() {
+    if (!audioElement) return;
+    audioElement.currentTime = trimStart;
+    audioElement.pause();
   }
 
   function handleTimeUpdate() {
@@ -174,19 +182,7 @@
 </script>
 
 <div class="player">
-  <Button large icon={isPlaying ? "Pause" : "Play"} onclick={togglePlayback} />
-
   <div class="waveform-stack">
-    <div>
-      <Button
-        small
-        onclick={resetTrim}
-        disabled={trimStart <= 0 && trimEnd >= duration}
-      >
-        Reset trim
-      </Button>
-    </div>
-
     <div class="waveform-container">
       <canvas
         bind:this={waveCanvas}
@@ -198,11 +194,41 @@
         onmouseleave={handleMouseUp}
       ></canvas>
     </div>
+
+    <div class="player-buttons">
+      <span style="width: 150px">
+        <span style="display: inline-block; width: 35px">
+          {formatSeconds(currentTime - trimStart)}
+        </span>
+        /
+        {formatSeconds(trimEnd - trimStart)}
+      </span>
+
+      <span style="flex: 1"></span>
+
+      <Button small secondary icon="SkipBack" onclick={resetPlayback} />
+      <Button icon={isPlaying ? "Pause" : "Play"} onclick={togglePlayback} />
+
+      <span style="flex: 1"></span>
+
+      <div style="width: 150px; display: flex; justify-content: flex-end">
+        <Button
+          small
+          destructive={!(trimStart <= 0 && trimEnd >= duration)}
+          onclick={resetTrim}
+          disabled={trimStart <= 0 && trimEnd >= duration}
+          icon="Scissors"
+        >
+          Reset trim
+        </Button>
+      </div>
+    </div>
   </div>
 </div>
 
 <audio
   bind:this={audioElement}
+  bind:currentTime
   src={audioSrc}
   ontimeupdate={handleTimeUpdate}
   onended={() => (isPlaying = false)}
@@ -226,6 +252,7 @@
     flex-direction: column;
     gap: 10px;
     width: 100%;
+    padding-left: 64px;
   }
 
   .waveform-container {
@@ -243,5 +270,11 @@
     height: 100%;
     display: block;
     image-rendering: pixelated;
+  }
+
+  .player-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 </style>

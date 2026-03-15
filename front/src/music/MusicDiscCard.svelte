@@ -7,13 +7,15 @@
   import Button from "../components/Button.svelte";
   import DropZone from "../components/DropZone.svelte";
   import WaveformPlayer from "./WaveformPlayer.svelte";
-  import { TextCursorIcon, UserIcon } from "@lucide/svelte";
+  import { MicVocal, AudioLines, NotepadText } from "@lucide/svelte";
 
   export let module: MainModule;
   export let wrapper: MusicDiscWrapper;
 
   let title = "";
   let artist = "";
+
+  let descriptionMode: boolean = false; // false: title/author; true: description
 
   // Data for the player
   let duration = 0;
@@ -101,25 +103,6 @@
 <SelectableCard bind:selected={wrapper.selected}>
   <div class="disc-card">
     <div class="controls-container">
-      <div class="metadata">
-        <label>
-          <TextCursorIcon />
-          <span>Title </span>
-          <input type="text" bind:value={title} oninput={syncMetadataToCpp} />
-        </label>
-
-        <label>
-          <UserIcon />
-          <span>Artist </span>
-          <input
-            type="text"
-            bind:value={artist}
-            oninput={syncMetadataToCpp}
-            placeholder="(optional)"
-          />
-        </label>
-      </div>
-
       {#if audioSrc && waveformData}
         <WaveformPlayer
           {audioSrc}
@@ -131,28 +114,87 @@
           onTrimChange={handleTrimChange}
         />
       {/if}
+
+      <div class="metadata">
+        <Button
+          onclick={() => {
+            descriptionMode = !descriptionMode;
+
+            if (descriptionMode) {
+              title =
+                artist && title ? artist + " - " + title : title ? title : "";
+              artist = "";
+              syncMetadataToCpp();
+            }
+          }}
+          icon={descriptionMode ? "MicVocal" : "NotepadText"}
+          title="Toggle description type"
+        />
+
+        {#if descriptionMode}
+          <label style="flex: 1">
+            <NotepadText />
+            <span>Description </span>
+            <input
+              type="text"
+              bind:value={title}
+              style="width: 100%; margin-left: 20px"
+              oninput={() => {
+                artist = "";
+                syncMetadataToCpp();
+              }}
+            />
+          </label>
+        {:else}
+          <label>
+            <AudioLines />
+            <span>Title </span>
+            <input type="text" bind:value={title} oninput={syncMetadataToCpp} />
+          </label>
+
+          <label>
+            <MicVocal />
+            <span>Artist </span>
+            <input
+              type="text"
+              bind:value={artist}
+              oninput={syncMetadataToCpp}
+              placeholder="(optional)"
+            />
+          </label>
+        {/if}
+      </div>
     </div>
 
     <div class="cover-container">
-      {#if coverImgSrc}
-        <img src={coverImgSrc} class="cover" alt="Disc Cover" />
-        <div class="cover-actions">
-          <Button
-            small
-            destructive
-            onclick={removeCoverImage}
-            icon="X"
-            title="Remove cover"
-          />
-        </div>
-      {:else}
-        <DropZone
-          style="padding: 0; height: 100%; margin: 0; font-size: 80%;"
-          handler={loadCover}
-        >
+      <DropZone
+        style={`
+          padding: 0;
+          height: 100%;
+          margin: 0;
+          font-size: 80%;
+          ${coverImgSrc ? "background-color: transparent;" : ""}
+          padding-left: ${coverImgSrc ? 8 : 0}px;
+        `}
+        handler={loadCover}
+      >
+        {#if coverImgSrc}
+          <img src={coverImgSrc} class="cover" alt="Disc Cover" />
+        {:else}
           Drag and drop a cover image
-        </DropZone>
-      {/if}
+        {/if}
+      </DropZone>
+
+      <div class="cover-actions">
+        <Button
+          small
+          destructive
+          disabled={!coverImgSrc}
+          onclick={removeCoverImage}
+          icon="X"
+          title="Remove cover"
+        />
+      </div>
     </div>
   </div>
 </SelectableCard>
