@@ -170,6 +170,10 @@ dialog::backdrop {
   }
 }
 
+svg {
+  vertical-align: text-bottom;
+}
+
 /* Spinner */
 
 .spinner {

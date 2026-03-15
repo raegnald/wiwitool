@@ -14,6 +14,13 @@
     type MusicDiscWrapper,
   } from "../stores/musicDiscsStore";
   import Carousel from "../components/Carousel.svelte";
+  import {
+    CpuIcon,
+    Disc2Icon,
+    GithubIcon,
+    ImageIcon,
+    WandSparklesIcon,
+  } from "@lucide/svelte";
 
   export let move: (id: string) => void;
   export let module: MainModule;
@@ -111,6 +118,7 @@
 
   <div id="center">
     <Button
+      large
       loading={!$wasmReady}
       icon="BadgePlus"
       onclick={() => move("paintings")}
@@ -119,6 +127,7 @@
     </Button>
 
     <Button
+      large
       loading={!$wasmReady}
       icon="FileUp"
       onclick={() => (showDropZone = true)}
@@ -148,29 +157,33 @@
 </div>
 
 {#snippet feature1()}
-  You can load and manipulate images, turning them into beautiful Minecraft
-  paintings.
+  You can load and manipulate images, turning them into
+  <b>beautiful Minecraft paintings</b>
+  <ImageIcon size="1.2em" />.
 {/snippet}
 
 {#snippet feature2()}
-  Turning your songs into Minecraft disc items has been easier! Just drag and
-  drop your audio files, and they will be turned into music discs you can craft
-  with a stonecutter.
+  Turning your songs into Minecraft disc items <Disc2Icon size="1.2em" /> has never
+  been easier! Just drag and drop your audio files, and they will be turned into
+  <b>music discs</b> you can craft with a stonecutter.
 {/snippet}
 
 {#snippet feature3()}
   Want to display something on a wall but don't like how the item frame looks?
-  We don't like it either! With the Invisible Item Frames pack you can craft,
-  ehem-ehem, invisible item frames!
+  We don't like it either! With the <b>Invisible Item Frames pack</b>
+  <WandSparklesIcon size="1.2em" /> you can craft, ehem-ehem, invisible item frames!
 {/snippet}
 
 {#snippet feature4()}
-  Open-source software (<a
+  <b>Open-source software</b> (<a
     href="https://github.com/raegnald/wiwitool/"
-    target="_blank">Github repository</a
-  >). Free to use forever.
-  <br /><br />
-  Runs locally on your browser (all your images are kept on <i>your</i> machine.)
+    target="_blank"
+  >
+    Github <GithubIcon size="1.2em" /> repository
+  </a>). Free to use forever.
+  <br />
+  <b>Runs locally on your browser</b>
+  <CpuIcon size="1.2em" /> (all your files are always kept on <i>your</i> machine.)
 {/snippet}
 
 <style>
