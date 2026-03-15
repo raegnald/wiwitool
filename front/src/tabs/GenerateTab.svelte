@@ -13,7 +13,9 @@
   export let module: MainModule;
 
   $: validGeneratableConfig =
-    $paintingsStore.length > 0 || $workspace.invisibleItemFrames;
+    $paintingsStore.length > 0 ||
+    $musicDiscsStore.length > 0 ||
+    ($workspace && $workspace.invisibleItemFrames);
 
   function generatePacks() {
     if (!$workspace) return;
