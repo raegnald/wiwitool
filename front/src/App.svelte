@@ -17,13 +17,14 @@
 
   import { paintingsStore } from "./stores/paintingsStore";
   import ChangelogTab from "./tabs/ChangelogTab.svelte";
-  import SelectableCard from "./components/SelectableCard.svelte";
   import MusicDiscsTab from "./tabs/MusicDiscsTab.svelte";
+  import { musicDiscsStore } from "./stores/musicDiscsStore";
 
   let module: MainModule | null = $state(null);
 
   function resetApp() {
     paintingsStore.set([]);
+    musicDiscsStore.set([]);
     $workspace.delete();
     $workspace = new module.Wiwiworkspace();
   }
