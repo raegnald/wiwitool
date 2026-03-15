@@ -13,6 +13,7 @@
     musicDiscsStore,
     type MusicDiscWrapper,
   } from "../stores/musicDiscsStore";
+  import Carousel from "../components/Carousel.svelte";
 
   export let move: (id: string) => void;
   export let module: MainModule;
@@ -77,6 +78,28 @@
 </script>
 
 <div class="app-card">
+  <Carousel
+    intervalMs={6000}
+    items={[
+      {
+        content: feature1,
+        image: "/geese.png",
+        alt: "Minecraft painting in game",
+      },
+      {
+        content: feature2,
+        image: "/stonecutter-discs.png",
+        alt: "Minecraft discs in stonecutter",
+      },
+      {
+        content: feature3,
+        image: "/invisible-item-frame-comparison.png",
+        alt: "Normal and invisible item frames holding the same music disc",
+      },
+      { content: feature4 },
+    ]}
+  />
+
   <p>
     Welcome to <span class="jb9">The Wiwitool</span>! The Wiwitool is a
     mix-and-match Minecraft resource pack and data pack generator that allows
@@ -112,22 +135,6 @@
     </DropZone>
   </div>
 
-  <h2><span class="jb9">Wiwitool</span> features</h2>
-  <ul>
-    <li>
-      Open-source software (<a
-        href="https://github.com/raegnald/wiwitool/"
-        target="_blank">Github repository</a
-      >). Free to use forever.
-    </li>
-    <li>
-      Runs locally on your browser (all your images are kept on <i>your</i> machine.)
-    </li>
-    <li>
-      You can manipulate and preview how your image will be seen in Minecraft.
-    </li>
-  </ul>
-
   <div class="version">
     Wiwitool version {__GIT_TAG__} (commit {__GIT_COMMIT__})
     <Button secondary onclick={() => move("changelog")}>Changelog</Button>
@@ -139,6 +146,32 @@
     </a>
   </center>
 </div>
+
+{#snippet feature1()}
+  You can load and manipulate images, turning them into beautiful Minecraft
+  paintings.
+{/snippet}
+
+{#snippet feature2()}
+  Turning your songs into Minecraft disc items has been easier! Just drag and
+  drop your audio files, and they will be turned into music discs you can craft
+  with a stonecutter.
+{/snippet}
+
+{#snippet feature3()}
+  Want to display something on a wall but don't like how the item frame looks?
+  We don't like it either! With the Invisible Item Frames pack you can craft,
+  ehem-ehem, invisible item frames!
+{/snippet}
+
+{#snippet feature4()}
+  Open-source software (<a
+    href="https://github.com/raegnald/wiwitool/"
+    target="_blank">Github repository</a
+  >). Free to use forever.
+  <br /><br />
+  Runs locally on your browser (all your images are kept on <i>your</i> machine.)
+{/snippet}
 
 <style>
   .dropZoneContainer {
@@ -173,10 +206,24 @@
   }
 
   .version {
-    margin: 20px 0;
+    margin: 40px 0 20px 0;
+    padding-top: 20px;
+    border-top: 1px solid rgba(127, 127, 127, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 10px;
+  }
+
+  .features .imgs {
+    display: flex;
+    gap: 10px;
+    justify-content: space-around;
+    align-items: center;
+    margin: 20px 0;
+  }
+
+  .features .imgs img {
+    width: 100%;
   }
 </style>
