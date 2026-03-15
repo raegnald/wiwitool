@@ -3,7 +3,7 @@ import { writable } from "svelte/store";
 import type { MainModule } from "../bindings/wiwitool";
 import type MainModuleFactory from "../bindings/wiwitool";
 
-import { toast, ERROR, INFO } from "./toastsStore";
+import { toast, ERROR } from "./toastsStore";
 
 export const wasmReady = writable(false);
 let wasmModule: MainModule | null = null;
@@ -47,5 +47,6 @@ export async function getWasmModule(): Promise<MainModule> {
   });
 
   wasmReady.set(true);
+
   return wasmModule;
 }

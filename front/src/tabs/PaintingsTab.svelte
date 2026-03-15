@@ -58,22 +58,27 @@
   }
 </script>
 
-<div>
+<main>
   <div class="title-component">
     <h2>Load your images</h2>
-    <Button onclick={() => (showingInfo = !showingInfo)}>
-      Information <InfoIcon size="1em" />
+    <Button onclick={() => (showingInfo = !showingInfo)} icon="Info">
+      Information
     </Button>
   </div>
-  <div class="infoContainer app-card" class:showingInfo>
+
+  <div
+    class="app-card help"
+    style={`display: ${showingInfo ? "block" : "none"}`}
+  >
     <HelpUsingPaintingsTool />
   </div>
+
   <DropZone handler={handleImageDrop}>
     <span>Drag and drop images here</span>
   </DropZone>
 
   {#if $paintingsStore.length > 0}
-    <div class="title-component">
+    <div class="title-component" style="margin-top: 2em">
       <h2>Customise your paintings</h2>
 
       <Button
@@ -82,45 +87,26 @@
       >
         {allSelected ? "Deselect" : "Select"} all
       </Button>
-
-      <!-- <button onclick={toggleSelectAll}>
-        {#if allSelected}
-          Deselect all <CircleMinusIcon size="1.1em" />
-        {:else}
-          Select all <CircleCheck size="1.1em" />
-        {/if}
-      </button> -->
     </div>
 
-    <div class="list">
+    <div>
       {#each [...$paintingsStore].reverse() as wrapper (wrapper.cppPainting.stringId())}
         <PaintingCard {wrapper} />
       {/each}
     </div>
   {/if}
 
-  <center>
-    <Button onclick={() => move("misc")} icon="ArrowRight">
+  <div class="pagination">
+    <Button onclick={() => move("discs")} icon="ArrowRight">
       {$paintingsStore.length > 0 ? "Next" : "Skip"}
     </Button>
-  </center>
+  </div>
 
   <BulkActions />
-</div>
+</main>
 
 <style>
-  .infoContainer {
-    display: none;
-  }
-
-  .infoContainer.showingInfo {
-    display: block;
+  .help {
     margin-bottom: 20px;
-  }
-
-  button {
-    display: flex;
-    align-items: center;
-    gap: 5px;
   }
 </style>

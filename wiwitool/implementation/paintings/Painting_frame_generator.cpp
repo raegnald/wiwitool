@@ -17,19 +17,6 @@ Image_data get_frame(Painting_frame_generator frame_generator,
                     frame_generator);
 }
 
-Image_data Minecraft_default_frame_generator::get(Painting_ratio ratio) const {
-  if (ratio == Nearest)
-    throw std::invalid_argument("Nearest ratio is not valid");
-
-  if (ratio == ICON_RATIO)
-    return Image_data{frames_directory / "painting.png"};
-
-  const auto [width, height] = ratio_sizes(ratio);
-  const auto frame_file = std::format("{}{}.png", width, height);
-
-  return Image_data{frames_directory / frame_file};
-}
-
 Image_data Procedural_frame_generator::get(Painting_ratio ratio) const {
   // Block size
   const auto [bw, bh] = ratio_sizes(ratio);
@@ -72,14 +59,6 @@ Image_data Procedural_frame_generator::get(Painting_ratio ratio) const {
 }
 
 // JSON serialisation
-
-void to_json(nlohmann::json &j, const Minecraft_default_frame_generator &g) {
-  j = nlohmann::json{{"type", "default"}};
-}
-
-void from_json(const nlohmann::json &j, Minecraft_default_frame_generator &g) {
-  return;
-}
 
 void to_json(nlohmann::json &j, const Procedural_frame_generator &g) {
   auto tint = g.get_tint();

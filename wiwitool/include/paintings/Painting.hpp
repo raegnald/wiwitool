@@ -60,7 +60,6 @@ public:
 
   // Painting frames
 
-  void use_default_frame(void);
   void use_procedural_frame(void);
 
   Procedural_frame_generator *get_procedural_settings(void);
@@ -81,8 +80,7 @@ private:
   Image_data original_image;
   mutable Image_data painting, icon;
 
-  Painting_frame_generator frame_generator =
-      Minecraft_default_frame_generator{};
+  Painting_frame_generator frame_generator{};
 
   Painting_ratio conversion_ratio{Nearest};
 

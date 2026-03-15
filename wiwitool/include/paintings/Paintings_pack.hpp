@@ -21,7 +21,7 @@ protected:
   virtual void generate_resource(void) override;
 
 private:
-  std::string paintings_namespace{default_paintings_namespace};
+  std::string paintings_namespace;
   std::vector<Painting> paintings{};
 
   std::vector<std::string> get_painting_ids(void) const;

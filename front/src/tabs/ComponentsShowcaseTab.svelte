@@ -13,6 +13,12 @@
   let clickMeButtonDisabled = $state(false);
 
   let buttonToggle = $state(true);
+
+  let loading = $state(false);
+
+  function toggleSpin() {
+    loading = !loading;
+  }
 </script>
 
 <div id="main">
@@ -158,6 +164,29 @@
         >
           {buttonToggle ? "Activado" : "Desactivado"}
         </Button>
+      </Showcase>
+
+      <Info>
+        Buttons have the <code>loading</code> property, which disables the button
+        and shows a spinner.
+      </Info>
+
+      <Showcase>
+        <Button onclick={toggleSpin} {loading} icon="Send">Submit</Button>
+
+        <Button onclick={toggleSpin} secondary {loading} icon="CloudSync">
+          Save changes
+        </Button>
+
+        <Button onclick={toggleSpin} transparent {loading} icon="Activity">
+          Check activity
+        </Button>
+
+        <Button onclick={toggleSpin} destructive {loading} icon="X" />
+
+        <div style="width: 100%"></div>
+
+        <Button onclick={toggleSpin}>Toggle loading state always</Button>
       </Showcase>
     </ComparisonList>
   </div>

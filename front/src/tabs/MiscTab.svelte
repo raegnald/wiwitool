@@ -30,18 +30,21 @@
     </div>
 
     <div class="hidden" class:showingInfoIIF>
-      Adds two simple item recipes that allow you to shapelessly craft invisible
-      item frames and glow item frames using glass panes, fermented spider eyes
-      and golden carrots.
+      <p>
+        Adds two simple item recipes that allow you to shapelessly craft
+        invisible item frames and glow item frames using glass panes, fermented
+        spider eyes and golden carrots.
+      </p>
+
+      <img
+        src="/invisible-item-frame-recipe.png"
+        alt="Recipe to create an invisible item frame"
+      />
     </div>
   </div>
 
   <div class="pagination">
-    <Button
-      class="secondary"
-      onclick={() => move("paintings")}
-      icon="ArrowLeft"
-    >
+    <Button class="secondary" onclick={() => move("discs")} icon="ArrowLeft">
       Previous
     </Button>
     <Button onclick={() => move("generate")} icon="ArrowRight">Next</Button>
@@ -51,13 +54,6 @@
 <style>
   .check-option {
     font-size: 120%;
-  }
-
-  .pagination {
-    margin: 50px 0;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
   }
 
   .hidden {

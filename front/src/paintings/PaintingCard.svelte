@@ -11,10 +11,13 @@
   import PaintingParams from "./PaintingParams.svelte";
   import type { ImageData } from "../bindings/wiwitool";
   import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
+  import SelectableCard from "../components/SelectableCard.svelte";
+  import Button from "../components/Button.svelte";
 
   export let wrapper: PaintingWrapper;
 
   let showFrameOptions = false;
+  let colourPicker: HTMLInputElement;
 
   let originalImageCanvas: HTMLCanvasElement;
   let paintingCanvas: HTMLCanvasElement;
@@ -23,6 +26,8 @@
   let title: string;
   let author: string;
   let currentRatio: string;
+
+  let selected: boolean;
 
   let proceduralFrame = wrapper.cppPainting.isFrameProcedural();
   let frameTint: string;
@@ -33,6 +38,7 @@
     title = wrapper.cppPainting.title;
     author = wrapper.cppPainting.author;
     currentRatio = wrapper.cppPainting.ratio;
+    selected = wrapper.selected;
 
     const settings = wrapper.cppPainting.getProceduralSettings();
     if (settings) {
@@ -51,6 +57,7 @@
     wrapper.cppPainting.title = title;
     wrapper.cppPainting.author = author;
     wrapper.cppPainting.ratio = currentRatio;
+    wrapper.selected = selected;
 
     const settings = wrapper.cppPainting.getProceduralSettings();
     if (settings) {
@@ -109,15 +116,6 @@
     paintingsStore.set($paintingsStore);
   }
 
-  function toggleFrameType() {
-    if (proceduralFrame) {
-      wrapper.cppPainting.useProceduralFrame();
-    } else {
-      wrapper.cppPainting.useDefaultFrame();
-    }
-    refresh();
-  }
-
   function remove() {
     const idToRemove = wrapper.cppPainting.stringId();
 
@@ -161,88 +159,63 @@
   onMount(refresh);
 </script>
 
-<div class="app-card card">
-  <div class="card-padding" class:selected={wrapper.selected}>
-    <div class="transformation">
-      <PaintingActions
-        bind:selected={wrapper.selected}
-        id={wrapper.cppPainting.stringId()}
-        {rotateClockwise}
-        {rotateAnticlockwise}
-        {clone}
-        {remove}
-      />
-      <PaintingCanvas bind:canvas={originalImageCanvas} />
-      <PaintingParams
-        bind:currentRatio
-        bind:title
-        bind:author
-        bind:showFrameOptions
-        onchange={syncToCpp}
-      />
-      <PaintingCanvas bind:canvas={paintingCanvas} />
-    </div>
+<SelectableCard
+  bind:selected
+  onToggle={() => {
+    wrapper.selected = selected;
+    $paintingsStore = $paintingsStore;
+  }}
+>
+  <div class="transformation">
+    <PaintingActions {rotateClockwise} {rotateAnticlockwise} {clone} {remove} />
+    <PaintingCanvas bind:canvas={originalImageCanvas} />
+    <PaintingParams
+      bind:currentRatio
+      bind:title
+      bind:author
+      bind:showFrameOptions
+      onchange={syncToCpp}
+    />
+    <PaintingCanvas bind:canvas={paintingCanvas} />
+  </div>
 
-    <div style={`display: ${showFrameOptions ? "block" : "none"}`}>
-      <div class="procedural-frame-card">
-        <Wiwicheckbox bind:checked={proceduralFrame} onclick={toggleFrameType}>
-          Use procedurally generated frames
-        </Wiwicheckbox>
+  <div style={`display: ${showFrameOptions ? "block" : "none"}`}>
+    <div class="procedural-frame-card">
+      <div class="procedural-frame-params">
+        <div class="colour-container">
+          <Button onclick={() => colourPicker.showPicker()}>
+            Frame colour
+            <div
+              style={`width: 15px; height: 15px; background: ${frameTint}; border-radius: 100%; border: 1px solid #ccc`}
+            ></div>
+          </Button>
 
-        {#if proceduralFrame}
-          <div class="procedural-frame-params">
-            <span>
-              <label for="frame-colour">Frame colour</label>
-              <input
-                name="frame-colour"
-                type="color"
-                bind:value={frameTint}
-                oninput={syncToCpp}
-                onchange={syncToCpp}
-              />
-            </span>
+          <input
+            bind:this={colourPicker}
+            name="frame-colour"
+            type="color"
+            bind:value={frameTint}
+            oninput={syncToCpp}
+            onchange={syncToCpp}
+          />
+        </div>
 
-            <span>
-              <label for="frame-seed">Frame seed</label>
-              <input
-                name="frame-seed"
-                type="number"
-                bind:value={frameSeed}
-                oninput={syncToCpp}
-                onchange={syncToCpp}
-              />
-            </span>
-          </div>
-        {/if}
+        <Button
+          icon="Dices"
+          onclick={() => {
+            frameSeed =
+              "" + Math.floor(Number.MAX_SAFE_INTEGER * Math.random());
+            syncToCpp();
+          }}
+        >
+          Frame seed
+        </Button>
       </div>
     </div>
   </div>
-</div>
+</SelectableCard>
 
 <style>
-  .card {
-    margin: 20px 0px;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    padding: 0;
-  }
-
-  .card-padding {
-    width: 100%;
-    border: 5px solid transparent;
-    padding: 15px;
-    transition: 100ms;
-    border-radius: 11px;
-    overflow: scroll;
-  }
-
-  .card-padding.selected {
-    border-color: #646cff;
-  }
-
   .transformation {
     display: flex;
     align-items: stretch;
@@ -267,21 +240,23 @@
 
   .procedural-frame-params {
     display: flex;
-    gap: 25px;
+    gap: 10px;
     font-size: 90%;
   }
 
-  .procedural-frame-params > span {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .colour-container {
+    position: relative;
   }
 
   input[type="color"] {
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
     padding: 0;
     border: 0;
-    border-radius: 100%;
-    width: 40px;
-    height: 40px;
+    pointer-events: none;
+    z-index: -1;
   }
 </style>

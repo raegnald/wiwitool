@@ -38,24 +38,17 @@ void Minecraft_pack::generate_pack_skeletons(void) {
   }
 }
 
-void compress_directory(std::filesystem::path folder,
+void compress_directory(std::filesystem::path directory,
                         std::filesystem::path zipname) {
   using namespace std::filesystem;
-  const auto all_entries = recursive_directory_iterator(folder);
+  const auto all_entries = recursive_directory_iterator(directory);
 
   miniz_cpp::zip_file zip;
 
   for (const directory_entry &entry : all_entries) {
-    wiwidebug std::println("Compressing {} in {}...", entry.path().string(),
-                           zipname.string());
-
     if (entry.is_regular_file()) {
-      const auto archive_name = entry.path().string().substr(
-          folder.string().length() + 1); // FOTUT really fotut
-      // /folder/a/b/c.txt ---> a/b/c.txt
-
-      wiwidebug std::println("Archive name for {} is {}", entry.path().string(),
-                             archive_name);
+      const std::string archive_name =
+          std::filesystem::relative(entry.path(), directory);
 
       zip.write(entry.path(), archive_name);
     }
@@ -74,7 +67,7 @@ void Minecraft_pack::generate(bool fresh) {
   }
 
   generate_pack_skeletons();
-  generate_resource(); // FOTUT: resuce must be generated beforehand
+  generate_resource(); // respack must be generated before datapack
   generate_data();
 }
 

@@ -8,31 +8,7 @@
 
 Image_data crop(Image_data image, Painting_ratio ratio) {
   auto [rw, rh] = ratio_sizes(ratio);
-  const auto target_ratio = static_cast<double>(rw) / rh;
-  const auto current_ratio = static_cast<double>(image.width()) / image.height();
-
-  // Practically equal, return original
-  if (std::abs(current_ratio - target_ratio) < 0.001)
-    return image;
-
-  int new_w, new_h, x0, y0;
-
-  // Image too wide, crop sides
-  if (current_ratio > target_ratio) {
-    new_h = image.height();
-    new_w = static_cast<int>(image.height() * target_ratio);
-    x0 = (image.width() - new_w) / 2;
-    y0 = 0;
-  }
-  // Image too tall, crop top/bottom
-  else {
-    new_w = image.width();
-    new_h = static_cast<int>(image.width() / target_ratio);
-    x0 = 0;
-    y0 = (image.height() - new_h) / 2;
-  }
-
-  return image.crop(x0, y0, new_w, new_h);
+  return image.crop(rw, rh);
 }
 
 Image_data downscale(Image_data image, Painting_ratio ratio, int scale = 16) {
@@ -60,7 +36,7 @@ Image_data frame(const Painting_frame_generator &frame_generator,
 }
 
 Image_data miniature_frame(Image_data image) {
-  auto frame_data = Minecraft_default_frame_generator{}.get(ICON_RATIO);
+  auto frame_data = Image_data{frames_directory / "painting.png"};
   constexpr auto x0 = 3, y0 = 5;
 
   if (frame_data.width() != 16 or frame_data.height() != 16)

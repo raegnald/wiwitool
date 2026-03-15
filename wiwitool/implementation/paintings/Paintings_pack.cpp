@@ -2,15 +2,15 @@
 
 #include <fstream>
 
+#include "util/strutil.hpp"
 #include "util/wiwidebug.hpp"
 
 #include "nlohmann/json.hpp"
 using json = nlohmann::ordered_json;
 
-
 Paintings_pack::Paintings_pack(void)
-    : Minecraft_pack{"A pack with custom paintings"} {}
-
+    : Minecraft_pack{"A pack with custom paintings"},
+      paintings_namespace{timestamped(default_paintings_namespace)} {}
 
 void Paintings_pack::generate_data(void) {
   // Minecraft namespace (wrinting placeable.json)

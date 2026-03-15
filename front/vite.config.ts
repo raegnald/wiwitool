@@ -13,10 +13,17 @@ try {
 
 export default defineConfig({
   plugins: [svelte()],
+  optimizeDeps: {
+    exclude: [],
+  },
   server: {
     host: "0.0.0.0", // all addresses
     port: 8080,
     allowedHosts: ["xulo.local", "suspi.gligan.net"],
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Embedder-Policy": "require-corp",
+    },
   },
   define: {
     __GIT_COMMIT__: JSON.stringify(commitHash),

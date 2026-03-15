@@ -8,35 +8,22 @@
 
   type ButtonClickHandler = () => void;
 
-  export let id: string;
-  export let selected: boolean;
   export let rotateClockwise: ButtonClickHandler;
   export let rotateAnticlockwise: ButtonClickHandler;
   export let clone: ButtonClickHandler;
   export let remove: ButtonClickHandler;
-
-  function toggleSelection() {
-    paintingsStore.update((paintings) =>
-      paintings.map((painting: PaintingWrapper) =>
-        painting.cppPainting.stringId() === id
-          ? { ...painting, selected: selected } // creating a new object triggers reactivity
-          : painting,
-      ),
-    );
-  }
 </script>
 
 <div class="actions">
-  <div class="first">
-    <Wiwicheckbox bind:checked={selected} onclick={toggleSelection} />
-  </div>
+  <div class="first"></div>
 
   <div>
-    <!--
-    <button onclick={() => alert("Crop!")} title="Crop image">
-      <CropIcon />
-    </button>
-    -->
+    <Button
+      grow
+      onclick={() => alert("Crop!")}
+      title="Crop image"
+      icon="Crop"
+    />
 
     <div class="actions-pack">
       <Button

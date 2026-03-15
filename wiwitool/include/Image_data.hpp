@@ -55,6 +55,9 @@ public:
   [[nodiscard]] Image_data crop(size_t x, size_t y, size_t width,
                                 size_t height) const;
 
+  // Crop around the center of the image given a ratio width and height
+  [[nodiscard]] Image_data crop(size_t ratio_width, size_t ratio_height) const;
+
   [[nodiscard]] Image_data rotate_clockwise(void) const;
   [[nodiscard]] Image_data rotate_anticlockwise(void) const;
 

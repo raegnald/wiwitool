@@ -12,9 +12,11 @@
 
 #include "nlohmann/json.hpp"
 
-std::array<Painting_ratio, 12> all_ratios(void) noexcept {
-  return {ONE_ONE,   ONE_TWO,     TWO_ONE,    TWO_TWO,  TWO_THREE,  TWO_FOUR,
-          THREE_TWO, THREE_THREE, THREE_FOUR, FOUR_TWO, FOUR_THREE, FOUR_FOUR};
+std::array<Painting_ratio, 16> all_ratios(void) noexcept {
+  return {  ONE_ONE,   ONE_TWO,   ONE_THREE,   ONE_FOUR,
+            TWO_ONE,   TWO_TWO,   TWO_THREE,   TWO_FOUR,
+          THREE_ONE, THREE_TWO, THREE_THREE, THREE_FOUR,
+           FOUR_ONE,  FOUR_TWO,  FOUR_THREE,  FOUR_FOUR};
 }
 
 std::pair<int, int> ratio_sizes(Painting_ratio r) noexcept {

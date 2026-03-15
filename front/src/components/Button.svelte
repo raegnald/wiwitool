@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as icons from "@lucide/svelte";
-  import { onMount } from "svelte";
+  import { LoaderCircleIcon } from "@lucide/svelte";
 
   let {
     icon = "",
@@ -18,6 +18,8 @@
     grow = false,
 
     hugeBorder = false,
+
+    loading = false,
 
     onclick = (_: MouseEvent) => {},
     children = undefined,
@@ -46,7 +48,7 @@
   );
 
   function performAction(e: MouseEvent) {
-    if (!disabled) onclick(e);
+    if (!disabled && !loading) onclick(e);
   }
 
   function iconSize() {
@@ -66,14 +68,17 @@
   class="{buttonType} {buttonShape} {buttonSize}"
   class:grow
   class:hugeBorder
-  {disabled}
+  disabled={disabled || loading}
   onclick={performAction}
   {...props}
 >
   {#if children}
     {@render children()}
   {/if}
-  {#if Icon}
+
+  {#if loading}
+    <LoaderCircleIcon size={iconSize()} class="spinner" />
+  {:else if Icon}
     <Icon size={iconSize()} />
   {/if}
 </button>

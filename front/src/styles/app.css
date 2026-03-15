@@ -137,6 +137,13 @@ dialog::backdrop {
   gap: 10px;
 }
 
+.pagination {
+  margin: 50px 0;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     color: rgba(255, 255, 255, 0.87);
@@ -160,5 +167,33 @@ dialog::backdrop {
   dialog {
     background-color: #292929;
     border-color: #666;
+  }
+}
+
+svg {
+  vertical-align: text-bottom;
+}
+
+/* Spinner */
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .drop-zone.hover {
+    background-color: #f0f8ff;
+  }
+  .drop-zone:not(.processing) {
+    background-color: #f1f1f1;
   }
 }
