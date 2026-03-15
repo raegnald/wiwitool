@@ -80,9 +80,10 @@
   <p>
     Welcome to <span class="jb9">The Wiwitool</span>! The Wiwitool is a
     mix-and-match Minecraft resource pack and data pack generator that allows
-    you to turn your photos into Minecraft paintings, to <i>block out</i> to your
-    favourite tunes (Coming Soon&#8482;) and choose from other simple QOL features.
-    You can either create a new pack or import an existing one.
+    you to turn your photos into Minecraft paintings, to <i>block out</i> to
+    your favourite tunes and choose from other simple
+    <abbr title="Quality of Life">QOL</abbr> features. You can either create a new
+    pack or import an existing one.
   </p>
 
   <div id="center">
