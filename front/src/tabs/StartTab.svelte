@@ -123,6 +123,12 @@
     Wiwitool version {__GIT_TAG__} (commit {__GIT_COMMIT__})
     <Button secondary onclick={() => move("changelog")}>Changelog</Button>
   </div>
+
+  <center>
+    <a href="https://github.com/raegnald/wiwitool/issues/" target="_blank">
+      <Button transparent icon="Github">Suggest a change or feature</Button>
+    </a>
+  </center>
 </div>
 
 <style>
@@ -158,7 +164,7 @@
   }
 
   .version {
-    margin-top: 20px;
+    margin: 20px 0;
     display: flex;
     justify-content: center;
     align-items: center;
