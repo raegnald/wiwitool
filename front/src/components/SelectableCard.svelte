@@ -1,13 +1,18 @@
 <script lang="ts">
   import Wiwicheckbox from "./Wiwicheckbox.svelte";
 
-  let { selected = $bindable(), children, ...props } = $props();
+  let {
+    selected = $bindable(),
+    onToggle = (() => {}) as () => any,
+    children,
+    ...props
+  } = $props();
 </script>
 
 <div class="app-card card">
   <div class="card-padding" class:selected>
     <div class="floating-checkbox">
-      <Wiwicheckbox bind:checked={selected} />
+      <Wiwicheckbox bind:checked={selected} onclick={onToggle} />
     </div>
 
     {@render children()}

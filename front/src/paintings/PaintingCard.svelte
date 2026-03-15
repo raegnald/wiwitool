@@ -27,6 +27,8 @@
   let author: string;
   let currentRatio: string;
 
+  let selected: boolean;
+
   let proceduralFrame = wrapper.cppPainting.isFrameProcedural();
   let frameTint: string;
   let frameSeed: string;
@@ -36,6 +38,7 @@
     title = wrapper.cppPainting.title;
     author = wrapper.cppPainting.author;
     currentRatio = wrapper.cppPainting.ratio;
+    selected = wrapper.selected;
 
     const settings = wrapper.cppPainting.getProceduralSettings();
     if (settings) {
@@ -54,6 +57,7 @@
     wrapper.cppPainting.title = title;
     wrapper.cppPainting.author = author;
     wrapper.cppPainting.ratio = currentRatio;
+    wrapper.selected = selected;
 
     const settings = wrapper.cppPainting.getProceduralSettings();
     if (settings) {
@@ -155,7 +159,13 @@
   onMount(refresh);
 </script>
 
-<SelectableCard bind:selected={wrapper.selected}>
+<SelectableCard
+  bind:selected
+  onToggle={() => {
+    wrapper.selected = selected;
+    $paintingsStore = $paintingsStore;
+  }}
+>
   <div class="transformation">
     <PaintingActions {rotateClockwise} {rotateAnticlockwise} {clone} {remove} />
     <PaintingCanvas bind:canvas={originalImageCanvas} />
