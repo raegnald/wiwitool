@@ -348,6 +348,8 @@ EMSCRIPTEN_BINDINGS(music_disc) {
       .function("getTrimEnd", &Music_disc::get_trim_end)
 
       .function("getDurationSeconds", &Music_disc::get_duration_seconds)
+      .function("getTrimmedDuration", &Music_disc::get_trimmed_duration)
+
 
       .function("setCover", &Music_disc::set_cover)
 

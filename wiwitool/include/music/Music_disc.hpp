@@ -53,6 +53,10 @@ public:
   float get_trim_start() const { return trim_start; }
   float get_trim_end() const { return trim_end; }
 
+  float get_trimmed_duration(void) const {
+    return (trim_end > 0) ? trim_end - trim_start : get_duration_seconds();
+  }
+
   // Generation
 
   std::vector<uint8_t> encode_ogg(void); // trimmed
