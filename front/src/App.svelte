@@ -66,8 +66,8 @@
       <MiscTab {move} />
     </Tab>
 
-    <Tab title="Generate" id="generate">
-      <GenerateTab {module} />
+    <Tab title="Generate" id="generate" let:move>
+      <GenerateTab {module} {move} />
     </Tab>
   </Tabs>
 
