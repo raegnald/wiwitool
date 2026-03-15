@@ -1,11 +1,12 @@
 #include "Invisible_item_frame_pack.hpp"
 
 #include "Minecraft_pack.hpp"
+#include "util/strutil.hpp"
 #include <fstream>
 
 Invisible_item_frame_pack::Invisible_item_frame_pack(std::string mc_namespace)
     : Minecraft_pack{"A recipe to craft invisible item frames"},
-      item_frame_namespace_{mc_namespace} {}
+      item_frame_namespace_{timestamped(mc_namespace)} {}
 
 constexpr auto invisible_glowing_item_frame_recipe_json = R"({
 	"type": "minecraft:crafting_shapeless",

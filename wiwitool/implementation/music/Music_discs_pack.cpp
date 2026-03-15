@@ -3,14 +3,15 @@
 #include <fstream>
 #include <print>
 
+#include "util/strutil.hpp"
 #include "util/wiwidebug.hpp"
 
 #include "nlohmann/json.hpp"
 using json = nlohmann::ordered_json;
 
-
 Music_discs_pack::Music_discs_pack(void)
-    : Minecraft_pack{"Minecraft pack containing custom music discs"} {}
+    : Minecraft_pack{"Minecraft pack containing custom music discs"},
+      music_discs_namespace(timestamped(default_music_discs_namespace)) {}
 
 void Music_discs_pack::set_discs(std::vector<Music_disc> ds) {
     discs = std::move(ds);

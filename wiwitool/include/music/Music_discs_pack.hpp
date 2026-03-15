@@ -19,7 +19,7 @@ protected:
   virtual void generate_resource(void) override;
 
 private:
-  std::string music_discs_namespace{default_music_discs_namespace};
+  std::string music_discs_namespace;
   std::vector<Music_disc> discs{};
 
   const std::string base_disc_id = "minecraft:music_disc_ward";
@@ -35,5 +35,4 @@ private:
   void generate_vanilla_override_json(std::filesystem::path directory);
   void export_disc_texture(Music_disc &disc, std::filesystem::path directory);
   void export_ogg_audio(Music_disc &disc, std::filesystem::path directory);
-
 };
