@@ -30,9 +30,16 @@
     </div>
 
     <div class="hidden" class:showingInfoIIF>
-      Adds two simple item recipes that allow you to shapelessly craft invisible
-      item frames and glow item frames using glass panes, fermented spider eyes
-      and golden carrots.
+      <p>
+        Adds two simple item recipes that allow you to shapelessly craft
+        invisible item frames and glow item frames using glass panes, fermented
+        spider eyes and golden carrots.
+      </p>
+
+      <img
+        src="/invisible-item-frame-recipe.png"
+        alt="Recipe to create an invisible item frame"
+      />
     </div>
   </div>
 
