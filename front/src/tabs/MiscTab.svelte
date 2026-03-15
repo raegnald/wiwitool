@@ -37,11 +37,7 @@
   </div>
 
   <div class="pagination">
-    <Button
-      class="secondary"
-      onclick={() => move("paintings")}
-      icon="ArrowLeft"
-    >
+    <Button class="secondary" onclick={() => move("discs")} icon="ArrowLeft">
       Previous
     </Button>
     <Button onclick={() => move("generate")} icon="ArrowRight">Next</Button>
@@ -51,13 +47,6 @@
 <style>
   .check-option {
     font-size: 120%;
-  }
-
-  .pagination {
-    margin: 50px 0;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
   }
 
   .hidden {

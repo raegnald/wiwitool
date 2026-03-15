@@ -93,11 +93,11 @@
     </div>
   {/if}
 
-  <center>
-    <Button onclick={() => move("misc")} icon="ArrowRight">
+  <div class="pagination">
+    <Button onclick={() => move("discs")} icon="ArrowRight">
       {$paintingsStore.length > 0 ? "Next" : "Skip"}
     </Button>
-  </center>
+  </div>
 
   <BulkActions />
 </div>
