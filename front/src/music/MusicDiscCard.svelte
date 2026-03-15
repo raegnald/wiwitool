@@ -258,4 +258,8 @@
   .metadata label span {
     min-width: 50px;
   }
+
+  .metadata label input {
+    width: 200px;
+  }
 </style>

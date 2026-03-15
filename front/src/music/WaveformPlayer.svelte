@@ -208,6 +208,7 @@
 
       <Button small secondary icon="SkipBack" onclick={resetPlayback} />
       <Button icon={isPlaying ? "Pause" : "Play"} onclick={togglePlayback} />
+      <span style="width: 36px"></span>
 
       <span style="flex: 1"></span>
 
