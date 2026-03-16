@@ -29,7 +29,7 @@ ASSETS_DIR := assets/
 BUILD_DIR  := build
 
 # Source files
-SRCS       := $(shell find $(SRC_DIR) -type file -name '*.cpp')
+SRCS       := $(shell find $(SRC_DIR) -type f -name '*.cpp')
 
 # External object files
 EXT_OBJS   := external/json/json.o            \
