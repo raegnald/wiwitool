@@ -119,6 +119,7 @@
   <div id="center">
     <Button
       large
+      intense
       loading={!$wasmReady}
       icon="BadgePlus"
       onclick={() => move("paintings")}

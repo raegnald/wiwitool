@@ -18,6 +18,7 @@
     grow = false,
 
     hugeBorder = false,
+    intense = false,
 
     loading = false,
 
@@ -68,6 +69,7 @@
   class="{buttonType} {buttonShape} {buttonSize}"
   class:grow
   class:hugeBorder
+  class:intense
   disabled={disabled || loading}
   onclick={performAction}
   {...props}
@@ -217,5 +219,43 @@
     width: 36px;
     height: 36px;
     padding: 2px;
+  }
+
+  /* Intense button */
+
+  @property --angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+  }
+
+  @keyframes rotate-gradient {
+    to {
+      --angle: 360deg;
+    }
+  }
+
+  button.intense {
+    position: relative;
+    border-color: transparent !important;
+  }
+
+  button.intense::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 2px; /* thickness of the intense border */
+    background: conic-gradient(from var(--angle), #646cff, #aaa, #aaa, #646cff);
+
+    /* Use a mask to cut out the middle, leaving ONLY the gradient border visible */
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+
+    pointer-events: none;
+    animation: rotate-gradient 3s linear infinite;
   }
 </style>
