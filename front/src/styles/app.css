@@ -78,9 +78,13 @@ dialog {
 }
 
 #app {
+  padding: 2rem 0;
+}
+
+#main-content,
+.app-width {
   max-width: 1024px;
   margin: 0 auto;
-  padding: 2rem;
 }
 
 details {
@@ -114,6 +118,10 @@ input {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.title-component h2 {
+  margin: 0;
 }
 
 dialog {
@@ -196,4 +204,128 @@ svg {
   .drop-zone:not(.processing) {
     background-color: #f1f1f1;
   }
+}
+
+/* Empty states -- kind of like Android's empty screen UIs */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+  user-select: none;
+}
+
+:global(.empty-icon) {
+  color: #aaa;
+  margin-bottom: 20px;
+}
+
+.empty-state h2 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-weight: 600;
+}
+
+.empty-state center.with-title {
+  /*margin: 0 0 20px 0;*/
+}
+
+.empty-state p {
+  max-width: 420px;
+  line-height: 1.5;
+  margin: 5px 0;
+}
+
+.empty-actions {
+  margin-top: 30px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (prefers-color-scheme: dark) {
+  .empty-state {
+    color: #aaa;
+  }
+  .empty-state h2 {
+    color: #eee;
+  }
+  :global(.empty-icon) {
+    color: #555;
+  }
+}
+
+/* Instruction boxes */
+
+.instructions-box {
+  background: rgba(100, 108, 255, 0.05);
+  border: 1px solid rgba(100, 108, 255, 0.3);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.instructions-box h3 {
+  margin-top: 0;
+  color: #646cff;
+}
+
+.instructions-box ol {
+  margin-bottom: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.instructions-box li {
+  display: list-item;
+  line-height: 1.5;
+}
+
+.instructions-box code {
+  background: rgba(0, 0, 0, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .instructions-box code {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.label {
+  text-transform: uppercase;
+  font-size: 90%;
+  font-weight: 500;
+  color: #6e6e6e;
+}
+
+.pill {
+  padding: 3px 10px;
+  color: #777;
+  background-color: #ddd;
+  border-radius: 15px;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 80%;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pill {
+    background-color: #3c3c3c;
+    color: #ddd;
+  }
+}
+
+.pills-horizontal-container {
+  display: flex;
+  gap: 5px;
 }

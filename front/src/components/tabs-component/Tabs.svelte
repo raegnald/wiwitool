@@ -60,38 +60,46 @@
 <div class="tabs-container">
   {#if $tabs.find((tab) => tab.id == $selectedTab && !tab.hidden)}
     <div class="tabs-header">
-      <button
-        class:active={$selectedTab === "start"}
-        class="icon-tab"
-        onclick={() => homeDialog.showModal()}
-      >
-        <HouseIcon size="1.2em" />
-      </button>
+      <div class="blur"></div>
 
-      <div class="normal-tabs-container">
-        {#each $tabs as tab}
-          {#if !tab.hidden && tab.id != "start" && tab.id != "generate"}
-            <button
-              class:active={$selectedTab === tab.id}
-              onclick={() => context.selectTab(tab.id)}
-            >
-              {tab.title}
-            </button>
-          {/if}
-        {/each}
+      <div class="tabs-header-container app-width">
+        <div class="coloured">
+          <button
+            class:active={$selectedTab === "start"}
+            class="icon-tab"
+            onclick={() => homeDialog.showModal()}
+          >
+            <HouseIcon size="1.2em" />
+          </button>
+        </div>
+
+        <div class="normal-tabs-container">
+          {#each $tabs as tab}
+            {#if !tab.hidden && tab.id != "start" && tab.id != "generate"}
+              <button
+                class:active={$selectedTab === tab.id}
+                onclick={() => context.selectTab(tab.id)}
+              >
+                {tab.title}
+              </button>
+            {/if}
+          {/each}
+        </div>
+
+        <div class="coloured">
+          <button
+            class:active={$selectedTab === "generate"}
+            class="icon-tab"
+            onclick={() => context.selectTab("generate")}
+          >
+            <DownloadIcon size="1.2em" />
+          </button>
+        </div>
       </div>
-
-      <button
-        class:active={$selectedTab === "generate"}
-        class="icon-tab"
-        onclick={() => context.selectTab("generate")}
-      >
-        <DownloadIcon size="1.2em" />
-      </button>
     </div>
   {/if}
 
-  <div class="tabs-content">
+  <div class="tabs-content" id="main-content">
     <slot />
   </div>
 </div>
@@ -101,34 +109,71 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    background-color: #ffff80;
-    display: flex;
-    justify-content: center;
-    border-bottom: 1px solid #ccc;
+    /*background-color: #ffff80;*/
+    /*border-bottom: 1px solid #dede6f;*/
+    padding-top: 10px;
     margin-bottom: 1rem;
   }
+  .blur {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    mask: linear-gradient(black, black, transparent);
+    backdrop-filter: blur(5px);
+    z-index: 1;
+  }
+  .tabs-header-container {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    z-index: 10;
+  }
+  .normal-tabs-container,
+  .coloured {
+    margin: 0 10px;
+    background-color: white;
+    border-radius: 23px;
+    border: 1px solid #ccc;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+  }
   .normal-tabs-container {
-    flex: 1;
     display: flex;
     justify-content: center;
   }
   button {
     padding: 10px 20px;
     background: transparent;
+    color: #666;
     border: none;
     cursor: pointer;
     border-radius: 0;
-    border-bottom: 2px solid transparent;
-    opacity: 0.8;
+    border: 2px solid transparent;
+    border-radius: 23px;
   }
   button.active {
-    border-color: #646cff;
+    color: hsl(237 100% 55.5%);
     opacity: 1;
+    border: 2px solid #646cff;
+    background-color: #f7f8ff;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.05);
   }
+
   @media (prefers-color-scheme: dark) {
-    .tabs-header {
-      border-bottom: 1px solid #666;
-      background-color: #242424;
+    .normal-tabs-container,
+    .coloured {
+      background-color: #333;
+      border-radius: 23px;
+      border: 1px solid #666;
+    }
+
+    button {
+      color: #aaa;
+    }
+
+    button.active {
+      color: white;
     }
   }
 </style>

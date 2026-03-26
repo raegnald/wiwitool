@@ -7,7 +7,7 @@
   import DropZone from "../components/DropZone.svelte";
   import PaintingCard from "../paintings/PaintingCard.svelte";
   import BulkActions from "../paintings/BulkActions.svelte";
-  import { InfoIcon } from "@lucide/svelte";
+  import { ImageUpIcon, InfoIcon } from "@lucide/svelte";
   import { onMount } from "svelte";
   import Button from "../components/Button.svelte";
 
@@ -59,23 +59,53 @@
 </script>
 
 <main>
-  <div class="title-component">
-    <h2>Load your images</h2>
-    <Button onclick={() => (showingInfo = !showingInfo)} icon="Info">
-      Information
-    </Button>
-  </div>
+  <div class="app-card drop-zone-container">
+    <DropZone handler={handleImageDrop} let:filePicker>
+      <div class="empty-state">
+        <ImageUpIcon size="80" strokeWidth="1.5" class="empty-icon" />
 
-  <div
-    class="app-card help"
-    style={`display: ${showingInfo ? "block" : "none"}`}
-  >
-    <HelpUsingPaintingsTool />
-  </div>
+        <h2>Load your images</h2>
+        <center class="with-title pills-horizontal-container">
+          <span class="pill">jpeg</span>
+          <span class="pill">png</span>
+          <span class="pill">bmp</span>
+          <span class="pill">gif</span>
+          <span class="pill">hdr</span>
+        </center>
 
-  <DropZone handler={handleImageDrop}>
-    <span>Drag and drop images here</span>
-  </DropZone>
+        <!--
+        <p>
+          Drag and drop your images or select them from the file explorer to
+          turn them into Minecraft paintings.
+        </p>
+        -->
+
+        <div class="empty-actions">
+          <Button icon="FolderInput" onclick={filePicker}>
+            Select from file picker
+          </Button>
+        </div>
+      </div>
+    </DropZone>
+
+    <center>
+      <Button
+        secondary
+        hugeBorder={showingInfo}
+        onclick={() => (showingInfo = !showingInfo)}
+        icon="Info"
+      >
+        Information
+      </Button>
+    </center>
+
+    <div
+      class="instructions-box"
+      style={`display: ${showingInfo ? "block" : "none"}`}
+    >
+      <HelpUsingPaintingsTool />
+    </div>
+  </div>
 
   {#if $paintingsStore.length > 0}
     <div class="title-component" style="margin-top: 2em">
@@ -106,7 +136,9 @@
 </main>
 
 <style>
-  .help {
-    margin-bottom: 20px;
+  .drop-zone-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
 </style>

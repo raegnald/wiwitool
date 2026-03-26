@@ -35,7 +35,7 @@
   });
 </script>
 
-<main>
+<div>
   <div id="wiwi-logo-wide">
     <img src="/logo-wide.svg" alt="Wide logo" />
   </div>
@@ -73,7 +73,7 @@
   </Tabs>
 
   <Toasts />
-</main>
+</div>
 
 <style>
   main {

@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <algorithm>
 #include <cstddef>
 #include <string>
 #include <vector>
@@ -17,7 +16,7 @@ public:
 
   std::string string_id(void) const;
 
-  // Getters and setters for title, artist, and cover
+  // Getters and setters for title, artist, comparator output, and cover
 
   void set_title(std::string t) { title = t; }
   std::string get_title(void) const { return title; }
@@ -30,7 +29,7 @@ public:
 
   std::string description(void) const;
 
-  void set_comparator_output(size_t x) { comparator_output = x > 15 ? 15 : x; }
+  void set_comparator_output(size_t x);
   size_t get_comparator_output(void) const { return comparator_output; }
 
   // Audio data

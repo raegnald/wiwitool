@@ -1,19 +1,26 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import type { MainModule } from "../bindings/wiwitool";
-  import type { MusicDiscWrapper } from "../stores/musicDiscsStore";
+  import {
+    musicDiscsStore,
+    type MusicDiscWrapper,
+  } from "../stores/musicDiscsStore";
 
   import SelectableCard from "../components/SelectableCard.svelte";
   import Button from "../components/Button.svelte";
   import DropZone from "../components/DropZone.svelte";
   import WaveformPlayer from "./WaveformPlayer.svelte";
   import { MicVocal, AudioLines, NotepadText } from "@lucide/svelte";
+  import { workspace } from "../stores/workspaceStore";
 
   export let module: MainModule;
   export let wrapper: MusicDiscWrapper;
 
+  let selected = false;
+
   let title = "";
   let artist = "";
+  let comparatorOutput: number;
 
   let descriptionMode: boolean = false; // false: title/author; true: description
 
@@ -26,9 +33,18 @@
 
   let coverImgSrc = "";
 
+  let deleteDiscDialog: HTMLDialogElement;
+
+  $: showMoreOptions = false;
+
+  $: if (wrapper && wrapper.cppDisc) {
+    selected = wrapper.selected;
+  }
+
   function syncMetadataToCpp() {
     wrapper.cppDisc.title = title;
     wrapper.cppDisc.artist = artist;
+    wrapper.cppDisc.comparatorOutput = comparatorOutput;
   }
 
   function handleTrimChange(start: number, end: number) {
@@ -41,6 +57,7 @@
     title = wrapper.cppDisc.title;
     artist = wrapper.cppDisc.artist;
     duration = wrapper.cppDisc.getDurationSeconds();
+    comparatorOutput = wrapper.cppDisc.comparatorOutput;
 
     trimStart = wrapper.cppDisc.getTrimStart();
     if (trimStart < 0) trimStart = 0;
@@ -98,9 +115,50 @@
 
     wrapper = wrapper;
   }
+
+  function remove() {
+    const idToRemove = wrapper.cppDisc.stringId();
+
+    $workspace.removeMusicDisc(idToRemove);
+
+    musicDiscsStore.update((list) => list.filter((p) => p !== wrapper));
+
+    wrapper.cppDisc.delete();
+  }
 </script>
 
-<SelectableCard bind:selected={wrapper.selected}>
+<dialog bind:this={deleteDiscDialog}>
+  <div class="modal-content">
+    <span>
+      Are you sure you want to remove this music disc? <br />
+      All the customizations you've made to it will be lost.
+    </span>
+
+    <div class="modal-actions">
+      <Button transparent onclick={() => deleteDiscDialog.close()}>
+        Cancel
+      </Button>
+
+      <Button
+        destructive
+        onclick={() => {
+          deleteDiscDialog.close();
+          remove();
+        }}
+      >
+        Remove painting
+      </Button>
+    </div>
+  </div>
+</dialog>
+
+<SelectableCard
+  bind:selected
+  onToggle={() => {
+    wrapper.selected = selected;
+    $musicDiscsStore = $musicDiscsStore;
+  }}
+>
   <div class="disc-card">
     <div class="controls-container">
       {#if audioSrc && waveformData}
@@ -115,55 +173,101 @@
         />
       {/if}
 
-      <div class="metadata">
+      <div class="metadata-and-delete">
         <Button
-          onclick={() => {
-            descriptionMode = !descriptionMode;
-
-            if (descriptionMode) {
-              title =
-                artist && title ? artist + " - " + title : title ? title : "";
-              artist = "";
-              syncMetadataToCpp();
-            }
-          }}
-          icon={descriptionMode ? "MicVocal" : "NotepadText"}
-          title="Toggle description type"
+          destructive
+          icon="Trash2"
+          onclick={() => deleteDiscDialog.showModal()}
         />
 
-        {#if descriptionMode}
-          <label style="flex: 1">
-            <NotepadText />
-            <span>Description </span>
-            <input
-              type="text"
-              bind:value={title}
-              style="width: 100%; margin-left: 20px"
-              oninput={() => {
-                artist = "";
-                syncMetadataToCpp();
-              }}
-            />
-          </label>
-        {:else}
-          <label>
-            <AudioLines />
-            <span>Title </span>
-            <input type="text" bind:value={title} oninput={syncMetadataToCpp} />
-          </label>
+        <div class="metadata centered">
+          <div>
+            <Button
+              onclick={() => {
+                descriptionMode = !descriptionMode;
 
+                if (descriptionMode) {
+                  title =
+                    artist && title
+                      ? artist + " - " + title
+                      : title
+                        ? title
+                        : "";
+                  artist = "";
+                  syncMetadataToCpp();
+                }
+              }}
+              icon={descriptionMode ? "MicVocal" : "NotepadText"}
+              title="Toggle description type"
+            >
+              Toggle edit mode
+            </Button>
+          </div>
+
+          {#if descriptionMode}
+            <label style:flex={1}>
+              <NotepadText />
+              <span>Description </span>
+              <input
+                type="text"
+                bind:value={title}
+                style="width: 100%; margin-left: 20px"
+                oninput={() => {
+                  artist = "";
+                  syncMetadataToCpp();
+                }}
+              />
+            </label>
+          {:else}
+            <label>
+              <AudioLines />
+              <span>Title </span>
+              <input
+                type="text"
+                bind:value={title}
+                oninput={syncMetadataToCpp}
+              />
+            </label>
+
+            <label>
+              <MicVocal />
+              <span>Artist </span>
+              <input
+                type="text"
+                bind:value={artist}
+                oninput={syncMetadataToCpp}
+                placeholder="(optional)"
+              />
+            </label>
+          {/if}
+        </div>
+      </div>
+
+      <div>
+        <Button
+          secondary
+          hugeBorder={showMoreOptions}
+          onclick={() => (showMoreOptions = !showMoreOptions)}
+        >
+          More settings
+        </Button>
+      </div>
+
+      {#if showMoreOptions}
+        <div>
           <label>
-            <MicVocal />
-            <span>Artist </span>
+            <span>Comparator output (0&ndash;15)</span>
             <input
-              type="text"
-              bind:value={artist}
+              id="compout-input"
+              type="number"
+              bind:value={comparatorOutput}
               oninput={syncMetadataToCpp}
-              placeholder="(optional)"
+              min="1"
+              max="15"
             />
           </label>
-        {/if}
-      </div>
+        </div>
+      {/if}
     </div>
 
     <div class="cover-container">
@@ -241,10 +345,15 @@
     width: 100%;
   }
 
+  .metadata-and-delete {
+    display: flex;
+    gap: 15px;
+  }
+
   .metadata {
+    flex: 1;
     display: flex;
     justify-content: space-between;
-    margin-left: 60px;
     display: flex;
     gap: 10px;
   }
@@ -260,6 +369,11 @@
   }
 
   .metadata label input {
-    width: 200px;
+    width: 130px;
+  }
+
+  .centered {
+    display: flex;
+    align-items: center;
   }
 </style>

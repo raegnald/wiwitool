@@ -15,6 +15,7 @@
   } from "../stores/musicDiscsStore";
   import Carousel from "../components/Carousel.svelte";
   import {
+    ArchiveRestore,
     CpuIcon,
     Disc2Icon,
     GithubIcon,
@@ -119,6 +120,7 @@
   <div id="center">
     <Button
       large
+      intense
       loading={!$wasmReady}
       icon="BadgePlus"
       onclick={() => move("paintings")}
@@ -130,17 +132,30 @@
       large
       loading={!$wasmReady}
       icon="FileUp"
-      onclick={() => (showDropZone = true)}
+      onclick={() => (showDropZone = !showDropZone)}
     >
       Import an existing pack
     </Button>
   </div>
-  <div class:showDropZone class="dropZoneContainer">
-    <DropZone handler={importPacks}>
-      <span>Drag and drop an existing configuration file</span><br />
-      <small>
-        (its default name is <code>Wiwitool Project Save file</code>)
-      </small>
+  <div
+    class="dropZoneContainer"
+    style:display={showDropZone ? "block" : "none"}
+  >
+    <DropZone handler={importPacks} let:filePicker>
+      <div class="empty-state">
+        <ArchiveRestore size="80" strokeWidth="1.5" class="empty-icon" />
+
+        <h2>Drag and drop an existing configuration file</h2>
+        <center class="with-title pills-horizontal-container">
+          <span class="pill">Wiwitool Project Save file</span>
+        </center>
+
+        <div class="empty-actions">
+          <Button icon="FolderInput" onclick={filePicker}>
+            Select from file picker
+          </Button>
+        </div>
+      </div>
     </DropZone>
   </div>
 
@@ -188,11 +203,6 @@
 
 <style>
   .dropZoneContainer {
-    display: none;
-  }
-
-  .dropZoneContainer.showDropZone {
-    display: block;
     padding-top: 20px;
   }
 
@@ -200,18 +210,6 @@
     display: flex;
     gap: 10px;
     justify-content: center;
-  }
-
-  h2 {
-    margin-bottom: 0;
-    border-bottom: 1px solid #ccc;
-    font-weight: normal;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    h2 {
-      border-color: #666;
-    }
   }
 
   .app-card p:first-child {
@@ -226,17 +224,5 @@
     justify-content: center;
     align-items: center;
     gap: 10px;
-  }
-
-  .features .imgs {
-    display: flex;
-    gap: 10px;
-    justify-content: space-around;
-    align-items: center;
-    margin: 20px 0;
-  }
-
-  .features .imgs img {
-    width: 100%;
   }
 </style>

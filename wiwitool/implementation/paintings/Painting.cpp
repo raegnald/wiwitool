@@ -148,7 +148,7 @@ EMSCRIPTEN_BINDINGS(painting) {
         Image_data hires{std::move(data)};
 
         const double maxlen = std::max(hires.width(), hires.height());
-        const double newmaxlen = 256; // in pixels
+        const double newmaxlen = 1024; // in pixels
 
         wiwidebug std::println("Scaling image by factor of {} (maxlen = {})",
                                newmaxlen / maxlen, maxlen);
