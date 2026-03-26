@@ -2,21 +2,22 @@
   import { ERROR, toast } from "../stores/toastsStore";
   import { LoaderCircleIcon } from "@lucide/svelte";
 
-  let { handler, children, ...other } = $props();
+  export let handler: (file: File) => Promise<void>;
 
-  let isDragOver = $state(false);
+  let isDragOver = false;
+  let totalFiles = 0;
+  let loadedFiles = 0;
+  $: isProcessing = totalFiles - loadedFiles > 0;
 
-  let totalFiles = $state(0);
-  let loadedFiles = $state(0);
-  let isProcessing = $derived(totalFiles - loadedFiles > 0);
+  let fileInput: HTMLInputElement;
 
-  async function handleDrop(e: DragEvent) {
-    e.preventDefault();
-    isDragOver = false;
+  function openFilePicker() {
+    if (!isProcessing) fileInput.click();
+  }
 
-    if (isProcessing) return;
+  async function processFiles(files: FileList | null | undefined) {
+    if (!files || files.length === 0 || isProcessing) return;
 
-    const files = e.dataTransfer?.files;
     totalFiles = files.length;
 
     for (const file of files) {
@@ -24,18 +25,33 @@
         await handler(file);
         loadedFiles++;
       } catch (e) {
-        toast(ERROR, "Could not load file: " + e);
+        toast(ERROR, "Could not load file " + file.name);
         totalFiles--;
       }
-
-      if (loadedFiles == totalFiles) loadedFiles = totalFiles = 0;
     }
+
+    if (loadedFiles === totalFiles) {
+      loadedFiles = 0;
+      totalFiles = 0;
+    }
+
+    if (fileInput) fileInput.value = "";
+  }
+
+  function handleDrop(e: DragEvent) {
+    e.preventDefault();
+    isDragOver = false;
+    processFiles(e.dataTransfer?.files);
+  }
+
+  function handleFileInput(e: Event) {
+    const target = e.target as HTMLInputElement;
+    processFiles(target.files);
   }
 
   function handleDragOver(e: DragEvent) {
     e.preventDefault();
     if (!isProcessing) isDragOver = true;
-    isDragOver = true;
   }
 
   function handleDragLeave() {
@@ -43,25 +59,39 @@
   }
 </script>
 
-<button
+<div
   class="drop-zone"
   class:hover={isDragOver}
   class:processing={isProcessing}
-  ondrop={handleDrop}
-  ondragover={handleDragOver}
-  ondragleave={handleDragLeave}
-  disabled={isProcessing}
-  {...other}
+  on:drop={handleDrop}
+  on:dragover={handleDragOver}
+  on:dragleave={handleDragLeave}
+  {...$$restProps}
 >
-  {#if isProcessing}
-    <div class="processing-content">
-      <LoaderCircleIcon size="32" class="spinner" />
-      <span>Processing {loadedFiles} of {totalFiles}...</span>
+  <input
+    type="file"
+    multiple
+    hidden
+    bind:this={fileInput}
+    on:change={handleFileInput}
+  />
+
+  <div class="content-wrapper">
+    <div
+      class="default-content"
+      style:visibility={isProcessing ? "hidden" : "visible"}
+    >
+      <slot filePicker={openFilePicker} />
     </div>
-  {:else}
-    {@render children()}
-  {/if}
-</button>
+
+    {#if isProcessing}
+      <div class="processing-content">
+        <LoaderCircleIcon size="32" class="spinner" />
+        <span>Processing {loadedFiles} of {totalFiles}...</span>
+      </div>
+    {/if}
+  </div>
+</div>
 
 <style>
   .drop-zone {
@@ -69,8 +99,7 @@
     width: 100%;
     cursor: default;
     border: 2px dashed #aaa;
-    padding: 0 6rem;
-    height: 15rem;
+    border-radius: 12px;
     text-align: center;
     transition: 0.2s;
   }
@@ -88,16 +117,30 @@
     }
   }
 
-  .drop-zone:disabled {
+  .drop-zone.processing {
     cursor: not-allowed;
     border-color: #646cff;
     background-color: rgba(100, 108, 255, 0.05);
+  }
+
+  .content-wrapper {
+    display: grid;
+    place-items: center;
+    width: 100%;
+  }
+
+  .default-content,
+  .processing-content {
+    grid-area: 1 / 1;
+    width: 100%;
+    height: 100%;
   }
 
   .processing-content {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 15px;
     color: #646cff;
     font-weight: 500;

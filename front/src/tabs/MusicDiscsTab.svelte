@@ -9,6 +9,7 @@
   import Button from "../components/Button.svelte";
   import DropZone from "../components/DropZone.svelte";
   import MusicDiscCard from "../music/MusicDiscCard.svelte";
+  import { FileMusic } from "@lucide/svelte";
 
   export let module: MainModule;
   export let move: (id: string) => void;
@@ -71,95 +72,145 @@
       { cppDisc, selected: false },
     ]);
   }
+
+  function getSupportedAudioFormats() {
+    const audio = document.createElement("audio");
+    return {
+      mp3: audio.canPlayType("audio/mpeg"),
+      wav: audio.canPlayType("audio/wav"),
+      ogg: audio.canPlayType("audio/ogg; codecs=vorbis"),
+      opus: audio.canPlayType("audio/ogg; codecs=opus"),
+      aac: audio.canPlayType("audio/aac"),
+      m4a: audio.canPlayType("audio/mp4; codecs=mp4a.40.2"),
+      webm: audio.canPlayType("audio/webm; codecs=vorbis"),
+      flac: audio.canPlayType("audio/flac"),
+    };
+  }
 </script>
 
 <main>
-  <div class="title-component">
-    <h2>Load your songs</h2>
-    <Button onclick={() => (showingInfo = !showingInfo)} icon="Info">
-      Information
-    </Button>
-  </div>
+  <div class="app-card drop-zone-container">
+    <DropZone handler={handleDrop} let:filePicker>
+      <div class="empty-state">
+        <FileMusic size="80" strokeWidth="1.5" class="empty-icon" />
 
-  <div
-    class="app-card help"
-    style={`display: ${showingInfo ? "block" : "none"}`}
-  >
-    <p>
-      This tool allows you to create <b
-        >custom playable music discs in Minecraft out of your own audio files</b
-      >. Simply drag and drop the songs you want to add, and this tool will
-      bundle them into your
-      <code>datapack.zip</code> and <code>respack.zip</code> files.
-    </p>
+        <h2>Load your songs</h2>
+        <!-- <p>
+          Drag and drop your audio files or select them from the file explorer
+          to turn them into Minecraft music discs.
+        </p> -->
+        <center class="with-title pills-horizontal-container">
+          {#each Object.entries(getSupportedAudioFormats()) as format}
+            {#if format[1] != ""}
+              <span class="pill">{format[0]}</span>
+            {/if}
+          {/each}
+        </center>
 
-    <table>
-      <tbody>
-        <tr>
-          <td>You have audio files you want to play in a Minecraft jukebox.</td>
-          <td></td>
-          <td>You customise your tracks and covers with the Wiwitool.</td>
-          <td></td>
-          <td>The Wiwitool gives you two zip files to import into Minecraft.</td
-          >
-          <td></td>
-          <td>Play your tunes in-game!</td>
-        </tr>
-        <tr>
-          <td>
-            <div class="icon-placeholder">🎵</div>
-          </td>
-          <td>You load <img src="/rightarrow.svg" alt="Arrow" /></td>
-          <td
-            ><img
-              class="fill-space"
-              src="/faviconcropped.png"
-              alt="App icon"
-            /></td
-          >
-          <td>Wiwitool generates <img src="/rightarrow.svg" alt="Arrow" /></td>
-          <td><div class="icon-placeholder">📦</div></td>
-          <td
-            >Import into Minecraft <img src="/rightarrow.svg" alt="Arrow" /></td
-          >
-          <td>
-            <div class="icon-placeholder">📻</div>
-          </td>
-        </tr>
-        <tr>
-          <td><code>song.mp3</code>, <code>track.wav</code>...</td>
-          <td></td>
-          <td><span class="jb9 wiwitool-text">The Wiwitool</span></td>
-          <td></td>
-          <td><code>datapack.zip</code> & <code>respack.zip</code></td>
-          <td></td>
-          <td>Enjoy your music!</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <p>
-      Once loaded into this tool, you can <b>trim the audio</b>, edit the
-      <b>title and artist</b>, and even
-      <b>drag and drop a custom cover image</b> that will be blended onto the record
-      item in-game.
-    </p>
-
-    <p>
-      In Minecraft, your custom music discs can be crafted from a stonecutter.
-      Simply place any music disc into the stonecutter to obtain your custom
-      tracks.
-    </p>
+        <div class="empty-actions">
+          <Button icon="FolderInput" onclick={filePicker}>
+            Select from file picker
+          </Button>
+        </div>
+      </div>
+    </DropZone>
 
     <center>
-      <img
-        src="/stonecutter-discs.png"
-        alt="Transforming any vanilla disc into a custom music disc"
-      />
+      <Button
+        secondary
+        hugeBorder={showingInfo}
+        onclick={() => (showingInfo = !showingInfo)}
+        icon="Info"
+      >
+        Information
+      </Button>
     </center>
-  </div>
 
-  <DropZone handler={handleDrop}>Drag and drop audio files here</DropZone>
+    <div
+      class="instructions-box"
+      style={`display: ${showingInfo ? "block" : "none"}`}
+    >
+      <p>
+        This tool allows you to create <b
+          >custom playable music discs in Minecraft out of your own audio files</b
+        >. Simply drag and drop the songs you want to add, and this tool will
+        bundle them into your
+        <code>datapack.zip</code> and <code>respack.zip</code> files.
+      </p>
+
+      <table>
+        <tbody>
+          <tr>
+            <td
+              >You have audio files you want to play in a Minecraft jukebox.</td
+            >
+            <td></td>
+            <td>You customise your tracks and covers with the Wiwitool.</td>
+            <td></td>
+            <td
+              >The Wiwitool gives you two zip files to import into Minecraft.</td
+            >
+            <td></td>
+            <td>Play your tunes in-game!</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="icon-placeholder">🎵</div>
+            </td>
+            <td>You load <img src="/rightarrow.svg" alt="Arrow" /></td>
+            <td
+              ><img
+                class="fill-space"
+                src="/faviconcropped.png"
+                alt="App icon"
+              /></td
+            >
+            <td>Wiwitool generates <img src="/rightarrow.svg" alt="Arrow" /></td
+            >
+            <td><div class="icon-placeholder">📦</div></td>
+            <td
+              >Import into Minecraft <img
+                src="/rightarrow.svg"
+                alt="Arrow"
+              /></td
+            >
+            <td>
+              <div class="icon-placeholder">📻</div>
+            </td>
+          </tr>
+          <tr>
+            <td><code>song.mp3</code>, <code>track.wav</code>...</td>
+            <td></td>
+            <td><span class="jb9 wiwitool-text">The Wiwitool</span></td>
+            <td></td>
+            <td><code>datapack.zip</code> & <code>respack.zip</code></td>
+            <td></td>
+            <td>Enjoy your music!</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        Once loaded into this tool, you can <b>trim the audio</b>, edit the
+        <b>title and artist</b>, and even
+        <b>drag and drop a custom cover image</b> that will be blended onto the record
+        item in-game.
+      </p>
+
+      <p>
+        In Minecraft, your custom music discs can be crafted from a stonecutter.
+        Simply place any music disc into the stonecutter to obtain your custom
+        tracks.
+      </p>
+
+      <center>
+        <img
+          src="/stonecutter-discs.png"
+          alt="Transforming any vanilla disc into a custom music disc"
+        />
+      </center>
+    </div>
+  </div>
 
   <div>
     {#if $musicDiscsStore.length > 0}
@@ -196,10 +247,6 @@
 </main>
 
 <style>
-  .help {
-    margin-bottom: 20px;
-  }
-
   .fill-space {
     width: 100%;
     height: 100%;
@@ -227,5 +274,11 @@
     text-align: center;
     vertical-align: middle;
     padding: 5px;
+  }
+
+  .drop-zone-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
 </style>
