@@ -16,3 +16,12 @@ export function formatRatio(ratioString: string): string {
     .map((word) => numberWords[word] || word)
     .join(":");
 }
+
+export function getRatios(): [string] {
+  let sizes = ["ONE", "TWO", "THREE", "FOUR"];
+  let ratios = [];
+
+  for (let r of sizes) for (let s of sizes) ratios.push(r + "_" + s);
+
+  return ratios as [string];
+}
