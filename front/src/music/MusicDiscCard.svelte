@@ -20,6 +20,7 @@
 
   let title = "";
   let artist = "";
+  let comparatorOutput: number;
 
   let descriptionMode: boolean = false; // false: title/author; true: description
 
@@ -34,6 +35,8 @@
 
   let deleteDiscDialog: HTMLDialogElement;
 
+  $: showMoreOptions = false;
+
   $: if (wrapper && wrapper.cppDisc) {
     selected = wrapper.selected;
   }
@@ -41,6 +44,7 @@
   function syncMetadataToCpp() {
     wrapper.cppDisc.title = title;
     wrapper.cppDisc.artist = artist;
+    wrapper.cppDisc.comparatorOutput = comparatorOutput;
   }
 
   function handleTrimChange(start: number, end: number) {
@@ -53,6 +57,7 @@
     title = wrapper.cppDisc.title;
     artist = wrapper.cppDisc.artist;
     duration = wrapper.cppDisc.getDurationSeconds();
+    comparatorOutput = wrapper.cppDisc.comparatorOutput;
 
     trimStart = wrapper.cppDisc.getTrimStart();
     if (trimStart < 0) trimStart = 0;
@@ -175,7 +180,30 @@
           onclick={() => deleteDiscDialog.showModal()}
         />
 
-        <div class="metadata">
+        <div class="metadata centered">
+          <div>
+            <Button
+              onclick={() => {
+                descriptionMode = !descriptionMode;
+
+                if (descriptionMode) {
+                  title =
+                    artist && title
+                      ? artist + " - " + title
+                      : title
+                        ? title
+                        : "";
+                  artist = "";
+                  syncMetadataToCpp();
+                }
+              }}
+              icon={descriptionMode ? "MicVocal" : "NotepadText"}
+              title="Toggle description type"
+            >
+              Toggle edit mode
+            </Button>
+          </div>
+
           {#if descriptionMode}
             <label style:flex={1}>
               <NotepadText />
@@ -212,23 +240,34 @@
               />
             </label>
           {/if}
-
-          <Button
-            onclick={() => {
-              descriptionMode = !descriptionMode;
-
-              if (descriptionMode) {
-                title =
-                  artist && title ? artist + " - " + title : title ? title : "";
-                artist = "";
-                syncMetadataToCpp();
-              }
-            }}
-            icon={descriptionMode ? "MicVocal" : "NotepadText"}
-            title="Toggle description type"
-          />
         </div>
       </div>
+
+      <div>
+        <Button
+          secondary
+          hugeBorder={showMoreOptions}
+          onclick={() => (showMoreOptions = !showMoreOptions)}
+        >
+          More settings
+        </Button>
+      </div>
+
+      {#if showMoreOptions}
+        <div>
+          <label>
+            <span>Comparator output (0&ndash;15)</span>
+            <input
+              id="compout-input"
+              type="number"
+              bind:value={comparatorOutput}
+              oninput={syncMetadataToCpp}
+              min="1"
+              max="15"
+            />
+          </label>
+        </div>
+      {/if}
     </div>
 
     <div class="cover-container">
@@ -314,7 +353,7 @@
   .metadata {
     flex: 1;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     display: flex;
     gap: 10px;
   }
@@ -330,6 +369,11 @@
   }
 
   .metadata label input {
-    width: 200px;
+    width: 130px;
+  }
+
+  .centered {
+    display: flex;
+    align-items: center;
   }
 </style>

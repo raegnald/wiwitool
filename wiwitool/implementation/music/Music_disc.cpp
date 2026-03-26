@@ -2,6 +2,7 @@
 
 #include "Image_data.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <algorithm>
 #include <cstdlib>
@@ -34,6 +35,11 @@ std::string Music_disc::description(void) const {
     return artist;
 
   return std::format("{} - {}", artist, title);
+}
+
+void Music_disc::set_comparator_output(size_t x) {
+  constexpr size_t min = 1, max = 15;
+  comparator_output = std::clamp(x, min, max);
 }
 
 void Music_disc::set_pcm_audio(std::vector<float> &&left_channel,
@@ -334,14 +340,16 @@ EMSCRIPTEN_BINDINGS(music_disc) {
   class_<Music_disc>("MusicDisc")
       .smart_ptr<std::shared_ptr<Music_disc>>("MusicDisc")
 
-      .constructor(optional_override([]() {
-        return std::make_shared<Music_disc>();
-      }))
+      .constructor(
+          optional_override([]() { return std::make_shared<Music_disc>(); }))
 
       .function("stringId", &Music_disc::string_id)
 
       .property("title", &Music_disc::get_title, &Music_disc::set_title)
       .property("artist", &Music_disc::get_artist, &Music_disc::set_artist)
+
+      .property("comparatorOutput", &Music_disc::get_comparator_output,
+                &Music_disc::set_comparator_output)
 
       .function("setTrim", &Music_disc::set_trim)
       .function("getTrimStart", &Music_disc::get_trim_start)
