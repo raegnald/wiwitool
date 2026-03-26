@@ -7,7 +7,34 @@
   export let rotateAnticlockwise: ButtonClickHandler;
   export let clone: ButtonClickHandler;
   export let remove: ButtonClickHandler;
+
+  let deletePaintingDialog: HTMLDialogElement;
 </script>
+
+<dialog bind:this={deletePaintingDialog}>
+  <div class="modal-content">
+    <span>
+      Are you sure you want to remove this painting? <br />
+      All the customizations you've made to it will be lost.
+    </span>
+
+    <div class="modal-actions">
+      <Button transparent onclick={() => deletePaintingDialog.close()}>
+        Cancel
+      </Button>
+
+      <Button
+        destructive
+        onclick={() => {
+          deletePaintingDialog.close();
+          remove();
+        }}
+      >
+        Remove painting
+      </Button>
+    </div>
+  </div>
+</dialog>
 
 <div class="actions">
   <div class="first"></div>
@@ -36,7 +63,7 @@
     <Button
       grow
       destructive
-      onclick={remove}
+      onclick={() => deletePaintingDialog.showModal()}
       title="Delete painting"
       icon="Trash2"
     />
