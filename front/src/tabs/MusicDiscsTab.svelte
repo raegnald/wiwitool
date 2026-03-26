@@ -10,11 +10,15 @@
   import DropZone from "../components/DropZone.svelte";
   import MusicDiscCard from "../music/MusicDiscCard.svelte";
   import { FileMusic } from "@lucide/svelte";
+  import HelpUsingMusicDiscsTool from "../music/HelpUsingMusicDiscsTool.svelte";
+  import BulkMusicDiscsActions from "../music/BulkMusicDiscsActions.svelte";
 
   export let module: MainModule;
   export let move: (id: string) => void;
 
   let showingInfo = false;
+
+  $: allSelected = $musicDiscsStore.every((musicDisc) => musicDisc.selected);
 
   async function handleDrop(file: File) {
     if (!module || !$workspace) return;
@@ -85,6 +89,13 @@
       webm: audio.canPlayType("audio/webm; codecs=vorbis"),
       flac: audio.canPlayType("audio/flac"),
     };
+  }
+
+  function toggleSelectAll() {
+    $musicDiscsStore.forEach((painting) => {
+      painting.selected = !allSelected;
+    });
+    musicDiscsStore.update((it) => it);
   }
 </script>
 
@@ -217,12 +228,12 @@
       <div class="title-component" style="margin-top: 2em">
         <h2>Customise your music discs</h2>
 
-        <!-- <Button
-        onclick={toggleSelectAll}
-        icon={allSelected ? "CircleMinus" : "CircleCheck"}
-      >
-        {allSelected ? "Deselect" : "Select"} all
-      </Button> -->
+        <Button
+          onclick={toggleSelectAll}
+          icon={allSelected ? "CircleMinus" : "CircleCheck"}
+        >
+          {allSelected ? "Deselect" : "Select"} all
+        </Button>
       </div>
     {/if}
 
@@ -244,38 +255,11 @@
       {$musicDiscsStore.length > 0 ? "Next" : "Skip"}
     </Button>
   </div>
+
+  <BulkMusicDiscsActions />
 </main>
 
 <style>
-  .fill-space {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    max-height: 64px;
-  }
-  .icon-placeholder {
-    font-size: 48px;
-    line-height: 1;
-  }
-  .wiwitool-text {
-    font-size: 150%;
-  }
-
-  p:first-child {
-    margin-top: 0;
-  }
-
-  table {
-    margin: 20px 0;
-    width: 100%;
-  }
-
-  td {
-    text-align: center;
-    vertical-align: middle;
-    padding: 5px;
-  }
-
   .drop-zone-container {
     display: flex;
     flex-direction: column;

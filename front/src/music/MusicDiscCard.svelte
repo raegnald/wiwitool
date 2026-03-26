@@ -16,6 +16,8 @@
   export let module: MainModule;
   export let wrapper: MusicDiscWrapper;
 
+  let selected = false;
+
   let title = "";
   let artist = "";
 
@@ -31,6 +33,10 @@
   let coverImgSrc = "";
 
   let deleteDiscDialog: HTMLDialogElement;
+
+  $: if (wrapper && wrapper.cppDisc) {
+    selected = wrapper.selected;
+  }
 
   function syncMetadataToCpp() {
     wrapper.cppDisc.title = title;
@@ -141,7 +147,13 @@
   </div>
 </dialog>
 
-<SelectableCard bind:selected={wrapper.selected}>
+<SelectableCard
+  bind:selected
+  onToggle={() => {
+    wrapper.selected = selected;
+    $musicDiscsStore = $musicDiscsStore;
+  }}
+>
   <div class="disc-card">
     <div class="controls-container">
       {#if audioSrc && waveformData}
