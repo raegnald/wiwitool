@@ -1,9 +1,4 @@
 <script lang="ts">
-  import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
-  import {
-    paintingsStore,
-    type PaintingWrapper,
-  } from "../stores/paintingsStore";
   import Button from "../components/Button.svelte";
 
   type ButtonClickHandler = () => void;
@@ -18,12 +13,9 @@
   <div class="first"></div>
 
   <div>
-    <Button
-      grow
-      onclick={() => alert("Crop!")}
-      title="Crop image"
-      icon="Crop"
-    />
+    {#if import.meta.env.DEV}
+      <Button grow disabled onclick={() => {}} title="Crop image" icon="Crop" />
+    {/if}
 
     <div class="actions-pack">
       <Button
