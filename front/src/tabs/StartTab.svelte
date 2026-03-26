@@ -139,7 +139,7 @@
   </div>
   <div
     class="dropZoneContainer"
-    style:display={showDropZone ? "none" : "block"}
+    style:display={showDropZone ? "block" : "none"}
   >
     <DropZone handler={importPacks} let:filePicker>
       <div class="empty-state">
