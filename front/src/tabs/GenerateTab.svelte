@@ -243,12 +243,12 @@
     }
   }
 
-  li {
+  .pack-contents li {
     display: flex;
     align-items: top;
   }
 
-  li.centered {
+  .pack-contents li.centered {
     align-items: center;
   }
 
@@ -265,87 +265,6 @@
   }
 
   .instructions-box {
-    background: rgba(100, 108, 255, 0.05);
-    border: 1px solid rgba(100, 108, 255, 0.3);
-    border-radius: 8px;
-    padding: 20px;
     margin: 30px 0;
-  }
-
-  .instructions-box h3 {
-    margin-top: 0;
-    color: #646cff;
-  }
-
-  .instructions-box ol {
-    margin-bottom: 0;
-    padding-left: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .instructions-box li {
-    display: list-item;
-    line-height: 1.5;
-  }
-
-  .instructions-box code {
-    background: rgba(0, 0, 0, 0.08);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.9em;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .instructions-box code {
-      background: rgba(255, 255, 255, 0.1);
-    }
-  }
-
-  .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 60px 20px;
-    color: #666;
-  }
-
-  :global(.empty-icon) {
-    color: #aaa;
-    margin-bottom: 20px;
-  }
-
-  .empty-state h2 {
-    margin: 0 0 10px 0;
-    color: #333;
-    font-weight: 600;
-  }
-
-  .empty-state p {
-    max-width: 420px;
-    margin: 0 0 30px 0;
-    line-height: 1.5;
-  }
-
-  .empty-actions {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .empty-state {
-      color: #aaa;
-    }
-    .empty-state h2 {
-      color: #eee;
-    }
-    :global(.empty-icon) {
-      color: #555;
-    }
   }
 </style>
