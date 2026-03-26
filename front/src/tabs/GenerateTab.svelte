@@ -157,7 +157,7 @@
         <Button large icon="Image" onclick={() => move("paintings")}>
           Add Paintings
         </Button>
-        <Button large secondary icon="Disc3" onclick={() => move("discs")}>
+        <Button large icon="Disc3" onclick={() => move("discs")}>
           Add Music Discs
         </Button>
       </div>
