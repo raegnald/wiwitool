@@ -200,6 +200,7 @@
     <center>
       <Button
         large
+        intense
         loading={generating}
         disabled={!validGeneratableConfig}
         onclick={generatePacks}
