@@ -29,8 +29,6 @@
   let artist = "";
   let comparatorOutput: number;
 
-  let descriptionMode: boolean = false; // false: title/author; true: description
-
   // Data for the player
   let duration = 0;
   let trimStart = 0;
@@ -184,65 +182,33 @@
       {/if}
 
       <div class="metadata-and-delete">
-        <Button
-          onclick={() => {
-            descriptionMode = !descriptionMode;
+        <div class="metadata centered" style="margin-left: 63px">
+          <label>
+            <div style="display:flex; align-items:center; gap: 5px;">
+              <AudioLines />
+              <span>Title </span>
+            </div>
+            <input
+              type="text"
+              style="width: 100%"
+              bind:value={title}
+              oninput={syncMetadataToCpp}
+            />
+          </label>
 
-            if (descriptionMode) {
-              title =
-                artist && title ? artist + " - " + title : title ? title : "";
-              artist = "";
-              syncMetadataToCpp();
-            }
-          }}
-          icon={descriptionMode ? "MicVocal" : "NotepadText"}
-          title="Toggle description type"
-        />
-        <div class="metadata centered">
-          {#if descriptionMode}
-            <label style:flex={1}>
-              <div style="display:flex; align-items:center; gap: 5px;">
-                <NotepadText />
-                <span>Description </span>
-              </div>
-              <input
-                type="text"
-                bind:value={title}
-                style="width: 100%"
-                oninput={() => {
-                  artist = "";
-                  syncMetadataToCpp();
-                }}
-              />
-            </label>
-          {:else}
-            <label>
-              <div style="display:flex; align-items:center; gap: 5px;">
-                <AudioLines />
-                <span>Title </span>
-              </div>
-              <input
-                type="text"
-                style="width: 100%"
-                bind:value={title}
-                oninput={syncMetadataToCpp}
-              />
-            </label>
-
-            <label>
-              <div style="display:flex; align-items:center; gap: 5px;">
-                <MicVocal />
-                <span>Artist </span>
-              </div>
-              <input
-                type="text"
-                style="width: 100%"
-                bind:value={artist}
-                oninput={syncMetadataToCpp}
-                placeholder="(optional)"
-              />
-            </label>
-          {/if}
+          <label>
+            <div style="display:flex; align-items:center; gap: 5px;">
+              <MicVocal />
+              <span>Artist </span>
+            </div>
+            <input
+              type="text"
+              style="width: 100%"
+              bind:value={artist}
+              oninput={syncMetadataToCpp}
+              placeholder="(optional)"
+            />
+          </label>
         </div>
       </div>
 
@@ -294,7 +260,7 @@
         align-items: center;
         font-size:120%;
         ${coverImgSrc ? "background-color: transparent;" : ""}
-        padding-left: ${coverImgSrc ? 8 : 0}px;
+        padding-left: ${coverImgSrc ? 13.875 : 0}px;
       `}
         handler={loadCover}
         let:filePicker
@@ -322,7 +288,7 @@
       <div class="cover-actions">
         <Button
           small
-          destructive
+          transparent
           disabled={!coverImgSrc}
           onclick={removeCoverImage}
           icon="X"
@@ -355,8 +321,8 @@
 
   .cover-container .cover-actions {
     position: absolute;
-    top: -12px;
-    left: -12px;
+    top: 8px;
+    left: 9px;
   }
 
   img.cover {
