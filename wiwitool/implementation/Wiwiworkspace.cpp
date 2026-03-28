@@ -118,12 +118,7 @@ std::filesystem::path Wiwiworkspace::generate_zip(void) {
 
   // Paintings pack
   if (not paintings.empty()) {
-    std::vector<Painting> copies;
-
-    for (const auto &p : paintings)
-      copies.push_back(Painting{*p});
-
-    paintings_pack.set_paintings(std::move(copies));
+    paintings_pack.set_paintings(paintings);
     packer.add(paintings_pack);
   }
 

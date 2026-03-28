@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "Minecraft_identifiable.hpp"
 #include "Minecraft_pack.hpp"
@@ -14,7 +15,7 @@ public:
   Paintings_pack(void);
   virtual ~Paintings_pack(void) = default;
 
-  void set_paintings(std::vector<Painting> paintings);
+  void set_paintings(std::vector<std::shared_ptr<Painting>> paintings);
 
 protected:
   virtual void generate_data(void) override;
@@ -22,7 +23,7 @@ protected:
 
 private:
   std::string paintings_namespace;
-  std::vector<Painting> paintings{};
+  std::vector<std::shared_ptr<Painting>> paintings{};
 
   std::vector<std::string> get_painting_ids(void) const;
 

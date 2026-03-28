@@ -1,6 +1,9 @@
 #include "paintings/Paintings_pack.hpp"
 
 #include <fstream>
+#include <print>
+#include <filesystem>
+#include <memory>
 
 #include "util/strutil.hpp"
 #include "util/wiwidebug.hpp"
@@ -35,12 +38,12 @@ void Paintings_pack::generate_data(void) {
   for (const auto &painting : paintings) {
     // Declare a new painting
     generate_painting_variant_json(
-        painting, in_data_folder(data_subfolder / paintings_namespace /
-                                 "painting_variant"));
+        *painting, in_data_folder(data_subfolder / paintings_namespace /
+                                  "painting_variant"));
 
     // Stone cutter recipe to obtain the painting
     generate_recipe_json(
-        painting,
+        *painting,
         in_data_folder(data_subfolder / paintings_namespace / "recipe"));
   }
 }
@@ -81,7 +84,7 @@ std::vector<std::string> Paintings_pack::get_painting_ids(void) const {
   auto painting_ids = std::vector<std::string>{};
 
   for (const auto &painting : paintings)
-    painting_ids.push_back(paintings_namespace + ":" + painting.string_id());
+    painting_ids.push_back(paintings_namespace + ":" + painting->string_id());
 
   return painting_ids;
 }
@@ -105,14 +108,14 @@ void Paintings_pack::generate_resource(void) {
       in_resource_folder(assets_subfolder / "minecraft" / "items");
 
   for (const auto &painting : paintings) {
-    generate_painting_resource(painting, paintings_image_folder); // FOTUT: must run before generating JSON
+    generate_painting_resource(*painting, paintings_image_folder); // FOTUT: must run before generating JSON
 
     // Miniature (aka. item)
-    generate_respack_item_json(painting, item_jsons_folder);
-    generate_miniature_resource(painting, miniatures_folder);
+    generate_respack_item_json(*painting, item_jsons_folder);
+    generate_miniature_resource(*painting, miniatures_folder);
 
     // Linking painting to miniature
-    generate_painting_json(painting, painting_to_icon_json_folder);
+    generate_painting_json(*painting, painting_to_icon_json_folder);
   }
 }
 
@@ -129,10 +132,10 @@ void Paintings_pack::generate_painting_json(const Painting &painting,
 
   for (const auto &painting : paintings) {
     data["model"]["cases"].push_back({
-      {"when", paintings_namespace + ":" + painting.string_id()},
+      {"when", paintings_namespace + ":" + painting->string_id()},
       {"model", {
         {"type", "minecraft:model"},
-        {"model", item_id(painting)}
+        {"model", item_id(*painting)}
       }}
     });
   }
@@ -188,8 +191,8 @@ void Paintings_pack::generate_painting_variant_json(
   jsonfile << data.dump(4) << std::endl;
 }
 
-void Paintings_pack::set_paintings(std::vector<Painting> paintings) {
-  this->paintings = std::move(paintings);
+void Paintings_pack::set_paintings(std::vector<std::shared_ptr<Painting>> paintings) {
+  this->paintings = paintings;
 }
 
 
