@@ -174,6 +174,7 @@
 
     button.active {
       color: white;
+      background-color: #191919;
     }
   }
 </style>
