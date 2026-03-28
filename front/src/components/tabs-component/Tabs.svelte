@@ -120,7 +120,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    mask: linear-gradient(black, black, transparent);
+    mask: linear-gradient(black, transparent);
     backdrop-filter: blur(5px);
     z-index: 1;
   }
