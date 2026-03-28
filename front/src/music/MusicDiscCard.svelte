@@ -46,6 +46,9 @@
 
   $: if (wrapper && wrapper.cppDisc) {
     selected = wrapper.selected;
+    title = wrapper.cppDisc.title;
+    artist = wrapper.cppDisc.artist;
+    comparatorOutput = wrapper.cppDisc.comparatorOutput;
   }
 
   function syncMetadataToCpp() {
