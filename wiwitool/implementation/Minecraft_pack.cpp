@@ -88,10 +88,14 @@ void Minecraft_pack::compress_genpath(std::filesystem::path packs_zip) {
   // Add import file when it exists
   if (std::filesystem::exists(genpath / Serialiser::import_filename)) {
     const auto importfile = genpath / Serialiser::import_filename;
-    zip.write(importfile.string());
+    zip.write(importfile.string(), Serialiser::import_filename.string());
+    std::filesystem::remove(importfile);
   }
 
   zip.save(packs_zip.string());
+
+  std::filesystem::remove(datapack_zip);
+  std::filesystem::remove(respack_zip);
 }
 
 void Minecraft_pack::compress_packs(void) {
