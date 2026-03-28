@@ -17,6 +17,10 @@ Image_data get_frame(Painting_frame_generator frame_generator,
                     frame_generator);
 }
 
+Image_data No_frame_generator::get(Painting_ratio) const {
+  return Image_data{};
+}
+
 Image_data Procedural_frame_generator::get(Painting_ratio ratio) const {
   // Block size
   const auto [bw, bh] = ratio_sizes(ratio);
@@ -59,6 +63,12 @@ Image_data Procedural_frame_generator::get(Painting_ratio ratio) const {
 }
 
 // JSON serialisation
+
+void to_json(nlohmann::json &j, const No_frame_generator &g) {
+  j = nlohmann::json{{"type", "no_frame"}};
+}
+
+void from_json(const nlohmann::json &j, No_frame_generator &g) {}
 
 void to_json(nlohmann::json &j, const Procedural_frame_generator &g) {
   auto tint = g.get_tint();

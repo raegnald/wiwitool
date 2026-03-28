@@ -29,6 +29,7 @@
 
   let selected: boolean;
 
+  let disableFrame = false;
   let proceduralFrame = wrapper.cppPainting.isFrameProcedural();
   let frameTint: string;
   let frameSeed: string;
@@ -182,6 +183,18 @@
   <div style={`display: ${showFrameOptions ? "block" : "none"}`}>
     <div class="procedural-frame-card">
       <div class="procedural-frame-params">
+        <Wiwicheckbox
+          bind:checked={disableFrame}
+          onclick={() => {
+            if (disableFrame) wrapper.cppPainting.useNoFrame();
+            else wrapper.cppPainting.useProceduralFrame();
+
+            refresh();
+          }}
+        >
+          Disable frame
+        </Wiwicheckbox>
+
         <div class="colour-container">
           <Button onclick={() => colourPicker.showPicker()}>
             Frame colour

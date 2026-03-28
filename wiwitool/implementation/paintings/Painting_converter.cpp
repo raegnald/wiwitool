@@ -20,6 +20,9 @@ Image_data frame(const Painting_frame_generator &frame_generator,
                  Image_data image, Painting_ratio ratio) {
   const auto frame_data = get_frame(frame_generator, ratio);
 
+  if (frame_data.empty())
+    return image;
+
   if (frame_data.width() != image.width() or
       frame_data.height() != image.height())
     throw std::runtime_error("Frame and image dimension mismatch");

@@ -83,12 +83,21 @@ void Painting::use_procedural_frame() {
   refresh();
 }
 
+void Painting::use_no_frame() {
+  frame_generator = No_frame_generator{};
+  refresh();
+}
+
 Procedural_frame_generator *Painting::get_procedural_settings(void) {
   return std::get_if<Procedural_frame_generator>(&frame_generator);
 }
 
 bool Painting::is_frame_procedural(void) const {
   return std::holds_alternative<Procedural_frame_generator>(frame_generator);
+}
+
+bool Painting::is_frame_nonexistent(void) const {
+  return std::holds_alternative<No_frame_generator>(frame_generator);
 }
 
 
@@ -187,9 +196,11 @@ EMSCRIPTEN_BINDINGS(painting) {
       .function("rotateAnticlockwise", &Painting::rotate_anticlockwise)
 
       .function("useProceduralFrame", &Painting::use_procedural_frame)
+      .function("useNoFrame", &Painting::use_no_frame)
       .function("getProceduralSettings", &Painting::get_procedural_settings,
                 allow_raw_pointers())
       .function("isFrameProcedural", &Painting::is_frame_procedural)
+      .function("isFrameNonexistent", &Painting::is_frame_nonexistent)
 
       .function("refresh", &Painting::refresh);
 }
