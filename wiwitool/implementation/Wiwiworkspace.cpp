@@ -66,22 +66,12 @@ std::vector<uint8_t> Wiwiworkspace::serialise(void) const {
   json j;
 
   // Paintings
-  {
-    std::vector<Painting> flat_paintings;
     for (const auto &painting : paintings)
-      flat_paintings.push_back(Painting{*painting});
-
-    j["paintings"] = flat_paintings;
-  }
+      j["paintings"].push_back(*painting);
 
   // Music discs
-  {
-    std::vector<Music_disc> flat_music_discs;
-    for (const auto &disc : discs)
-      flat_music_discs.push_back(Music_disc{*disc});
-
-    j["music_discs"] = flat_music_discs;
-  }
+  for (const auto &disc : discs)
+    j["music_discs"].push_back(*disc);
 
   // Invisible item frames
   j["invisible_item_frames"] = invisible_item_frames;
@@ -128,23 +118,13 @@ std::filesystem::path Wiwiworkspace::generate_zip(void) {
 
   // Paintings pack
   if (not paintings.empty()) {
-    std::vector<Painting> copies;
-
-    for (const auto &p : paintings)
-      copies.push_back(Painting{*p});
-
-    paintings_pack.set_paintings(std::move(copies));
+    paintings_pack.set_paintings(paintings);
     packer.add(paintings_pack);
   }
 
   // Music discs pack
   if (not discs.empty()) {
-    std::vector<Music_disc> copies;
-
-    for (const auto &disc : discs)
-      copies.push_back(Music_disc{*disc});
-
-    music_discs_pack.set_discs(copies);
+    music_discs_pack.set_discs(discs);
     packer.add(music_discs_pack);
   }
 
@@ -182,12 +162,15 @@ EMSCRIPTEN_BINDINGS(wiwiworkspace) {
                 &Wiwiworkspace::set_invisible_item_frames)
 
       .function("serialise", &Wiwiworkspace::serialise)
-      .function(
-          "deserialise",
-          optional_override([](Wiwiworkspace &self,
-                               const std::vector<uint8_t> &binary_msgpack) {
-            self.deserialise(binary_msgpack);
-          }))
+      .function("deserialise", optional_override([](Wiwiworkspace &self,
+                                                    emscripten::val js_array) {
+                  size_t length = js_array["length"].as<size_t>();
+                  std::vector<uint8_t> vec(length);
+                  emscripten::val memory_view = emscripten::val(
+                      emscripten::typed_memory_view(length, vec.data()));
+                  memory_view.call<void>("set", js_array);
+                  self.deserialise(vec);
+                }))
 
       .function("generateZip", optional_override([](Wiwiworkspace &self) {
                   return std::string{self.generate_zip()};

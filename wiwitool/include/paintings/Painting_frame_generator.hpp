@@ -9,6 +9,14 @@
 
 #include "nlohmann/json.hpp"
 
+class No_frame_generator {
+public:
+  Image_data get(Painting_ratio) const;
+
+  friend void to_json(nlohmann::json &j, const No_frame_generator &g);
+  friend void from_json(const nlohmann::json &j, No_frame_generator &g);
+};
+
 class Procedural_frame_generator {
 public:
   Procedural_frame_generator(void) = default;
@@ -29,6 +37,8 @@ private:
   rgba tint{144, 70, 0, 255};
 };
 
-using Painting_frame_generator = std::variant<Procedural_frame_generator>;
+using Painting_frame_generator =
+    std::variant<No_frame_generator, Procedural_frame_generator>;
+
 
 Image_data get_frame(Painting_frame_generator, Painting_ratio);

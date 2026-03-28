@@ -43,15 +43,21 @@ Image_data::Image_data(std::vector<uint8_t> data) {
   const auto imgdata = reinterpret_cast<Pixel *>(stbi_load_from_memory(
       data.data(), data.size(), &w, &h, nullptr, channels_));
 
-  if (not imgdata)
-    throw std::runtime_error("Image_data: failed to load from data");
+  if (not imgdata) {
+    // throw std::runtime_error("Image_data: failed to load from data");
+    wiwidebug std::println(
+        "Failed to decode PNG data! Constructing empty image instead");
+    width_ = 0;
+    height_ = 0;
+    data_ = Stb_image{nullptr, [](void *) {}};
+    return;
+  }
 
   width_ = w;
   height_ = h;
 
   data_ = Stb_image{reinterpret_cast<Pixel *>(imgdata), stbi_image_free};
 }
-
 
 Image_data::Image_data(size_t w, size_t h) : width_{w}, height_{h} {
   const size_t size = width_ * height_ * sizeof(Pixel);
@@ -274,12 +280,27 @@ std::vector<uint8_t> Image_data::encode_png(void) const {
 }
 
 void to_json(nlohmann::json &j, const Image_data &image) {
-  j = nlohmann::json{{"image_data", image.encode_png()}};
+  if (image.empty())
+    j = nlohmann::json{{"image_data", nullptr}};
+  else
+    j = nlohmann::json{
+        {"image_data", nlohmann::json::binary(image.encode_png())}};
 }
 
 void from_json(const nlohmann::json &j, Image_data &image) {
-  auto encoded_data = j.at("image_data").get<std::vector<uint8_t>>();
-  image = Image_data{encoded_data};
+  auto &img = j.at("image_data");
+
+  if (img.is_binary()) {
+    image = Image_data{img.get_binary()};
+  }
+  else if (img.is_array()) {
+    std::vector<uint8_t> encoded_data;
+    img.get_to(encoded_data);
+    image = encoded_data.empty() ? Image_data{} : Image_data{encoded_data};
+  }
+  else {
+    image = Image_data{};
+  }
 }
 
 

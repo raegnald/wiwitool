@@ -4,6 +4,7 @@
 
 #include "Minecraft_pack.hpp"
 #include "music/Music_disc.hpp"
+#include <memory>
 
 static std::string default_music_discs_namespace{"custommusicdiscs"};
 
@@ -12,7 +13,7 @@ public:
   Music_discs_pack(void);
   virtual ~Music_discs_pack(void) = default;
 
-  void set_discs(std::vector<Music_disc> discs);
+  void set_discs(std::vector<std::shared_ptr<Music_disc>> discs);
 
 protected:
   virtual void generate_data(void) override;
@@ -20,7 +21,7 @@ protected:
 
 private:
   std::string music_discs_namespace;
-  std::vector<Music_disc> discs{};
+  std::vector<std::shared_ptr<Music_disc>> discs{};
 
   const std::string base_disc_id = "minecraft:music_disc_ward";
 

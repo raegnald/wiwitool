@@ -48,13 +48,13 @@ void compress_directory(std::filesystem::path directory,
   for (const directory_entry &entry : all_entries) {
     if (entry.is_regular_file()) {
       const std::string archive_name =
-          std::filesystem::relative(entry.path(), directory);
+          std::filesystem::relative(entry.path(), directory).string();
 
-      zip.write(entry.path(), archive_name);
+      zip.write(entry.path().string(), archive_name);
     }
   }
 
-  zip.save(zipname);
+  zip.save(zipname.string());
 }
 
 void Minecraft_pack::generate(bool fresh) {
@@ -82,27 +82,33 @@ void Minecraft_pack::compress_genpath(std::filesystem::path packs_zip) {
 
   miniz_cpp::zip_file zip;
 
-  zip.write(datapack_zip);
-  zip.write(respack_zip);
+  zip.write(datapack_zip.string());
+  zip.write(respack_zip.string());
 
   // Add import file when it exists
-  if (std::filesystem::exists(genpath / Serialiser::import_filename))
-    zip.write(genpath / Serialiser::import_filename);
+  if (std::filesystem::exists(genpath / Serialiser::import_filename)) {
+    const auto importfile = genpath / Serialiser::import_filename;
+    zip.write(importfile.string(), Serialiser::import_filename.string());
+    std::filesystem::remove(importfile);
+  }
 
-  zip.save(packs_zip);
+  zip.save(packs_zip.string());
+
+  std::filesystem::remove(datapack_zip);
+  std::filesystem::remove(respack_zip);
 }
 
 void Minecraft_pack::compress_packs(void) {
   Minecraft_pack::compress_genpath(genpath / "packs.zip");
 }
 
-std::filesystem::path Minecraft_pack::in_data_folder(std::string name) {
+std::filesystem::path Minecraft_pack::in_data_folder(std::filesystem::path name) {
   auto dir = genpath / "datapack" / name;
   std::filesystem::create_directories(dir);
   return dir;
 }
 
-std::filesystem::path Minecraft_pack::in_resource_folder(std::string name) {
+std::filesystem::path Minecraft_pack::in_resource_folder(std::filesystem::path name) {
   auto dir = genpath / "respack" / name;
   std::filesystem::create_directories(dir);
   return dir;

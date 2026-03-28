@@ -1,6 +1,7 @@
 #include "music/Music_discs_pack.hpp"
 
 #include <fstream>
+#include <memory>
 #include <print>
 
 #include "util/strutil.hpp"
@@ -13,7 +14,7 @@ Music_discs_pack::Music_discs_pack(void)
     : Minecraft_pack{"Minecraft pack containing custom music discs"},
       music_discs_namespace(timestamped(default_music_discs_namespace)) {}
 
-void Music_discs_pack::set_discs(std::vector<Music_disc> ds) {
+void Music_discs_pack::set_discs(std::vector<std::shared_ptr<Music_disc>> ds) {
     discs = std::move(ds);
 }
 
@@ -31,8 +32,8 @@ void Music_discs_pack::generate_data(void) {
       in_data_folder(data_subfolder / music_discs_namespace / "recipe");
 
   for (auto &disc : discs) {
-    generate_jukebox_song_json(disc, jukebox_folder);
-    generate_recipe_json(disc, recipe_folder);
+    generate_jukebox_song_json(*disc, jukebox_folder);
+    generate_recipe_json(*disc, recipe_folder);
   }
 }
 
@@ -125,9 +126,11 @@ void Music_discs_pack::generate_resource(void) {
       assets_subfolder / music_discs_namespace / "sounds" / "records");
 
   for (auto &disc : discs) {
-    generate_item_model_json(disc, models_folder);
-    export_disc_texture(disc, textures_folder);
-    export_ogg_audio(disc, sounds_folder);
+    generate_item_model_json(*disc, models_folder);
+    export_disc_texture(*disc, textures_folder);
+    wiwidebug std::println("Exporting ogg audio for {}", disc->string_id());
+    export_ogg_audio(*disc, sounds_folder);
+    wiwidebug std::println("  done");
   }
 }
 
@@ -136,9 +139,9 @@ void Music_discs_pack::generate_sounds_json(std::filesystem::path directory) {
   json data;
 
   for (const auto &disc : discs) {
-    std::string sound_event = "music_disc." + disc.string_id();
+    std::string sound_event = "music_disc." + disc->string_id();
     std::string sound_path =
-        music_discs_namespace + ":records/" + disc.string_id();
+        music_discs_namespace + ":records/" + disc->string_id();
 
     data[sound_event]["sounds"].push_back({{"name", sound_path}});
   }
@@ -163,10 +166,10 @@ void Music_discs_pack::generate_vanilla_override_json(
 
   for (const auto &disc : discs) {
     data["model"]["cases"].push_back(
-        {{"when", music_discs_namespace + ":" + disc.string_id()},
+        {{"when", music_discs_namespace + ":" + disc->string_id()},
          {"model",
           {{"type", "minecraft:model"},
-           {"model", music_discs_namespace + ":item/" + disc.string_id()}}}});
+           {"model", music_discs_namespace + ":item/" + disc->string_id()}}}});
   }
 
   data["model"]["fallback"] = {{"type", "minecraft:model"},

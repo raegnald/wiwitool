@@ -282,12 +282,16 @@ void to_json(nlohmann::json &j, const Music_disc &d) {
                      {"artist", d.artist},
                      {"comparator_output", d.comparator_output},
                      {"cover", d.cover},
-                     {"ogg_data", d.ogg_data},
                      {"cached_waveform", d.cached_waveform},
                      {"sample_rate", d.sample_rate},
                      {"duration_seconds", d.duration_seconds},
                      {"trim_start", d.trim_start},
                      {"trim_end", d.trim_end}};
+
+  if (d.ogg_data.empty())
+    j["ogg_data"] = nullptr;
+  else
+    j["ogg_data"] = nlohmann::json::binary(d.ogg_data);
 }
 
 void from_json(const nlohmann::json &j, Music_disc &d) {
@@ -299,7 +303,17 @@ void from_json(const nlohmann::json &j, Music_disc &d) {
 
   j.at("cover").get_to(d.cover);
 
-  j.at("ogg_data").get_to(d.ogg_data);
+  {
+    auto &ogg = j.at("ogg_data");
+
+    if (ogg.is_binary())
+      d.ogg_data = ogg.get_binary();
+    else if (ogg.is_array())
+      ogg.get_to(d.ogg_data);
+    else
+      d.ogg_data.clear();
+  }
+
   j.at("cached_waveform").get_to(d.cached_waveform);
   j.at("sample_rate").get_to(d.sample_rate);
   j.at("duration_seconds").get_to(d.duration_seconds);

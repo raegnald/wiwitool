@@ -10,7 +10,14 @@
   import Button from "../components/Button.svelte";
   import DropZone from "../components/DropZone.svelte";
   import WaveformPlayer from "./WaveformPlayer.svelte";
-  import { MicVocal, AudioLines, NotepadText } from "@lucide/svelte";
+  import {
+    MicVocal,
+    AudioLines,
+    NotepadText,
+    Zap,
+    Timer,
+    ImageUpIcon,
+  } from "@lucide/svelte";
   import { workspace } from "../stores/workspaceStore";
 
   export let module: MainModule;
@@ -21,8 +28,6 @@
   let title = "";
   let artist = "";
   let comparatorOutput: number;
-
-  let descriptionMode: boolean = false; // false: title/author; true: description
 
   // Data for the player
   let duration = 0;
@@ -39,6 +44,9 @@
 
   $: if (wrapper && wrapper.cppDisc) {
     selected = wrapper.selected;
+    title = wrapper.cppDisc.title;
+    artist = wrapper.cppDisc.artist;
+    comparatorOutput = wrapper.cppDisc.comparatorOutput;
   }
 
   function syncMetadataToCpp() {
@@ -174,89 +182,48 @@
       {/if}
 
       <div class="metadata-and-delete">
+        <div class="metadata centered" style="margin-left: 63px">
+          <label>
+            <div style="display:flex; align-items:center; gap: 5px;">
+              <AudioLines />
+              <span>Title </span>
+            </div>
+            <input
+              type="text"
+              style="width: 100%"
+              bind:value={title}
+              oninput={syncMetadataToCpp}
+            />
+          </label>
+
+          <label>
+            <div style="display:flex; align-items:center; gap: 5px;">
+              <MicVocal />
+              <span>Artist </span>
+            </div>
+            <input
+              type="text"
+              style="width: 100%"
+              bind:value={artist}
+              oninput={syncMetadataToCpp}
+              placeholder="(optional)"
+            />
+          </label>
+        </div>
+      </div>
+
+      <div class="metadata-and-delete">
         <Button
           destructive
           icon="Trash2"
           onclick={() => deleteDiscDialog.showModal()}
         />
-
-        <div class="metadata centered">
-          <div>
-            <Button
-              onclick={() => {
-                descriptionMode = !descriptionMode;
-
-                if (descriptionMode) {
-                  title =
-                    artist && title
-                      ? artist + " - " + title
-                      : title
-                        ? title
-                        : "";
-                  artist = "";
-                  syncMetadataToCpp();
-                }
-              }}
-              icon={descriptionMode ? "MicVocal" : "NotepadText"}
-              title="Toggle description type"
-            >
-              Toggle edit mode
-            </Button>
-          </div>
-
-          {#if descriptionMode}
-            <label style:flex={1}>
-              <NotepadText />
-              <span>Description </span>
-              <input
-                type="text"
-                bind:value={title}
-                style="width: 100%; margin-left: 20px"
-                oninput={() => {
-                  artist = "";
-                  syncMetadataToCpp();
-                }}
-              />
-            </label>
-          {:else}
-            <label>
-              <AudioLines />
-              <span>Title </span>
-              <input
-                type="text"
-                bind:value={title}
-                oninput={syncMetadataToCpp}
-              />
-            </label>
-
-            <label>
-              <MicVocal />
-              <span>Artist </span>
-              <input
-                type="text"
-                bind:value={artist}
-                oninput={syncMetadataToCpp}
-                placeholder="(optional)"
-              />
-            </label>
-          {/if}
-        </div>
-      </div>
-
-      <div>
-        <Button
-          secondary
-          hugeBorder={showMoreOptions}
-          onclick={() => (showMoreOptions = !showMoreOptions)}
-        >
-          More settings
-        </Button>
-      </div>
-
-      {#if showMoreOptions}
-        <div>
+        <div class="metadata">
           <label>
-            <span>Comparator output (0&ndash;15)</span>
+            <div style="display:flex; align-items:center; gap: 5px;">
+              <Zap />
+              <span style="display: block ruby">Comparator output </span>
+            </div>
             <input
               id="compout-input"
               type="number"
@@ -266,33 +233,62 @@
               max="15"
             />
           </label>
+
+          <label>
+            <div style="display:flex; align-items:center; gap: 5px;">
+              <Timer />
+              <span style="display: block ruby"
+                ><abbr title="Seconds of silence added to the end of a song"
+                  >Silence gap</abbr
+                >
+              </span>
+            </div>
+            <input type="number" min="0" />
+          </label>
         </div>
-      {/if}
+      </div>
     </div>
 
     <div class="cover-container">
       <DropZone
         style={`
-          padding: 0;
-          height: 100%;
-          margin: 0;
-          font-size: 80%;
-          ${coverImgSrc ? "background-color: transparent;" : ""}
-          padding-left: ${coverImgSrc ? 8 : 0}px;
-        `}
+        padding: 0;
+        height: 100%;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size:120%;
+        ${coverImgSrc ? "background-color: transparent;" : ""}
+        padding-left: ${coverImgSrc ? 13.875 : 0}px;
+      `}
         handler={loadCover}
+        let:filePicker
       >
         {#if coverImgSrc}
           <img src={coverImgSrc} class="cover" alt="Disc Cover" />
         {:else}
-          Drag and drop a cover image
+          <div>
+            <ImageUpIcon
+              size="90"
+              strokeWidth="1.5"
+              class="empty-icon"
+              style="margin-bottom: 10px;"
+            />
+
+            <center>
+              <Button icon="FolderInput" onclick={filePicker}>
+                Select cover
+              </Button>
+            </center>
+          </div>
         {/if}
       </DropZone>
 
       <div class="cover-actions">
         <Button
           small
-          destructive
+          transparent
           disabled={!coverImgSrc}
           onclick={removeCoverImage}
           icon="X"
@@ -312,8 +308,8 @@
   }
 
   .cover-container {
-    width: 160px;
-    height: 160px;
+    width: 234px;
+    height: 234px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -325,8 +321,8 @@
 
   .cover-container .cover-actions {
     position: absolute;
-    top: -12px;
-    left: -12px;
+    top: 8px;
+    left: 9px;
   }
 
   img.cover {
@@ -355,21 +351,18 @@
     display: flex;
     justify-content: space-between;
     display: flex;
-    gap: 10px;
+    gap: 30px;
   }
 
   .metadata label {
     display: flex;
     align-items: center;
     gap: 10px;
-  }
-
-  .metadata label span {
-    min-width: 50px;
+    flex: 1;
   }
 
   .metadata label input {
-    width: 130px;
+    width: 100%;
   }
 
   .centered {

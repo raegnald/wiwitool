@@ -19,6 +19,7 @@
   let showingInfo = false;
 
   $: allSelected = $musicDiscsStore.every((musicDisc) => musicDisc.selected);
+  $: selectedCount = $musicDiscsStore.filter((disc) => disc.selected).length;
 
   async function handleDrop(file: File) {
     if (!module || !$workspace) return;
@@ -150,12 +151,18 @@
       <div class="title-component" style="margin-top: 2em">
         <h2>Customise your music discs</h2>
 
-        <Button
-          onclick={toggleSelectAll}
-          icon={allSelected ? "CircleMinus" : "CircleCheck"}
-        >
-          {allSelected ? "Deselect" : "Select"} all
-        </Button>
+        <div style="display: flex; align-items: center; gap: 20px">
+          {#if selectedCount > 0}
+            <span style="font-size: 110%">{selectedCount} selected</span>
+          {/if}
+
+          <Button
+            onclick={toggleSelectAll}
+            icon={allSelected ? "CircleMinus" : "CircleCheck"}
+          >
+            {allSelected ? "Deselect" : "Select"} all
+          </Button>
+        </div>
       </div>
     {/if}
 

@@ -219,7 +219,7 @@ svg {
   user-select: none;
 }
 
-:global(.empty-icon) {
+.empty-icon {
   color: #aaa;
   margin-bottom: 20px;
 }
@@ -256,7 +256,7 @@ svg {
   .empty-state h2 {
     color: #eee;
   }
-  :global(.empty-icon) {
+  .empty-icon {
     color: #555;
   }
 }
@@ -328,4 +328,5 @@ svg {
 .pills-horizontal-container {
   display: flex;
   gap: 5px;
+  justify-content: center;
 }

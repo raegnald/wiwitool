@@ -215,7 +215,7 @@
       <div style="width: 150px; display: flex; justify-content: flex-end">
         <Button
           small
-          destructive={!(trimStart <= 0 && trimEnd >= duration)}
+          secondary
           onclick={resetTrim}
           disabled={trimStart <= 0 && trimEnd >= duration}
           icon="Scissors"

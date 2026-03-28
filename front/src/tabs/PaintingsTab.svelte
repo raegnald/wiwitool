@@ -16,6 +16,7 @@
 
   $: showingInfo = false;
   $: allSelected = $paintingsStore.every((painting) => painting.selected);
+  $: selectedCount = $paintingsStore.filter((p) => p.selected).length;
 
   onMount(() => {
     // Ask the user for confirmation when reloading the page
@@ -31,11 +32,7 @@
     const buffer = await file.arrayBuffer();
     const uint8View = new Uint8Array(buffer);
 
-    const vec = new module.PaintingBufferVector();
-    for (let i = 0; i < uint8View.length; i++) vec.push_back(uint8View[i]);
-
-    const cppPainting = new module.Painting(vec);
-    vec.delete();
+    const cppPainting = new module.Painting(uint8View as any);
 
     cppPainting.title = file.name.split(".")[0];
     cppPainting.author = "";
@@ -111,12 +108,18 @@
     <div class="title-component" style="margin-top: 2em">
       <h2>Customise your paintings</h2>
 
-      <Button
-        onclick={toggleSelectAll}
-        icon={allSelected ? "CircleMinus" : "CircleCheck"}
-      >
-        {allSelected ? "Deselect" : "Select"} all
-      </Button>
+      <div style="display: flex; align-items: center; gap: 20px">
+        {#if selectedCount > 0}
+          <span style="font-size: 110%">{selectedCount} selected</span>
+        {/if}
+
+        <Button
+          onclick={toggleSelectAll}
+          icon={allSelected ? "CircleMinus" : "CircleCheck"}
+        >
+          {allSelected ? "Deselect" : "Select"} all
+        </Button>
+      </div>
     </div>
 
     <div>

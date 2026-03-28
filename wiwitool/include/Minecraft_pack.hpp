@@ -33,13 +33,13 @@ protected:
 
   /// Get existing or create new subfolder relative to data pack
   /// folder.
-  std::filesystem::path in_data_folder(std::string name = std::string{});
+  std::filesystem::path in_data_folder(std::filesystem::path name = std::filesystem::path{});
 
   static inline const std::filesystem::path data_subfolder{"data/"};
 
   /// Get existing or create new subfolder relative to resource pack
   /// folder.
-  std::filesystem::path in_resource_folder(std::string name = std::string{});
+  std::filesystem::path in_resource_folder(std::filesystem::path = std::filesystem::path{});
 
   static inline const std::filesystem::path assets_subfolder{"assets/"};
 };

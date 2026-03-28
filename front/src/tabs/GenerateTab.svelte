@@ -49,6 +49,8 @@
       a.click();
 
       URL.revokeObjectURL(url);
+
+      module.FS.unlink(zipPath);
     } catch (e) {
       console.error("Error reading generated file:", e);
       alert("Generation finished, but failed to read zip");
