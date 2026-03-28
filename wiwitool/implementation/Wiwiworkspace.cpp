@@ -66,22 +66,12 @@ std::vector<uint8_t> Wiwiworkspace::serialise(void) const {
   json j;
 
   // Paintings
-  {
-    std::vector<Painting> flat_paintings;
     for (const auto &painting : paintings)
-      flat_paintings.push_back(Painting{*painting});
-
-    j["paintings"] = flat_paintings;
-  }
+      j["paintings"].push_back(*painting);
 
   // Music discs
-  {
-    std::vector<Music_disc> flat_music_discs;
-    for (const auto &disc : discs)
-      flat_music_discs.push_back(Music_disc{*disc});
-
-    j["music_discs"] = flat_music_discs;
-  }
+  for (const auto &disc : discs)
+    j["music_discs"].push_back(*disc);
 
   // Invisible item frames
   j["invisible_item_frames"] = invisible_item_frames;
@@ -139,12 +129,7 @@ std::filesystem::path Wiwiworkspace::generate_zip(void) {
 
   // Music discs pack
   if (not discs.empty()) {
-    std::vector<Music_disc> copies;
-
-    for (const auto &disc : discs)
-      copies.push_back(Music_disc{*disc});
-
-    music_discs_pack.set_discs(copies);
+    music_discs_pack.set_discs(discs);
     packer.add(music_discs_pack);
   }
 
