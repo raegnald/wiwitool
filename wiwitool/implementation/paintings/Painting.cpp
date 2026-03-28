@@ -153,8 +153,13 @@ EMSCRIPTEN_BINDINGS(painting) {
   class_<Painting>("Painting")
       .smart_ptr<std::shared_ptr<Painting>>("Painting")
 
-      .constructor(optional_override([](std::vector<uint8_t> data) {
-        Image_data hires{std::move(data)};
+      .constructor(optional_override([](emscripten::val js_array) {
+        size_t length = js_array["length"].as<size_t>();
+        std::vector<uint8_t> vec(length);
+        emscripten::val memory_view = emscripten::val(emscripten::typed_memory_view(length, vec.data()));
+        memory_view.call<void>("set", js_array);
+
+        Image_data hires{std::move(vec)};
 
         const double maxlen = std::max(hires.width(), hires.height());
         const double newmaxlen = 1024; // in pixels
