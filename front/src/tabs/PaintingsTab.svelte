@@ -16,6 +16,7 @@
 
   $: showingInfo = false;
   $: allSelected = $paintingsStore.every((painting) => painting.selected);
+  $: selectedCount = $paintingsStore.filter((p) => p.selected).length;
 
   onMount(() => {
     // Ask the user for confirmation when reloading the page
@@ -107,12 +108,18 @@
     <div class="title-component" style="margin-top: 2em">
       <h2>Customise your paintings</h2>
 
-      <Button
-        onclick={toggleSelectAll}
-        icon={allSelected ? "CircleMinus" : "CircleCheck"}
-      >
-        {allSelected ? "Deselect" : "Select"} all
-      </Button>
+      <div style="display: flex; align-items: center; gap: 20px">
+        {#if selectedCount > 0}
+          <span style="font-size: 110%">{selectedCount} selected</span>
+        {/if}
+
+        <Button
+          onclick={toggleSelectAll}
+          icon={allSelected ? "CircleMinus" : "CircleCheck"}
+        >
+          {allSelected ? "Deselect" : "Select"} all
+        </Button>
+      </div>
     </div>
 
     <div>
