@@ -162,12 +162,15 @@ EMSCRIPTEN_BINDINGS(wiwiworkspace) {
                 &Wiwiworkspace::set_invisible_item_frames)
 
       .function("serialise", &Wiwiworkspace::serialise)
-      .function(
-          "deserialise",
-          optional_override([](Wiwiworkspace &self,
-                               const std::vector<uint8_t> &binary_msgpack) {
-            self.deserialise(binary_msgpack);
-          }))
+      .function("deserialise", optional_override([](Wiwiworkspace &self,
+                                                    emscripten::val js_array) {
+                  size_t length = js_array["length"].as<size_t>();
+                  std::vector<uint8_t> vec(length);
+                  emscripten::val memory_view = emscripten::val(
+                      emscripten::typed_memory_view(length, vec.data()));
+                  memory_view.call<void>("set", js_array);
+                  self.deserialise(vec);
+                }))
 
       .function("generateZip", optional_override([](Wiwiworkspace &self) {
                   return std::string{self.generate_zip()};

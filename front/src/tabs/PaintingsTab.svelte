@@ -31,11 +31,7 @@
     const buffer = await file.arrayBuffer();
     const uint8View = new Uint8Array(buffer);
 
-    const vec = new module.PaintingBufferVector();
-    for (let i = 0; i < uint8View.length; i++) vec.push_back(uint8View[i]);
-
-    const cppPainting = new module.Painting(vec);
-    vec.delete();
+    const cppPainting = new module.Painting(uint8View as any);
 
     cppPainting.title = file.name.split(".")[0];
     cppPainting.author = "";

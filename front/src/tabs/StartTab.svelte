@@ -1,7 +1,7 @@
 <script lang="ts">
   import DropZone from "../components/DropZone.svelte";
   import type { MainModule } from "../bindings/wiwitool";
-  import { INFO, toast, toasts } from "../stores/toastsStore";
+  import { ERROR, INFO, toast, toasts } from "../stores/toastsStore";
   import { workspace } from "../stores/workspaceStore";
   import {
     paintingsStore,
@@ -30,26 +30,24 @@
 
   async function importPacks(file: File) {
     if (!module || !$workspace) return;
-
     toast(INFO, "Importing configuration...");
 
-    const buffer = await file.arrayBuffer();
-    const uint8View = new Uint8Array(buffer);
+    try {
+      const buffer = await file.arrayBuffer();
+      const uint8View = new Uint8Array(buffer);
 
-    const vec = new module.PaintingBufferVector();
-    for (let i = 0; i < uint8View.length; i++) {
-      vec.push_back(uint8View[i]);
+      $workspace.deserialise(uint8View as any);
+
+      retrievePaintings();
+      retrieveMusicDiscs();
+
+      toasts.set([]);
+      toast(INFO, "Configuration was imported");
+      move("paintings");
+    } catch (e: any) {
+      console.error("Deserialisation failed:", e);
+      toast(ERROR, e.message || "Unknown error during import", 8000);
     }
-
-    $workspace.deserialise(vec);
-    vec.delete();
-
-    retrievePaintings();
-    retrieveMusicDiscs();
-
-    toasts.set([]);
-    toast(INFO, "Configuration was imported");
-    move("paintings");
   }
 
   function retrievePaintings() {
