@@ -79,7 +79,8 @@ void Music_discs_pack::generate_jukebox_song_json(
 
   data["comparator_output"] = disc.get_comparator_output();
   data["description"] = disc.description();
-  data["length_in_seconds"] = disc.get_duration_seconds();
+  data["length_in_seconds"] =
+      disc.get_trimmed_duration() + disc.get_silence_gap();
   data["sound_event"]["sound_id"] =
       music_discs_namespace + ":music_disc." + disc.string_id();
 

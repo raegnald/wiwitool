@@ -28,6 +28,7 @@
   let title = "";
   let artist = "";
   let comparatorOutput: number;
+  let silenceGap: number;
 
   // Data for the player
   let duration = 0;
@@ -47,12 +48,14 @@
     title = wrapper.cppDisc.title;
     artist = wrapper.cppDisc.artist;
     comparatorOutput = wrapper.cppDisc.comparatorOutput;
+    silenceGap = wrapper.cppDisc.silenceGap;
   }
 
   function syncMetadataToCpp() {
     wrapper.cppDisc.title = title;
     wrapper.cppDisc.artist = artist;
     wrapper.cppDisc.comparatorOutput = comparatorOutput;
+    wrapper.cppDisc.silenceGap = silenceGap;
   }
 
   function handleTrimChange(start: number, end: number) {
@@ -237,13 +240,18 @@
           <label>
             <div style="display:flex; align-items:center; gap: 5px;">
               <Timer />
-              <span style="display: block ruby"
-                ><abbr title="Seconds of silence added to the end of a song"
-                  >Silence gap</abbr
-                >
+              <span style="display: block ruby">
+                <abbr title="Seconds of silence added to the end of a song">
+                  Silence gap
+                </abbr>
               </span>
             </div>
-            <input type="number" min="0" />
+            <input
+              type="number"
+              bind:value={silenceGap}
+              oninput={syncMetadataToCpp}
+              min="0"
+            />
           </label>
         </div>
       </div>

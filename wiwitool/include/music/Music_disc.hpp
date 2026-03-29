@@ -32,6 +32,9 @@ public:
   void set_comparator_output(size_t x);
   size_t get_comparator_output(void) const { return comparator_output; }
 
+  void set_silence_gap(float s) { silence_gap = s; }
+  float get_silence_gap(void) const { return silence_gap; }
+
   // Audio data
 
   void set_pcm_audio(std::vector<float> &&left_channel,
@@ -91,6 +94,7 @@ private:
   unsigned int sample_rate{0};
   float trim_start{-1.0f}, trim_end{-1.0f}; // in seconds
   float duration_seconds{0.0f};
+  float silence_gap{0.0f};
 
   // Internal helper to handle the heavy Vorbis math
   std::vector<uint8_t> internal_vorbis_encode(const std::vector<float> &left,

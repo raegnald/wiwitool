@@ -365,6 +365,9 @@ EMSCRIPTEN_BINDINGS(music_disc) {
       .property("comparatorOutput", &Music_disc::get_comparator_output,
                 &Music_disc::set_comparator_output)
 
+      .property("silenceGap", &Music_disc::get_silence_gap,
+                &Music_disc::set_silence_gap)
+
       .function("setTrim", &Music_disc::set_trim)
       .function("getTrimStart", &Music_disc::get_trim_start)
       .function("getTrimEnd", &Music_disc::get_trim_end)
