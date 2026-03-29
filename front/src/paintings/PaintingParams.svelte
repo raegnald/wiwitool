@@ -4,7 +4,7 @@
   import Button from "../components/Button.svelte";
 
   export let currentRatio: string, title: string, author: string;
-  export let showFrameOptions: boolean;
+  export let showMoreOptions: boolean;
 
   export let oninput: (e?: Event) => void = () => {};
   export let onchange: (e?: Event) => void = () => {};
@@ -36,11 +36,11 @@
 
   <Button
     secondary
-    hugeBorder={showFrameOptions}
-    onclick={() => (showFrameOptions = !showFrameOptions)}
-    icon="Square"
+    hugeBorder={showMoreOptions}
+    onclick={() => (showMoreOptions = !showMoreOptions)}
+    icon="Cog"
   >
-    Frame options
+    More options
   </Button>
 </div>
 

@@ -26,6 +26,7 @@ private:
   std::vector<std::shared_ptr<Painting>> paintings{};
 
   std::vector<std::string> get_painting_ids(void) const;
+  std::vector<std::string> get_placeable_painting_ids(void) const;
 
   // IDEA: Show tree file structure and assign every file the method
   // that generates it.

@@ -68,6 +68,11 @@ public:
   bool is_frame_procedural(void) const;
   bool is_frame_nonexistent(void) const;
 
+  // Placeable
+
+  void set_placeable(bool p) { placeable = p; }
+  bool is_placeable(void) const { return placeable; }
+
   // Serialisation
 
   friend void to_json(nlohmann::json &j, const Painting &p);
@@ -86,6 +91,8 @@ private:
   Painting_frame_generator frame_generator = Procedural_frame_generator{};
 
   Painting_ratio conversion_ratio{Nearest};
+
+  bool placeable{true};
 
   inline void compute_painting_and_icon_if_necessary(void) const {
     // if (not original_image.empty() and (painting.empty() or icon.empty()))

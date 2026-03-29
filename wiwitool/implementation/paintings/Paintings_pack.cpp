@@ -23,14 +23,13 @@ void Paintings_pack::generate_data(void) {
 
     std::ofstream placeable_json{painting_variant_folder / "placeable.json"};
 
-    const auto painting_ids = get_painting_ids();
+    const auto placeable_painting_ids = get_placeable_painting_ids();
     json content;
 
     content["replace"] = false;
-    content["values"] = painting_ids;
+    content["values"] = placeable_painting_ids;
 
     placeable_json << content.dump(4) << std::endl;
-
   }
 
   // Custom paintings namespace
@@ -85,6 +84,17 @@ std::vector<std::string> Paintings_pack::get_painting_ids(void) const {
 
   for (const auto &painting : paintings)
     painting_ids.push_back(paintings_namespace + ":" + painting->string_id());
+
+  return painting_ids;
+}
+
+std::vector<std::string>
+Paintings_pack::get_placeable_painting_ids(void) const {
+  auto painting_ids = std::vector<std::string>{};
+
+  for (const auto &painting : paintings)
+    if (painting->is_placeable())
+      painting_ids.push_back(paintings_namespace + ":" + painting->string_id());
 
   return painting_ids;
 }

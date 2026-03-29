@@ -207,6 +207,8 @@ EMSCRIPTEN_BINDINGS(painting) {
       .function("isFrameProcedural", &Painting::is_frame_procedural)
       .function("isFrameNonexistent", &Painting::is_frame_nonexistent)
 
+      .property("placeable", &Painting::is_placeable, &Painting::set_placeable)
+
       .function("refresh", &Painting::refresh);
 }
 #endif

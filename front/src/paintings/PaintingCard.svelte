@@ -16,7 +16,7 @@
 
   export let wrapper: PaintingWrapper;
 
-  let showFrameOptions = false;
+  let showMoreOptions = false;
   let colourPicker: HTMLInputElement;
 
   let originalImageCanvas: HTMLCanvasElement;
@@ -33,6 +33,7 @@
   let proceduralFrame = wrapper.cppPainting.isFrameProcedural();
   let frameTint: string;
   let frameSeed: string;
+  let placeable: boolean;
 
   // External changes that modify local UI state
   $: if (wrapper && wrapper.cppPainting) {
@@ -40,6 +41,7 @@
     author = wrapper.cppPainting.author;
     currentRatio = wrapper.cppPainting.ratio;
     selected = wrapper.selected;
+    placeable = wrapper.cppPainting.placeable;
 
     const settings = wrapper.cppPainting.getProceduralSettings();
     if (settings) {
@@ -59,6 +61,7 @@
     wrapper.cppPainting.author = author;
     wrapper.cppPainting.ratio = currentRatio;
     wrapper.selected = selected;
+    wrapper.cppPainting.placeable = placeable;
 
     const settings = wrapper.cppPainting.getProceduralSettings();
     if (settings) {
@@ -174,56 +177,67 @@
       bind:currentRatio
       bind:title
       bind:author
-      bind:showFrameOptions
+      bind:showMoreOptions
       onchange={syncToCpp}
     />
     <PaintingCanvas bind:canvas={paintingCanvas} />
   </div>
 
-  <div style={`display: ${showFrameOptions ? "block" : "none"}`}>
-    <div class="procedural-frame-card">
-      <div class="procedural-frame-params">
-        <Wiwicheckbox
-          bind:checked={disableFrame}
-          onclick={() => {
-            if (disableFrame) wrapper.cppPainting.useNoFrame();
-            else wrapper.cppPainting.useProceduralFrame();
+  <div
+    style={`display: ${showMoreOptions ? "flex" : "none"}`}
+    class="more-options"
+  >
+    <div class="more-options-section">
+      <span class="more-options-section-label">Frame options</span>
+      <Wiwicheckbox
+        bind:checked={disableFrame}
+        onclick={() => {
+          if (disableFrame) wrapper.cppPainting.useNoFrame();
+          else wrapper.cppPainting.useProceduralFrame();
 
-            refresh();
-          }}
-        >
-          Disable frame
-        </Wiwicheckbox>
+          refresh();
+        }}
+      >
+        Disable frame
+      </Wiwicheckbox>
 
-        <div class="colour-container">
-          <Button onclick={() => colourPicker.showPicker()}>
-            Frame colour
-            <div
-              style={`width: 15px; height: 15px; background: ${frameTint}; border-radius: 100%; border: 1px solid #ccc`}
-            ></div>
-          </Button>
-
-          <input
-            bind:this={colourPicker}
-            name="frame-colour"
-            type="color"
-            bind:value={frameTint}
-            oninput={syncToCpp}
-            onchange={syncToCpp}
-          />
-        </div>
-
+      <div class="colour-container">
         <Button
-          icon="Dices"
-          onclick={() => {
-            frameSeed =
-              "" + Math.floor(Number.MAX_SAFE_INTEGER * Math.random());
-            syncToCpp();
-          }}
+          disabled={disableFrame}
+          onclick={() => colourPicker.showPicker()}
         >
-          Frame seed
+          Frame colour
+          <div
+            style={`width: 15px; height: 15px; background: ${frameTint}; border-radius: 100%; border: 1px solid #ccc`}
+          ></div>
         </Button>
+
+        <input
+          bind:this={colourPicker}
+          name="frame-colour"
+          type="color"
+          bind:value={frameTint}
+          oninput={syncToCpp}
+          onchange={syncToCpp}
+        />
       </div>
+
+      <Button
+        disabled={disableFrame}
+        icon="Dices"
+        onclick={() => {
+          frameSeed = "" + Math.floor(Number.MAX_SAFE_INTEGER * Math.random());
+          syncToCpp();
+        }}
+      >
+        Frame seed
+      </Button>
+    </div>
+    <div class="more-options-section">
+      <span class="more-options-section-label">Other options</span>
+      <Wiwicheckbox bind:checked={placeable} onclick={syncToCpp}>
+        Painting is placeable
+      </Wiwicheckbox>
     </div>
   </div>
 </SelectableCard>
@@ -235,26 +249,31 @@
     gap: 10px;
   }
 
-  .procedural-frame-card {
+  .more-options {
     display: flex;
-    align-items: stretch;
-    justify-content: space-between;
-
+    flex-direction: column;
+    gap: 10px;
     margin-top: 15px;
     padding-top: 15px;
     border-top: 1px solid #ccc;
   }
 
   @media (prefers-color-scheme: dark) {
-    .procedural-frame-card {
+    .more-options {
       border-top: 1px solid #555;
     }
   }
 
-  .procedural-frame-params {
+  .more-options-section {
     display: flex;
     gap: 10px;
+    align-items: center;
     font-size: 90%;
+  }
+
+  .more-options-section-label {
+    font-weight: 500;
+    width: 120px;
   }
 
   .colour-container {
