@@ -15,6 +15,111 @@
     </p>
 
     <div class="version-header">
+      <h2>v0.3.0</h2>
+      <time datetime="2026-03-29">March 28, 2026</time>
+    </div>
+
+    <p>
+      This update focuses heavily on Quality-of-Life improvements, a refreshed
+      user interface, and under-the-hood optimisations. Music discs now support
+      bulk management and comparator output customisation, while paintings allow
+      you to toggle the frame on and off.
+    </p>
+
+    <dl>
+      <dt>Update: Music discs</dt>
+      <dd>
+        <ul>
+          <li>
+            <b>Bulk management</b>: Implemented bulk actions allowing you to
+            easily select, deselect, delete, and change the artist, comparator
+            output and silence gap of multiple music discs at once.
+          </li>
+          <li>
+            <b>Comparator outputs</b>: You can now manually set or randomise the
+            redstone power emitted by a comparator when a music disc is playing
+            in a jukebox.
+          </li>
+          <li>
+            <b>Card interactions</b>: Added the ability to delete individual
+            music disc cards.
+          </li>
+          <li>
+            <b>Visuals</b>: Applied stylistic improvements to the music disc
+            interface
+          </li>
+        </ul>
+      </dd>
+
+      <dt>Update: Paintings</dt>
+      <dd>
+        <ul>
+          <li>
+            <b>Frame toggling</b>: The procedurally generated painting frames
+            can now be disabled entirely if you prefer borderless artwork.
+          </li>
+          <li>
+            <b>Quality bump</b>: Reduced the downscaling amount applied to
+            uploaded images to preserve better visual quality. This is done
+            because in the future cropping will be available.
+          </li>
+          <li>
+            <b>Safety checks</b>: Added a confirmation prompt when deleting a
+            painting to prevent accidental data loss.
+          </li>
+          <li>
+            <b>Guidance</b>: Added descriptive text to help guide new users
+            through the paintings tool.
+          </li>
+        </ul>
+      </dd>
+
+      <dt>Interface & UX improvements</dt>
+      <dd>
+        <ul>
+          <li>
+            <b>Refreshed navigation</b>: Switched to a new tab bar style with
+            rounded corners and a subtle blur gradient.
+          </li>
+          <li>
+            <b>Selection counters</b>: Added counters to indicate how many
+            paintings and discs are selected.
+          </li>
+          <li>
+            <b>Button styling</b>: Important buttons now feature an animated
+            moving border to highlight their presence.
+          </li>
+          <li>
+            <b>Drag & drop:</b> Now they look better, having a consistent and pretty
+            UI.
+          </li>
+        </ul>
+      </dd>
+
+      <dt>Performance & bug fixes</dt>
+      <dd>
+        <ul>
+          <li>
+            <b>Memory optimisations</b>: The tool now avoids unnecessary memory
+            copying for paintings, music discs and all images, and aggressively
+            frees up browser resources once a pack is generated.
+          </li>
+        </ul>
+      </dd>
+
+      <dt>
+        Incompatibilities
+        <TriangleAlert />
+      </dt>
+      <dd>
+        Importing a pack from any older version will <b>not</b> work. The Wiwitool
+        still needs to mature until it is in a state of file format stability. For
+        now we are focused on bringing new features, maintaining version-to-version
+        file compatibility will be a priority at a later date.
+      </dd>
+    </dl>
+
+    <div class="version-header">
       <h2>v0.2</h2>
       <time datetime="2026-03-15">March 15, 2026</time>
     </div>
