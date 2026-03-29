@@ -286,7 +286,8 @@ void to_json(nlohmann::json &j, const Music_disc &d) {
                      {"sample_rate", d.sample_rate},
                      {"duration_seconds", d.duration_seconds},
                      {"trim_start", d.trim_start},
-                     {"trim_end", d.trim_end}};
+                     {"trim_end", d.trim_end},
+                     {"silence_gap", d.silence_gap}};
 
   if (d.ogg_data.empty())
     j["ogg_data"] = nullptr;
@@ -300,6 +301,7 @@ void from_json(const nlohmann::json &j, Music_disc &d) {
   j.at("title").get_to(d.title);
   j.at("artist").get_to(d.artist);
   j.at("comparator_output").get_to(d.comparator_output);
+  j.at("silence_gap").get_to(d.silence_gap);
 
   j.at("cover").get_to(d.cover);
 
