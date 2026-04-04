@@ -19,7 +19,7 @@ NATIVE_PKG_FLAGS := $(shell pkg-config --cflags vorbisenc vorbis ogg)
 CXXFLAGS_NATIVE  := $(CXXFLAGS) $(NATIVE_PKG_FLAGS)
 
 # WASM-specific flags (emscripten)
-WASM_PORT_FLAGS := -s USE_VORBIS=1 -s USE_OGG=1
+WASM_PORT_FLAGS := -s USE_VORBIS=1 -s USE_OGG=1 --bind -DEMSCRIPTEN
 CXXFLAGS_WASM   := $(CXXFLAGS) $(WASM_PORT_FLAGS) -O3 -flto
 
 # Directories
@@ -111,9 +111,8 @@ $(WASM_TARGET): $(WASM_OBJS)
 	$(CXX_WASM) $(CXXFLAGS_WASM) \
 		$(WASM_OBJS) \
 		$(EXT_OBJS) \
-		--bind \
 		-o $@ \
-		-s NO_DISABLE_EXCEPTION_CATCHING \
+		-s DISABLE_EXCEPTION_CATCHING=0 \
 		-s WASM=1 \
 		-s ALLOW_MEMORY_GROWTH=1 \
 		-s FORCE_FILESYSTEM=1 \
