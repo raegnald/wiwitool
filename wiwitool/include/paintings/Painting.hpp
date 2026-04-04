@@ -38,7 +38,10 @@ public:
   inline std::string get_author(void) const { return author; }
 
   // Getter/setter for conversion ratio
-  inline void set_ratio(Painting_ratio ratio) { conversion_ratio = ratio; refresh(); }
+  inline void set_ratio(Painting_ratio ratio) {
+    conversion_ratio = ratio;
+    invalidate_cache();
+  }
   inline Painting_ratio get_ratio(void) const { return conversion_ratio; }
 
   // Getters for the painting and icon images
@@ -101,9 +104,14 @@ private:
 
   bool placeable{true};
 
+  inline void invalidate_cache(void) const {
+    painting = Image_data{};
+    icon = Image_data{};
+  }
+
   inline void compute_painting_and_icon_if_necessary(void) const {
-    // if (not original_image.empty() and (painting.empty() or icon.empty()))
-    refresh();
+    if (not original_image.empty() and (painting.empty() or icon.empty()))
+      refresh();
   }
 };
 
