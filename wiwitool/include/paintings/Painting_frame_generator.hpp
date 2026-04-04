@@ -11,7 +11,7 @@
 
 class No_frame_generator {
 public:
-  Image_data get(Painting_ratio) const;
+  Image_data get(Painting_ratio, size_t pixels_per_block) const;
 
   friend void to_json(nlohmann::json &j, const No_frame_generator &g);
   friend void from_json(const nlohmann::json &j, No_frame_generator &g);
@@ -27,7 +27,7 @@ public:
   void set_tint(Image_data::Pixel t) { tint = t; }
   Image_data::Pixel get_tint(void) const { return tint; }
 
-  Image_data get(Painting_ratio) const;
+  Image_data get(Painting_ratio, size_t pixels_per_block) const;
 
   friend void to_json(nlohmann::json &j, const Procedural_frame_generator &g);
   friend void from_json(const nlohmann::json &j, Procedural_frame_generator &g);
@@ -40,5 +40,5 @@ private:
 using Painting_frame_generator =
     std::variant<No_frame_generator, Procedural_frame_generator>;
 
-
-Image_data get_frame(Painting_frame_generator, Painting_ratio);
+Image_data get_frame(Painting_frame_generator, Painting_ratio,
+                     size_t pixels_per_block);

@@ -13,6 +13,7 @@
   import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
   import SelectableCard from "../components/SelectableCard.svelte";
   import Button from "../components/Button.svelte";
+  import { RulerIcon, SquareIcon, WrenchIcon } from "@lucide/svelte";
 
   export let wrapper: PaintingWrapper;
 
@@ -35,6 +36,8 @@
   let frameSeed: string;
   let placeable: boolean;
 
+  let downscalePower: number;
+
   // External changes that modify local UI state
   $: if (wrapper && wrapper.cppPainting) {
     title = wrapper.cppPainting.title;
@@ -42,6 +45,7 @@
     currentRatio = wrapper.cppPainting.ratio;
     selected = wrapper.selected;
     placeable = wrapper.cppPainting.placeable;
+    downscalePower = Math.log2(wrapper.cppPainting.pixelPerBlock);
 
     const settings = wrapper.cppPainting.getProceduralSettings();
     if (settings) {
@@ -62,6 +66,7 @@
     wrapper.cppPainting.ratio = currentRatio;
     wrapper.selected = selected;
     wrapper.cppPainting.placeable = placeable;
+    wrapper.cppPainting.pixelPerBlock = Math.pow(2, downscalePower);
 
     const settings = wrapper.cppPainting.getProceduralSettings();
     if (settings) {
@@ -188,7 +193,39 @@
     class="more-options"
   >
     <div class="more-options-section">
-      <span class="more-options-section-label">Frame options</span>
+      <span class="more-options-section-label">
+        <RulerIcon size="1.5em" />
+        Resolution
+      </span>
+
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          align-items: center;
+          gap: 10px"
+      >
+        <input
+          id="range"
+          type="range"
+          min="3"
+          max="8"
+          bind:value={downscalePower}
+          oninput={syncToCpp}
+          step="1"
+        />
+        <span class="pill">
+          {Math.pow(2, downscalePower)} pixels / block
+        </span>
+      </div>
+    </div>
+
+    <div class="more-options-section">
+      <span class="more-options-section-label">
+        <SquareIcon size="1.5em" />
+        Frame options
+      </span>
       <Wiwicheckbox
         bind:checked={disableFrame}
         onclick={() => {
@@ -233,8 +270,12 @@
         Frame seed
       </Button>
     </div>
+
     <div class="more-options-section">
-      <span class="more-options-section-label">Other options</span>
+      <span class="more-options-section-label">
+        <WrenchIcon size="1.5em" />
+        Other options
+      </span>
       <Wiwicheckbox bind:checked={placeable} onclick={syncToCpp}>
         Painting is placeable
       </Wiwicheckbox>
@@ -273,7 +314,17 @@
 
   .more-options-section-label {
     font-weight: 500;
-    width: 120px;
+    color: #333;
+    width: 150px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .more-options-section-label {
+      color: #eee;
+    }
   }
 
   .colour-container {

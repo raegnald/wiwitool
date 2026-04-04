@@ -73,12 +73,18 @@ public:
   void set_placeable(bool p) { placeable = p; }
   bool is_placeable(void) const { return placeable; }
 
+  // Pixels per block
+
+  void set_pixels_per_block(size_t ppb) { pixels_per_block = ppb; }
+  size_t get_pixels_per_block(void) const { return pixels_per_block; }
+
   // Serialisation
 
   friend void to_json(nlohmann::json &j, const Painting &p);
   friend void from_json(const nlohmann::json &j, Painting &p);
 
 private:
+  static constexpr inline size_t default_resolution{16}; // in pixels_per_block
   static inline unsigned int next_painting_id{0};
 
   unsigned int painting_id;
@@ -87,6 +93,7 @@ private:
 
   Image_data original_image;
   mutable Image_data painting, icon;
+  size_t pixels_per_block{default_resolution};
 
   Painting_frame_generator frame_generator = Procedural_frame_generator{};
 
