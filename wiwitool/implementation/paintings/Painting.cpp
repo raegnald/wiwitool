@@ -115,6 +115,11 @@ void to_json(nlohmann::json &j, const Painting &p) {
 
 void from_json(const nlohmann::json &j, Painting &p) {
   j.at("id").get_to(p.painting_id);
+
+  // Prevent string_id() collisions after loading an existing pack
+  if (p.painting_id >= Painting::next_painting_id)
+    Painting::next_painting_id = p.painting_id + 1;
+
   j.at("title").get_to(p.title);
   j.at("author").get_to(p.author);
   j.at("ratio").get_to(p.conversion_ratio);
