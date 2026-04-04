@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <memory>
 
+#include "paintings/Painting_ratio.hpp"
 #include "util/strutil.hpp"
 #include "util/wiwidebug.hpp"
 
@@ -192,9 +193,11 @@ void Paintings_pack::generate_painting_variant_json(
   json data;
 
   data["asset_id"] = painting_id(painting);
-  // I still don't like for the scale of 16 to be hard-coded
-  data["width"] = painting.painting_data().width() / 16;
-  data["height"] = painting.painting_data().height() / 16;
+
+  const auto [width, height] = ratio_sizes(painting.get_ratio());
+  data["width"] = width;
+  data["height"] = height;
+
   data["title"].push_back({{"text", painting.get_title()}});
   data["author"].push_back({{"text", painting.get_author()}});
 

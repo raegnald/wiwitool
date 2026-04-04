@@ -17,8 +17,9 @@ Image_data downscale(Image_data image, Painting_ratio ratio, int scale = 16) {
 }
 
 Image_data frame(const Painting_frame_generator &frame_generator,
-                 Image_data image, Painting_ratio ratio) {
-  const auto frame_data = get_frame(frame_generator, ratio);
+                 Image_data image, Painting_ratio ratio,
+                 size_t pixels_per_block) {
+  const auto frame_data = get_frame(frame_generator, ratio, pixels_per_block);
 
   if (frame_data.empty())
     return image;
@@ -62,12 +63,12 @@ Image_data Painting_converter::miniatureise(void) {
 
 Image_data
 Painting_converter::convert(const Painting_frame_generator &frame_generator,
-                            Painting_ratio ratio) {
+                            size_t pixels_per_block, Painting_ratio ratio) {
   if (ratio == Nearest) ratio = nearest_ratio(image.width(), image.height());
 
   auto cropped = crop(image, ratio);
-  auto downscaled = downscale(std::move(cropped), ratio);
-  auto framed = frame(frame_generator, std::move(downscaled), ratio);
+  auto downscaled = downscale(std::move(cropped), ratio, pixels_per_block);
+  auto framed = frame(frame_generator, std::move(downscaled), ratio, pixels_per_block);
 
   return framed;
 }

@@ -58,8 +58,9 @@ const Image_data Painting::icon_data(void) const {
 
 void Painting::refresh(void) const {
   auto converter = Painting_converter{original_image};
-  painting = converter.convert(frame_generator, conversion_ratio);
   icon = converter.miniatureise();
+  painting =
+      converter.convert(frame_generator, pixels_per_block, conversion_ratio);
 
   wiwidebug std::println("Painting and icon image data computed!");
 }
@@ -208,6 +209,8 @@ EMSCRIPTEN_BINDINGS(painting) {
       .function("isFrameNonexistent", &Painting::is_frame_nonexistent)
 
       .property("placeable", &Painting::is_placeable, &Painting::set_placeable)
+      .property("pixelPerBlock", &Painting::get_pixels_per_block,
+                &Painting::set_pixels_per_block)
 
       .function("refresh", &Painting::refresh);
 }

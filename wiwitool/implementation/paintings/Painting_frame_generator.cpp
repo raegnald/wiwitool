@@ -5,38 +5,49 @@
 #include "paintings/Painting_ratio.hpp"
 
 #include "stb_perlin.h"
+#include "util/wiwidebug.hpp"
 
+#include <algorithm>
 #include <cstdlib>
 #include <filesystem>
 #include <format>
 #include <variant>
 
 Image_data get_frame(Painting_frame_generator frame_generator,
-                     Painting_ratio ratio) {
-  return std::visit([ratio](const auto &gen) { return gen.get(ratio); },
-                    frame_generator);
+                     Painting_ratio ratio, size_t pixels_per_block) {
+  return std::visit(
+      [&](const auto &gen) { return gen.get(ratio, pixels_per_block); },
+      frame_generator);
 }
 
-Image_data No_frame_generator::get(Painting_ratio) const {
+Image_data No_frame_generator::get(Painting_ratio, size_t) const {
   return Image_data{};
 }
 
-Image_data Procedural_frame_generator::get(Painting_ratio ratio) const {
+Image_data Procedural_frame_generator::get(Painting_ratio ratio,
+                                           size_t pixels_per_block) const {
   // Block size
   const auto [bw, bh] = ratio_sizes(ratio);
-  // Pixel size
-  const size_t pw = static_cast<size_t>(16 * bw),
-               ph = static_cast<size_t>(16 * bh);
+  // Pixel size of the painting
+  const size_t pw = static_cast<size_t>(pixels_per_block * bw);
+  const size_t ph = static_cast<size_t>(pixels_per_block * bh);
 
   Image_data im{pw, ph};
 
   const hsv base{tint};
 
+  auto border_width = std::max({1uz, pixels_per_block / 16});
+
   for (size_t y = 0; y < ph; y++) {
     for (size_t x = 0; x < pw; x++) {
 
-      if (y != 0 and y != ph - 1 and x != 0)
-        x = pw - 1;
+      const bool inside_top_bottom_border =
+          y < border_width or y >= (ph - border_width);
+      const bool inside_left_right_border =
+          x < border_width or x >= (pw - border_width);
+
+      if (not inside_top_bottom_border and not inside_left_right_border)
+        continue;
 
       constexpr float A = 0.25;
       constexpr auto power = 4;
