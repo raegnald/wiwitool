@@ -49,32 +49,37 @@
     selected = w.selected;
     placeable = w.cppPainting.placeable;
 
-    let needsRealRefresh = false;
+    let canvasNeedsUpdate = false;
 
     if (currentRatio !== w.cppPainting.ratio) {
       currentRatio = w.cppPainting.ratio;
-      needsRealRefresh = true;
+      canvasNeedsUpdate = true;
     }
 
     let currentDownscale = Math.log2(w.cppPainting.pixelPerBlock);
     if (downscalePower !== currentDownscale) {
       downscalePower = currentDownscale;
-      needsRealRefresh = true;
+      canvasNeedsUpdate = true;
     }
 
     const settings = w.cppPainting.getProceduralSettings();
     if (settings) {
       if (frameSeed !== String(settings.seed)) {
         frameSeed = String(settings.seed);
-        needsRealRefresh = true;
+        canvasNeedsUpdate = true;
       }
       if (frameTint !== settings.tintHex) {
         frameTint = settings.tintHex;
-        needsRealRefresh = true;
+        canvasNeedsUpdate = true;
       }
     }
 
-    if (needsRealRefresh) refresh();
+    if (!w.cachedOriginalJS || !w.cachedPaintingJS) canvasNeedsUpdate = true;
+
+    if (canvasNeedsUpdate) {
+      w.cachedPaintingJS = undefined;
+      updateCanvases();
+    }
   }
 
   // Fast sync for typing metadata
@@ -90,7 +95,6 @@
   function syncVisualsAndRefresh() {
     if (!wrapper.cppPainting) return;
 
-    wrapper.cppPainting.ratio = currentRatio;
     wrapper.cppPainting.pixelPerBlock = Math.pow(2, downscalePower);
 
     const settings = wrapper.cppPainting.getProceduralSettings();
@@ -99,7 +103,15 @@
       settings.tintHex = frameTint;
     }
 
-    refresh();
+    // Since setting the ratio in C++ automatically triggers a C++ refresh(),
+    // we do this last.
+    wrapper.cppPainting.ratio = currentRatio;
+
+    // Safety net in case ratio didn't change but the seed/scale did
+    wrapper.cppPainting.refresh();
+
+    wrapper.cachedPaintingJS = undefined;
+    updateCanvases();
   }
 
   function scalePixelCanvas(c: HTMLCanvasElement, imgW: number, imgH: number) {
@@ -134,22 +146,55 @@
     img.delete();
   }
 
+  function extractJSImageData(img: ImageData) {
+    const width = img.width;
+    const height = img.height;
+
+    const pixelView = img.getPixels();
+    const clampedArray = new Uint8ClampedArray(pixelView);
+
+    return new globalThis.ImageData(clampedArray, width, height);
+  }
+
+  function drawJSImageData(
+    canvas: HTMLCanvasElement,
+    jsImageData: globalThis.ImageData,
+  ) {
+    if (!canvas) return;
+
+    scalePixelCanvas(canvas, jsImageData.width, jsImageData.height);
+    const ctx = canvas.getContext("2d");
+    if (ctx) ctx.putImageData(jsImageData, 0, 0);
+  }
+
   function renderOriginalImage() {
-    renderCppImage(originalImageCanvas, wrapper.cppPainting.originalData());
+    if (!wrapper.cachedOriginalJS) {
+      const img = wrapper.cppPainting.originalData();
+      wrapper.cachedOriginalJS = extractJSImageData(img);
+      img.delete();
+    }
+    drawJSImageData(originalImageCanvas, wrapper.cachedOriginalJS);
   }
 
   function renderPainting() {
-    renderCppImage(paintingCanvas, wrapper.cppPainting.paintingData());
+    if (!wrapper.cachedPaintingJS) {
+      const img = wrapper.cppPainting.paintingData();
+      wrapper.cachedPaintingJS = extractJSImageData(img);
+      img.delete();
+    }
+    drawJSImageData(paintingCanvas, wrapper.cachedPaintingJS);
   }
 
   function rotateClockwise() {
     wrapper.cppPainting.rotateClockwise();
-    paintingsStore.set($paintingsStore);
+    wrapper.cachedOriginalJS = wrapper.cachedPaintingJS = undefined;
+    paintingsStore.set($paintingsStore); // This triggers pullFromCpp
   }
 
   function rotateAnticlockwise() {
     wrapper.cppPainting.rotateAnticlockwise();
-    paintingsStore.set($paintingsStore);
+    wrapper.cachedOriginalJS = wrapper.cachedPaintingJS = undefined;
+    paintingsStore.set($paintingsStore); // This triggers pullFromCpp
   }
 
   function remove() {
@@ -183,16 +228,12 @@
     });
   }
 
-  function refresh() {
-    wrapper.cppPainting.refresh();
-
+  function updateCanvases() {
     renderPainting();
     renderOriginalImage();
-
-    wrapper.cppPainting.ratio = currentRatio;
   }
 
-  onMount(refresh);
+  onMount(updateCanvases);
 </script>
 
 <SelectableCard
@@ -260,7 +301,8 @@
           if (disableFrame) wrapper.cppPainting.useNoFrame();
           else wrapper.cppPainting.useProceduralFrame();
 
-          refresh();
+          wrapper.cachedPaintingJS = undefined;
+          updateCanvases();
         }}
       >
         Disable frame
