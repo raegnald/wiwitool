@@ -20,7 +20,7 @@
   import MusicDiscsTab from "./tabs/MusicDiscsTab.svelte";
   import { musicDiscsStore } from "./stores/musicDiscsStore";
 
-  let module: MainModule | null = $state(null);
+  let module: MainModule | null = $state.raw(null);
 
   function resetApp() {
     paintingsStore.set([]);
