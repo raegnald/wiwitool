@@ -6,8 +6,8 @@
   export let currentRatio: string, title: string, author: string;
   export let showMoreOptions: boolean;
 
-  export let oninput: (e?: Event) => void = () => {};
-  export let onchange: (e?: Event) => void = () => {};
+  export let onMetadataChange: (e?: Event) => void = () => {};
+  export let onVisualChange: (e?: Event) => void = () => {};
 </script>
 
 <div class="transformation-ratio-selection">
@@ -15,12 +15,22 @@
     <label>
       <TextCursorIcon />
       <span> Title </span>
-      <input type="text" bind:value={title} {oninput} {onchange} />
+      <input
+        type="text"
+        bind:value={title}
+        oninput={onMetadataChange}
+        onchange={onMetadataChange}
+      />
     </label>
     <label>
       <UserIcon />
       <span> Author </span>
-      <input type="text" bind:value={author} {oninput} {onchange} />
+      <input
+        type="text"
+        bind:value={author}
+        oninput={onMetadataChange}
+        onchange={onMetadataChange}
+      />
     </label>
   </div>
 
@@ -30,7 +40,11 @@
     <label>
       <ProportionsIcon />
       <span> Aspect ratio&nbsp; </span>
-      <RatioSelect bind:value={currentRatio} {oninput} {onchange} />
+      <RatioSelect
+        bind:value={currentRatio}
+        oninput={onVisualChange}
+        onchange={onVisualChange}
+      />
     </label>
   </div>
 

@@ -38,34 +38,59 @@
 
   let downscalePower: number;
 
-  // External changes that modify local UI state
-  $: if (wrapper && wrapper.cppPainting) {
-    title = wrapper.cppPainting.title;
-    author = wrapper.cppPainting.author;
-    currentRatio = wrapper.cppPainting.ratio;
-    selected = wrapper.selected;
-    placeable = wrapper.cppPainting.placeable;
-    downscalePower = Math.log2(wrapper.cppPainting.pixelPerBlock);
+  // React to wrapper changes
+  $: pullFromCpp(wrapper);
 
-    const settings = wrapper.cppPainting.getProceduralSettings();
-    if (settings) {
-      frameSeed = String(settings.seed);
-      frameTint = settings.tintHex;
+  function pullFromCpp(w: PaintingWrapper) {
+    if (!w || !w.cppPainting) return;
 
-      wrapper = wrapper;
+    title = w.cppPainting.title;
+    author = w.cppPainting.author;
+    selected = w.selected;
+    placeable = w.cppPainting.placeable;
+
+    let needsRealRefresh = false;
+
+    if (currentRatio !== w.cppPainting.ratio) {
+      currentRatio = w.cppPainting.ratio;
+      needsRealRefresh = true;
     }
 
-    refresh();
+    let currentDownscale = Math.log2(w.cppPainting.pixelPerBlock);
+    if (downscalePower !== currentDownscale) {
+      downscalePower = currentDownscale;
+      needsRealRefresh = true;
+    }
+
+    const settings = w.cppPainting.getProceduralSettings();
+    if (settings) {
+      if (frameSeed !== String(settings.seed)) {
+        frameSeed = String(settings.seed);
+        needsRealRefresh = true;
+      }
+      if (frameTint !== settings.tintHex) {
+        frameTint = settings.tintHex;
+        needsRealRefresh = true;
+      }
+    }
+
+    if (needsRealRefresh) refresh();
   }
 
-  function syncToCpp() {
+  // Fast sync for typing metadata
+  function syncMetadata() {
     if (!wrapper.cppPainting) return;
-
     wrapper.cppPainting.title = title;
     wrapper.cppPainting.author = author;
-    wrapper.cppPainting.ratio = currentRatio;
     wrapper.selected = selected;
     wrapper.cppPainting.placeable = placeable;
+  }
+
+  // Heavy sync for visual parameters (slider, ratio, colors)
+  function syncVisualsAndRefresh() {
+    if (!wrapper.cppPainting) return;
+
+    wrapper.cppPainting.ratio = currentRatio;
     wrapper.cppPainting.pixelPerBlock = Math.pow(2, downscalePower);
 
     const settings = wrapper.cppPainting.getProceduralSettings();
@@ -73,6 +98,8 @@
       settings.seed = BigInt(frameSeed);
       settings.tintHex = frameTint;
     }
+
+    refresh();
   }
 
   function scalePixelCanvas(c: HTMLCanvasElement, imgW: number, imgH: number) {
@@ -183,7 +210,8 @@
       bind:title
       bind:author
       bind:showMoreOptions
-      onchange={syncToCpp}
+      onMetadataChange={syncMetadata}
+      onVisualChange={syncVisualsAndRefresh}
     />
     <PaintingCanvas bind:canvas={paintingCanvas} />
   </div>
@@ -212,7 +240,7 @@
           min="3"
           max="8"
           bind:value={downscalePower}
-          oninput={syncToCpp}
+          oninput={syncVisualsAndRefresh}
           step="1"
         />
         <span class="pill">
@@ -254,8 +282,8 @@
           name="frame-colour"
           type="color"
           bind:value={frameTint}
-          oninput={syncToCpp}
-          onchange={syncToCpp}
+          oninput={syncVisualsAndRefresh}
+          onchange={syncVisualsAndRefresh}
         />
       </div>
 
@@ -264,7 +292,7 @@
         icon="Dices"
         onclick={() => {
           frameSeed = "" + Math.floor(Number.MAX_SAFE_INTEGER * Math.random());
-          syncToCpp();
+          syncVisualsAndRefresh();
         }}
       >
         Frame seed
@@ -276,7 +304,7 @@
         <WrenchIcon size="1.5em" />
         Other options
       </span>
-      <Wiwicheckbox bind:checked={placeable} onclick={syncToCpp}>
+      <Wiwicheckbox bind:checked={placeable} onclick={syncMetadata}>
         Painting is placeable
       </Wiwicheckbox>
     </div>
