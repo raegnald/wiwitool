@@ -26,7 +26,7 @@ Painting::Painting(Image_data image_data)
   wiwidebug std::println("Loaded image from image data (painting id = {})",
                          painting_id);
 
-  refresh();
+  invalidate_cache();
 }
 
 std::shared_ptr<Painting> Painting::clone(void) const {
@@ -69,24 +69,24 @@ void Painting::rotate_clockwise(void) {
   original_image = original_image.rotate_clockwise();
   conversion_ratio = opposite_ratio(conversion_ratio);
 
-  refresh();
+  invalidate_cache();
 }
 
 void Painting::rotate_anticlockwise(void) {
   original_image = original_image.rotate_anticlockwise();
   conversion_ratio = opposite_ratio(conversion_ratio);
 
-  refresh();
+  invalidate_cache();
 }
 
 void Painting::use_procedural_frame() {
   frame_generator = Procedural_frame_generator{};
-  refresh();
+  invalidate_cache();
 }
 
 void Painting::use_no_frame() {
   frame_generator = No_frame_generator{};
-  refresh();
+  invalidate_cache();
 }
 
 Procedural_frame_generator *Painting::get_procedural_settings(void) {

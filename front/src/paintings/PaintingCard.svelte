@@ -38,34 +38,63 @@
 
   let downscalePower: number;
 
-  // External changes that modify local UI state
-  $: if (wrapper && wrapper.cppPainting) {
-    title = wrapper.cppPainting.title;
-    author = wrapper.cppPainting.author;
-    currentRatio = wrapper.cppPainting.ratio;
-    selected = wrapper.selected;
-    placeable = wrapper.cppPainting.placeable;
-    downscalePower = Math.log2(wrapper.cppPainting.pixelPerBlock);
+  // React to wrapper changes
+  $: pullFromCpp(wrapper);
 
-    const settings = wrapper.cppPainting.getProceduralSettings();
-    if (settings) {
-      frameSeed = String(settings.seed);
-      frameTint = settings.tintHex;
+  function pullFromCpp(w: PaintingWrapper) {
+    if (!w || !w.cppPainting) return;
 
-      wrapper = wrapper;
+    title = w.cppPainting.title;
+    author = w.cppPainting.author;
+    selected = w.selected;
+    placeable = w.cppPainting.placeable;
+
+    let canvasNeedsUpdate = false;
+
+    if (currentRatio !== w.cppPainting.ratio) {
+      currentRatio = w.cppPainting.ratio;
+      canvasNeedsUpdate = true;
     }
 
-    refresh();
+    let currentDownscale = Math.log2(w.cppPainting.pixelPerBlock);
+    if (downscalePower !== currentDownscale) {
+      downscalePower = currentDownscale;
+      canvasNeedsUpdate = true;
+    }
+
+    const settings = w.cppPainting.getProceduralSettings();
+    if (settings) {
+      if (frameSeed !== String(settings.seed)) {
+        frameSeed = String(settings.seed);
+        canvasNeedsUpdate = true;
+      }
+      if (frameTint !== settings.tintHex) {
+        frameTint = settings.tintHex;
+        canvasNeedsUpdate = true;
+      }
+    }
+
+    if (!w.cachedOriginalJS || !w.cachedPaintingJS) canvasNeedsUpdate = true;
+
+    if (canvasNeedsUpdate) {
+      w.cachedPaintingJS = undefined;
+      updateCanvases();
+    }
   }
 
-  function syncToCpp() {
+  // Fast sync for typing metadata
+  function syncMetadata() {
     if (!wrapper.cppPainting) return;
-
     wrapper.cppPainting.title = title;
     wrapper.cppPainting.author = author;
-    wrapper.cppPainting.ratio = currentRatio;
     wrapper.selected = selected;
     wrapper.cppPainting.placeable = placeable;
+  }
+
+  // Heavy sync for visual parameters (slider, ratio, colors)
+  function syncVisualsAndRefresh() {
+    if (!wrapper.cppPainting) return;
+
     wrapper.cppPainting.pixelPerBlock = Math.pow(2, downscalePower);
 
     const settings = wrapper.cppPainting.getProceduralSettings();
@@ -73,6 +102,16 @@
       settings.seed = BigInt(frameSeed);
       settings.tintHex = frameTint;
     }
+
+    // Since setting the ratio in C++ automatically triggers a C++ refresh(),
+    // we do this last.
+    wrapper.cppPainting.ratio = currentRatio;
+
+    // Safety net in case ratio didn't change but the seed/scale did
+    wrapper.cppPainting.refresh();
+
+    wrapper.cachedPaintingJS = undefined;
+    updateCanvases();
   }
 
   function scalePixelCanvas(c: HTMLCanvasElement, imgW: number, imgH: number) {
@@ -107,22 +146,55 @@
     img.delete();
   }
 
+  function extractJSImageData(img: ImageData) {
+    const width = img.width;
+    const height = img.height;
+
+    const pixelView = img.getPixels();
+    const clampedArray = new Uint8ClampedArray(pixelView);
+
+    return new globalThis.ImageData(clampedArray, width, height);
+  }
+
+  function drawJSImageData(
+    canvas: HTMLCanvasElement,
+    jsImageData: globalThis.ImageData,
+  ) {
+    if (!canvas) return;
+
+    scalePixelCanvas(canvas, jsImageData.width, jsImageData.height);
+    const ctx = canvas.getContext("2d");
+    if (ctx) ctx.putImageData(jsImageData, 0, 0);
+  }
+
   function renderOriginalImage() {
-    renderCppImage(originalImageCanvas, wrapper.cppPainting.originalData());
+    if (!wrapper.cachedOriginalJS) {
+      const img = wrapper.cppPainting.originalData();
+      wrapper.cachedOriginalJS = extractJSImageData(img);
+      img.delete();
+    }
+    drawJSImageData(originalImageCanvas, wrapper.cachedOriginalJS);
   }
 
   function renderPainting() {
-    renderCppImage(paintingCanvas, wrapper.cppPainting.paintingData());
+    if (!wrapper.cachedPaintingJS) {
+      const img = wrapper.cppPainting.paintingData();
+      wrapper.cachedPaintingJS = extractJSImageData(img);
+      img.delete();
+    }
+    drawJSImageData(paintingCanvas, wrapper.cachedPaintingJS);
   }
 
   function rotateClockwise() {
     wrapper.cppPainting.rotateClockwise();
-    paintingsStore.set($paintingsStore);
+    wrapper.cachedOriginalJS = wrapper.cachedPaintingJS = undefined;
+    paintingsStore.set($paintingsStore); // This triggers pullFromCpp
   }
 
   function rotateAnticlockwise() {
     wrapper.cppPainting.rotateAnticlockwise();
-    paintingsStore.set($paintingsStore);
+    wrapper.cachedOriginalJS = wrapper.cachedPaintingJS = undefined;
+    paintingsStore.set($paintingsStore); // This triggers pullFromCpp
   }
 
   function remove() {
@@ -156,16 +228,12 @@
     });
   }
 
-  function refresh() {
-    wrapper.cppPainting.refresh();
-
+  function updateCanvases() {
     renderPainting();
     renderOriginalImage();
-
-    wrapper.cppPainting.ratio = currentRatio;
   }
 
-  onMount(refresh);
+  onMount(updateCanvases);
 </script>
 
 <SelectableCard
@@ -183,7 +251,8 @@
       bind:title
       bind:author
       bind:showMoreOptions
-      onchange={syncToCpp}
+      onMetadataChange={syncMetadata}
+      onVisualChange={syncVisualsAndRefresh}
     />
     <PaintingCanvas bind:canvas={paintingCanvas} />
   </div>
@@ -212,7 +281,7 @@
           min="3"
           max="8"
           bind:value={downscalePower}
-          oninput={syncToCpp}
+          oninput={syncVisualsAndRefresh}
           step="1"
         />
         <span class="pill">
@@ -232,7 +301,8 @@
           if (disableFrame) wrapper.cppPainting.useNoFrame();
           else wrapper.cppPainting.useProceduralFrame();
 
-          refresh();
+          wrapper.cachedPaintingJS = undefined;
+          updateCanvases();
         }}
       >
         Disable frame
@@ -254,8 +324,8 @@
           name="frame-colour"
           type="color"
           bind:value={frameTint}
-          oninput={syncToCpp}
-          onchange={syncToCpp}
+          oninput={syncVisualsAndRefresh}
+          onchange={syncVisualsAndRefresh}
         />
       </div>
 
@@ -264,7 +334,7 @@
         icon="Dices"
         onclick={() => {
           frameSeed = "" + Math.floor(Number.MAX_SAFE_INTEGER * Math.random());
-          syncToCpp();
+          syncVisualsAndRefresh();
         }}
       >
         Frame seed
@@ -276,7 +346,7 @@
         <WrenchIcon size="1.5em" />
         Other options
       </span>
-      <Wiwicheckbox bind:checked={placeable} onclick={syncToCpp}>
+      <Wiwicheckbox bind:checked={placeable} onclick={syncMetadata}>
         Painting is placeable
       </Wiwicheckbox>
     </div>
