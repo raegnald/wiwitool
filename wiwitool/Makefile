@@ -20,7 +20,7 @@ CXXFLAGS_NATIVE  := $(CXXFLAGS) $(NATIVE_PKG_FLAGS)
 
 # WASM-specific flags (emscripten)
 WASM_PORT_FLAGS := -s USE_VORBIS=1 -s USE_OGG=1 --bind -DEMSCRIPTEN
-CXXFLAGS_WASM   := $(CXXFLAGS) $(WASM_PORT_FLAGS) -O3 -flto
+CXXFLAGS_WASM   := $(CXXFLAGS) $(WASM_PORT_FLAGS) -O3 -flto -fexceptions
 
 # Directories
 SRC_DIR    := implementation
@@ -115,10 +115,11 @@ $(WASM_TARGET): $(WASM_OBJS)
 		-s DISABLE_EXCEPTION_CATCHING=0 \
 		-s WASM=1 \
 		-s ALLOW_MEMORY_GROWTH=1 \
+		-s MAXIMUM_MEMORY=4GB \
 		-s FORCE_FILESYSTEM=1 \
 		-s MODULARIZE=1 \
 		-s EXPORT_NAME='createWiwitoolModule' \
-		-s EXPORTED_RUNTIME_METHODS='["FS"]' \
+		-s EXPORTED_RUNTIME_METHODS='["FS", "getExceptionMessage"]' \
 		--emit-tsd 'wiwitool.d.ts' \
 		--preload-file $(ASSETS_DIR)@/
 	@echo "WASM module created at: $@"
