@@ -9,7 +9,9 @@ private:
   struct mcversion_range { double min, max; };
 
   const std::string description;
-  const mcversion_range data_ver{88.0, 94.1}, res_ver{73.0, 76.0};
+
+  // https://minecraft.wiki/w/Pack_format#List_of_pack_formats
+  const mcversion_range data_ver{88.0, 101.1}, res_ver{73.0, 84.0};
 
   void generate_pack_skeletons(void);
 
