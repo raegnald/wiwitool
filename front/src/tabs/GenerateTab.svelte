@@ -29,6 +29,16 @@
     try {
       const zipPath = $workspace.generateZip();
       download(zipPath);
+    } catch (e: any) {
+      // Check if the error is a C++ memory pointer
+      if (typeof e === "number" && module.getExceptionMessage) {
+        const [type, message] = module.getExceptionMessage(e);
+        console.error(`C++ Exception (${type}): ${message}`);
+        // alert(`Failed to generate packs!\nType: ${type}\nMessage: ${message}`);
+      } else {
+        console.error("Unknown JS Error generating packs:", e);
+        // alert("Failed to generate packs! Check console for details.");
+      }
     } finally {
       generating = false;
     }
