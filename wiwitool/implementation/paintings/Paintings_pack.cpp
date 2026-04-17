@@ -8,6 +8,7 @@
 #include "paintings/Painting_ratio.hpp"
 #include "util/strutil.hpp"
 #include "util/wiwidebug.hpp"
+#include "util/memstat.hpp"
 
 #include "nlohmann/json.hpp"
 using json = nlohmann::ordered_json;
@@ -118,6 +119,7 @@ void Paintings_pack::generate_resource(void) {
   const auto painting_to_icon_json_folder =
       in_resource_folder(assets_subfolder / "minecraft" / "items");
 
+  size_t count = 0;
   for (const auto &painting : paintings) {
     generate_painting_resource(*painting, paintings_image_folder); // FOTUT: must run before generating JSON
 
@@ -127,6 +129,10 @@ void Paintings_pack::generate_resource(void) {
 
     // Linking painting to miniature
     generate_painting_json(*painting, painting_to_icon_json_folder);
+
+    count++;
+    if (count % 3 == 0)
+      print_memory_stats("Paintings Loop: Processed " + std::to_string(count));
   }
 }
 

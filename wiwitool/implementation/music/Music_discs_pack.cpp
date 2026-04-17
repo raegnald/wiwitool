@@ -126,12 +126,16 @@ void Music_discs_pack::generate_resource(void) {
   const auto sounds_folder = in_resource_folder(
       assets_subfolder / music_discs_namespace / "sounds" / "records");
 
+  size_t count = 0;
   for (auto &disc : discs) {
     generate_item_model_json(*disc, models_folder);
     export_disc_texture(*disc, textures_folder);
     wiwidebug std::println("Exporting ogg audio for {}", disc->string_id());
     export_ogg_audio(*disc, sounds_folder);
     wiwidebug std::println("  done");
+
+    count++;
+    print_memory_stats("Music Loop: Processed " + std::to_string(count));
   }
 }
 

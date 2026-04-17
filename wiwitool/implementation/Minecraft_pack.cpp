@@ -1,6 +1,8 @@
 #include "Minecraft_pack.hpp"
 
 #include "util/wiwidebug.hpp"
+#include "util/memstat.hpp"
+
 #include "Serialiser.hpp"
 
 #include <filesystem>
@@ -54,7 +56,11 @@ void compress_directory(std::filesystem::path directory,
     }
   }
 
+  print_memory_stats("Zipping: Right before saving " +
+                     zipname.filename().string());
+
   zip.save(zipname.string());
+  std::filesystem::remove_all(directory);
 }
 
 void Minecraft_pack::generate(bool fresh) {

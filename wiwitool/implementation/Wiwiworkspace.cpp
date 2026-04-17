@@ -9,6 +9,8 @@
 
 #include "Invisible_item_frame_pack.hpp"
 
+#include "util/memstat.hpp"
+
 #include <filesystem>
 #include <memory>
 #include <vector>
@@ -112,9 +114,13 @@ std::filesystem::path Wiwiworkspace::generate_zip(void) {
   Music_discs_pack music_discs_pack;
   Invisible_item_frame_pack iif_pack;
 
+  print_memory_stats("Start generate_zip");
+
   Serialiser::serialise(serialise()); // FOTUT: I don't like current
                                       // way I am injecting the
                                       // serialised workspace data.
+
+  print_memory_stats("After workspace serialisation");
 
   // Paintings pack
   if (not paintings.empty()) {
@@ -133,7 +139,10 @@ std::filesystem::path Wiwiworkspace::generate_zip(void) {
     packer.add(iif_pack);
   }
 
-  return packer.get_zip();
+  const auto zip_path = packer.get_zip();
+  print_memory_stats("End generate_zip");
+
+  return zip_path;
 }
 
 
