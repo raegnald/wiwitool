@@ -5,7 +5,7 @@
 #include <fstream>
 #include <vector>
 
-void Serialiser::serialise(std::vector<uint8_t> data) {
+void Serialiser::serialise(const std::vector<uint8_t> &data) {
   std::ofstream out{Minecraft_pack::genpath / import_filename,
                     std::ios::binary};
   out.write(reinterpret_cast<const char *>(data.data()), data.size());

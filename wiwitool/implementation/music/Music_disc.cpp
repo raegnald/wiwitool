@@ -104,7 +104,7 @@ std::vector<uint8_t> Music_disc::encode_ogg(void) {
   if (ogg_data.empty()) return {};
 
   // return cached OGG when no meaningful trim is applied
-  if (trim_start <= 0.0f and (trim_end < 0.0f or trim_end >= duration_seconds))
+  if (not requires_audio_trim())
     return ogg_data;
 
   // Decode, trim, and re-encode

@@ -6,6 +6,7 @@
 
 #include "util/strutil.hpp"
 #include "util/wiwidebug.hpp"
+#include "util/memstat.hpp"
 
 #include "nlohmann/json.hpp"
 using json = nlohmann::ordered_json;
@@ -15,7 +16,7 @@ Music_discs_pack::Music_discs_pack(void)
       music_discs_namespace(timestamped(default_music_discs_namespace)) {}
 
 void Music_discs_pack::set_discs(std::vector<std::shared_ptr<Music_disc>> ds) {
-    discs = std::move(ds);
+  discs = std::move(ds);
 }
 
 void Music_discs_pack::generate_data(void) {
@@ -214,14 +215,21 @@ void Music_discs_pack::export_ogg_audio(Music_disc &disc,
   const auto output_filename = disc.string_id() + ".ogg";
   wiwidebug std::println("Encoding & writing audio {}...", output_filename);
 
-  auto ogg_data = disc.encode_ogg();
+  const std::vector<uint8_t>* data_to_write = nullptr;
+  std::vector<uint8_t> temp_trimmed_data;
 
-  if (not ogg_data.empty()) {
-    std::ofstream outfile(directory / output_filename, std::ios::binary);
-    outfile.write(reinterpret_cast<const char *>(ogg_data.data()),
-                  ogg_data.size());
+  if (not disc.requires_audio_trim()) {
+    data_to_write = &disc.get_ogg_audio_data();
+  } else {
+    temp_trimmed_data = disc.encode_ogg();
+    data_to_write = &temp_trimmed_data;
   }
-  else {
+
+  if (not data_to_write->empty()) {
+    std::ofstream outfile(directory / output_filename, std::ios::binary);
+    outfile.write(reinterpret_cast<const char *>(data_to_write->data()),
+                  data_to_write->size());
+  } else {
     wiwidebug std::println("Warning: Encoded OGG data was empty for {}",
                            disc.string_id());
   }

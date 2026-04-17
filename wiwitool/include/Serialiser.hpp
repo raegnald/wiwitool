@@ -5,7 +5,7 @@
 
 class Serialiser {
 public:
-  static void serialise(std::vector<uint8_t>);
+  static void serialise(const std::vector<uint8_t> &);
   static std::vector<uint8_t> deserialise(void);
 
   static inline auto import_filename = std::filesystem::path{"Wiwitool Project Save file"};

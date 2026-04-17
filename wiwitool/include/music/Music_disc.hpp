@@ -41,7 +41,9 @@ public:
                      std::vector<float> &&right_channel,
                      unsigned int sample_rate);
 
-  std::vector<uint8_t> get_ogg_audio_data(void) const { return ogg_data; }
+  const std::vector<uint8_t> &get_ogg_audio_data(void) const {
+    return ogg_data;
+  }
 
   unsigned int get_sample_rate(void) const { return sample_rate; }
 
@@ -57,6 +59,16 @@ public:
 
   float get_trimmed_duration(void) const {
     return (trim_end > 0) ? trim_end - trim_start : get_duration_seconds();
+  }
+
+  bool requires_audio_trim(void) const {
+    if (trim_start > 0.1f)
+      return true;
+
+    if (trim_end >= 0.0f and trim_end < (duration_seconds - 0.1f))
+      return true;
+
+    return false;
   }
 
   // Generation
