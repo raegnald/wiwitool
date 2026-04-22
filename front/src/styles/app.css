@@ -87,6 +87,10 @@ dialog {
   margin: 0 auto;
 }
 
+#main-content {
+  padding: 0 10px;
+}
+
 details {
   z-index: 0;
 }
