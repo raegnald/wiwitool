@@ -90,6 +90,8 @@ void Music_discs_pack::generate_jukebox_song_json(
 
 void Music_discs_pack::generate_recipe_json(Music_disc &disc,
                                             std::filesystem::path directory) {
+  if (not disc.has_stonecutter_recipe())
+    return;
 
   const auto json_name = disc.string_id() + ".json";
   std::ofstream jsonfile{directory / json_name};

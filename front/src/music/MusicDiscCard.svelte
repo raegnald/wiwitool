@@ -19,6 +19,7 @@
     ImageUpIcon,
   } from "@lucide/svelte";
   import { workspace } from "../stores/workspaceStore";
+  import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
 
   export let module: MainModule;
   export let wrapper: MusicDiscWrapper;
@@ -29,6 +30,8 @@
   let artist = "";
   let comparatorOutput: number;
   let silenceGap: number;
+
+  let hasStonecutterRecipe: boolean;
 
   // Data for the player
   let duration = 0;
@@ -49,6 +52,7 @@
     artist = wrapper.cppDisc.artist;
     comparatorOutput = wrapper.cppDisc.comparatorOutput;
     silenceGap = wrapper.cppDisc.silenceGap;
+    hasStonecutterRecipe = wrapper.cppDisc.hasStonecutterRecipe;
   }
 
   function syncMetadataToCpp() {
@@ -56,6 +60,7 @@
     wrapper.cppDisc.artist = artist;
     wrapper.cppDisc.comparatorOutput = comparatorOutput;
     wrapper.cppDisc.silenceGap = silenceGap;
+    wrapper.cppDisc.hasStonecutterRecipe = hasStonecutterRecipe;
   }
 
   function handleTrimChange(start: number, end: number) {
@@ -157,7 +162,7 @@
           remove();
         }}
       >
-        Remove painting
+        Remove disc
       </Button>
     </div>
   </div>
@@ -255,6 +260,13 @@
           </label>
         </div>
       </div>
+
+      <Wiwicheckbox
+        bind:checked={hasStonecutterRecipe}
+        onclick={syncMetadataToCpp}
+      >
+        Music disc has stonecutter recipe
+      </Wiwicheckbox>
     </div>
 
     <div class="cover-container">
