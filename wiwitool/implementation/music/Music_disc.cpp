@@ -287,7 +287,8 @@ void to_json(nlohmann::json &j, const Music_disc &d) {
                      {"duration_seconds", d.duration_seconds},
                      {"trim_start", d.trim_start},
                      {"trim_end", d.trim_end},
-                     {"silence_gap", d.silence_gap}};
+                     {"silence_gap", d.silence_gap},
+                     {"hasStonecutterRecipe", d.stonecutter_recipe}};
 
   if (d.ogg_data.empty())
     j["ogg_data"] = nullptr;
@@ -302,6 +303,9 @@ void from_json(const nlohmann::json &j, Music_disc &d) {
   j.at("artist").get_to(d.artist);
   j.at("comparator_output").get_to(d.comparator_output);
   j.at("silence_gap").get_to(d.silence_gap);
+
+  if (j.contains("hasStonecutterRecipe"))
+    j.at("hasStonecutterRecipe").get_to(d.stonecutter_recipe);
 
   j.at("cover").get_to(d.cover);
 
@@ -411,6 +415,9 @@ EMSCRIPTEN_BINDINGS(music_disc) {
                   return val::global("Uint8Array")
                       .new_(typed_memory_view(data.size(), data.data()));
                 }))
+
+      .property("hasStonecutterRecipe", &Music_disc::has_stonecutter_recipe,
+                &Music_disc::set_has_stonecutter_recipe)
 
       // Zero-copy getter for the finalized OGG bytes (used by
       // WebWorker/Generate)

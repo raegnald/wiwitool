@@ -51,6 +51,9 @@ void Paintings_pack::generate_data(void) {
 
 void Paintings_pack::generate_recipe_json(const Painting &painting,
                                           std::filesystem::path in_folder) {
+  if (not painting.has_stone_cutter_recipe())
+    return;
+
   const auto json_name = painting.string_id() + "_recipe.json";
   std::ofstream jsonfile{in_folder / json_name};
 

@@ -71,6 +71,11 @@ public:
     return false;
   }
 
+  // Stonecutter recipe
+
+  void set_has_stonecutter_recipe(bool b) { stonecutter_recipe = b; }
+  bool has_stonecutter_recipe(void) const { return stonecutter_recipe; }
+
   // Generation
 
   std::vector<uint8_t> encode_ogg(void); // trimmed
@@ -107,6 +112,8 @@ private:
   float trim_start{-1.0f}, trim_end{-1.0f}; // in seconds
   float duration_seconds{0.0f};
   float silence_gap{0.0f};
+
+  bool stonecutter_recipe{true};
 
   // Internal helper to handle the heavy Vorbis math
   std::vector<uint8_t> internal_vorbis_encode(const std::vector<float> &left,
