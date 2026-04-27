@@ -76,6 +76,11 @@ public:
   void set_placeable(bool p) { placeable = p; }
   bool is_placeable(void) const { return placeable; }
 
+  // Stonecutter recipe
+
+  void set_has_stonecutter_recipe(bool b) { stonecutter_recipe = b; }
+  bool has_stonecutter_recipe(void) const { return stonecutter_recipe; }
+
   // Pixels per block
 
   void set_pixels_per_block(size_t ppb) { pixels_per_block = ppb; }
@@ -103,6 +108,7 @@ private:
   Painting_ratio conversion_ratio{Nearest};
 
   bool placeable{true};
+  bool stonecutter_recipe{true};
 
   inline void invalidate_cache(void) const {
     painting = Image_data{};

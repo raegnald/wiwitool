@@ -108,7 +108,8 @@ void to_json(nlohmann::json &j, const Painting &p) {
                      {"author", p.author},
                      {"ratio", p.conversion_ratio},
                      {"sourceImage", p.original_image},
-                     {"placeable", p.placeable}};
+                     {"placeable", p.placeable},
+                     {"hasStonecutterRecipe", p.stonecutter_recipe}};
 
   std::visit([&j](const auto &gen) { j["frame_generator"] = gen; },
              p.frame_generator);
@@ -125,7 +126,12 @@ void from_json(const nlohmann::json &j, Painting &p) {
   j.at("author").get_to(p.author);
   j.at("ratio").get_to(p.conversion_ratio);
   j.at("sourceImage").get_to(p.original_image);
-  j.at("placeable").get_to(p.placeable);
+
+  if (j.contains("placeable"))
+    j.at("placeable").get_to(p.placeable);
+
+  if (j.contains("hasStonecutterRecipe"))
+    j.at("hasStonecutterRecipe").get_to(p.stonecutter_recipe);
 
   if (j.contains("frame_generator")) {
     const auto &j_gen = j.at("frame_generator");
@@ -216,6 +222,8 @@ EMSCRIPTEN_BINDINGS(painting) {
       .function("isFrameNonexistent", &Painting::is_frame_nonexistent)
 
       .property("placeable", &Painting::is_placeable, &Painting::set_placeable)
+      .property("hasStonecutterRecipe", &Painting::has_stonecutter_recipe,
+                &Painting::set_has_stonecutter_recipe)
       .property("pixelPerBlock", &Painting::get_pixels_per_block,
                 &Painting::set_pixels_per_block)
 

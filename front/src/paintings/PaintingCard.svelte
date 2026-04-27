@@ -35,6 +35,7 @@
   let frameTint: string;
   let frameSeed: string;
   let placeable: boolean;
+  let hasStonecutterRecipe: boolean;
 
   let downscalePower: number;
 
@@ -48,6 +49,7 @@
     author = w.cppPainting.author;
     selected = w.selected;
     placeable = w.cppPainting.placeable;
+    hasStonecutterRecipe = w.cppPainting.hasStonecutterRecipe;
 
     let canvasNeedsUpdate = false;
 
@@ -89,6 +91,7 @@
     wrapper.cppPainting.author = author;
     wrapper.selected = selected;
     wrapper.cppPainting.placeable = placeable;
+    wrapper.cppPainting.hasStonecutterRecipe = hasStonecutterRecipe;
   }
 
   // Heavy sync for visual parameters (slider, ratio, colors)
@@ -348,6 +351,9 @@
       </span>
       <Wiwicheckbox bind:checked={placeable} onclick={syncMetadata}>
         Painting is placeable
+      </Wiwicheckbox>
+      <Wiwicheckbox bind:checked={hasStonecutterRecipe} onclick={syncMetadata}>
+        Painting has stonecutter recipe
       </Wiwicheckbox>
     </div>
   </div>
