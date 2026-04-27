@@ -107,7 +107,8 @@ void to_json(nlohmann::json &j, const Painting &p) {
                      {"title", p.title},
                      {"author", p.author},
                      {"ratio", p.conversion_ratio},
-                     {"sourceImage", p.original_image}};
+                     {"sourceImage", p.original_image},
+                     {"placeable", p.placeable}};
 
   std::visit([&j](const auto &gen) { j["frame_generator"] = gen; },
              p.frame_generator);
@@ -124,6 +125,7 @@ void from_json(const nlohmann::json &j, Painting &p) {
   j.at("author").get_to(p.author);
   j.at("ratio").get_to(p.conversion_ratio);
   j.at("sourceImage").get_to(p.original_image);
+  j.at("placeable").get_to(p.placeable);
 
   if (j.contains("frame_generator")) {
     const auto &j_gen = j.at("frame_generator");
