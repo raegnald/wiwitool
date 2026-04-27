@@ -15,6 +15,8 @@
   import StartTab from "./tabs/StartTab.svelte";
   import ComponentsShowcaseTab from "./tabs/ComponentsShowcaseTab.svelte";
 
+  import OnboardingOverlay from "./components/OnboardingOverlay.svelte";
+
   import { paintingsStore } from "./stores/paintingsStore";
   import ChangelogTab from "./tabs/ChangelogTab.svelte";
   import MusicDiscsTab from "./tabs/MusicDiscsTab.svelte";
@@ -46,7 +48,7 @@
     </Tab>
 
     {#if import.meta.env.DEV}
-      <Tab title="Components showcase (dev)" id="dummy">
+      <Tab title="Components (dev)" id="dummy">
         <ComponentsShowcaseTab />
       </Tab>
     {/if}
@@ -73,6 +75,8 @@
   </Tabs>
 
   <Toasts />
+
+  <OnboardingOverlay />
 </div>
 
 <style>

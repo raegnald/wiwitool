@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import DropZone from "../components/DropZone.svelte";
   import type { MainModule } from "../bindings/wiwitool";
   import { ERROR, INFO, toast, toasts } from "../stores/toastsStore";
@@ -13,6 +14,7 @@
     musicDiscsStore,
     type MusicDiscWrapper,
   } from "../stores/musicDiscsStore";
+  import { firstTimeUser } from "../stores/firstTimeUserStore";
   import Carousel from "../components/Carousel.svelte";
   import {
     ArchiveRestore,
@@ -25,6 +27,8 @@
 
   export let move: (id: string) => void;
   export let module: MainModule;
+
+  const isInitialVisit = $firstTimeUser;
 
   $: showDropZone = false;
 
@@ -81,6 +85,10 @@
 
     musicDiscsStore.set(newWrappers);
   }
+
+  onMount(() => {
+    if ($firstTimeUser && !import.meta.env.DEV) firstTimeUser.set(false);
+  });
 </script>
 
 <div class="app-card">
@@ -105,6 +113,14 @@
       { content: feature4 },
     ]}
   />
+
+  <p>
+    {#if isInitialVisit}
+      Your first time!
+    {:else}
+      Welcome back!
+    {/if}
+  </p>
 
   <p>
     Welcome to <span class="jb9">The Wiwitool</span>! The Wiwitool is a
