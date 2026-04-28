@@ -9,6 +9,7 @@
   import PaintingActions from "./PaintingActions.svelte";
   import PaintingCanvas from "./PaintingCanvas.svelte";
   import PaintingParams from "./PaintingParams.svelte";
+  import CropModal from "./CropModal.svelte";
   import type { ImageData } from "../bindings/wiwitool";
   import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
   import SelectableCard from "../components/SelectableCard.svelte";
@@ -18,6 +19,7 @@
   export let wrapper: PaintingWrapper;
 
   let showMoreOptions = false;
+  let showCropModal = false;
   let colourPicker: HTMLInputElement;
 
   let originalImageCanvas: HTMLCanvasElement;
@@ -30,6 +32,7 @@
 
   let selected: boolean;
 
+  let isCropped = false;
   let disableFrame = false;
   let proceduralFrame = wrapper.cppPainting.isFrameProcedural();
   let frameTint: string;
@@ -50,6 +53,12 @@
     selected = w.selected;
     placeable = w.cppPainting.placeable;
     hasStonecutterRecipe = w.cppPainting.hasStonecutterRecipe;
+
+    isCropped =
+      w.cppPainting.cropX !== 0 ||
+      w.cppPainting.cropY !== 0 ||
+      w.cppPainting.cropW !== 1 ||
+      w.cppPainting.cropH !== 1;
 
     let canvasNeedsUpdate = false;
 
@@ -172,7 +181,7 @@
 
   function renderOriginalImage() {
     if (!wrapper.cachedOriginalJS) {
-      const img = wrapper.cppPainting.originalData();
+      const img = wrapper.cppPainting.croppedOriginalData();
       wrapper.cachedOriginalJS = extractJSImageData(img);
       img.delete();
     }
@@ -210,6 +219,17 @@
     wrapper.cppPainting.delete();
   }
 
+  function crop() {
+    showCropModal = true;
+  }
+
+  function handleCropConfirm() {
+    showCropModal = false;
+    wrapper.cachedPaintingJS = undefined;
+    wrapper.cachedOriginalJS = undefined;
+    updateCanvases();
+  }
+
   function clone() {
     const newCppPainting = wrapper.cppPainting.clone();
     newCppPainting.title = title + " (copy)";
@@ -239,6 +259,14 @@
   onMount(updateCanvases);
 </script>
 
+{#if showCropModal}
+  <CropModal
+    painting={wrapper.cppPainting}
+    onConfirm={handleCropConfirm}
+    onCancel={() => (showCropModal = false)}
+  />
+{/if}
+
 <SelectableCard
   bind:selected
   onToggle={() => {
@@ -247,7 +275,14 @@
   }}
 >
   <div class="transformation">
-    <PaintingActions {rotateClockwise} {rotateAnticlockwise} {clone} {remove} />
+    <PaintingActions
+      {rotateClockwise}
+      {rotateAnticlockwise}
+      {clone}
+      {remove}
+      {crop}
+      {isCropped}
+    />
     <PaintingCanvas bind:canvas={originalImageCanvas} />
     <PaintingParams
       bind:currentRatio

@@ -44,8 +44,22 @@ public:
   }
   inline Painting_ratio get_ratio(void) const { return conversion_ratio; }
 
+  // Getter/setter for crop
+  inline void set_crop(double x, double y, double w, double h) {
+    crop_x = x;
+    crop_y = y;
+    crop_w = w;
+    crop_h = h;
+    invalidate_cache();
+  }
+  inline double get_crop_x(void) const { return crop_x; }
+  inline double get_crop_y(void) const { return crop_y; }
+  inline double get_crop_w(void) const { return crop_w; }
+  inline double get_crop_h(void) const { return crop_h; }
+
   // Getters for the painting and icon images
   const Image_data original_data(void) const;
+  const Image_data cropped_original_data(void) const;
   const Image_data painting_data(void) const;
   const Image_data icon_data(void) const;
 
@@ -102,6 +116,8 @@ private:
   Image_data original_image;
   mutable Image_data painting, icon;
   size_t pixels_per_block{default_resolution};
+
+  double crop_x{0.0}, crop_y{0.0}, crop_w{1.0}, crop_h{1.0};
 
   Painting_frame_generator frame_generator = Procedural_frame_generator{};
 

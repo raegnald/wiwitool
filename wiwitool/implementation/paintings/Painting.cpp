@@ -46,6 +46,14 @@ std::shared_ptr<Painting> Painting::clone(void) const {
 
 const Image_data Painting::original_data(void) const { return original_image; }
 
+const Image_data Painting::cropped_original_data(void) const {
+  return original_image.crop(
+      static_cast<size_t>(crop_x * original_image.width()),
+      static_cast<size_t>(crop_y * original_image.height()),
+      static_cast<size_t>(crop_w * original_image.width()),
+      static_cast<size_t>(crop_h * original_image.height()));
+}
+
 const Image_data Painting::painting_data(void) const {
   compute_painting_and_icon_if_necessary();
   return painting;
@@ -57,7 +65,13 @@ const Image_data Painting::icon_data(void) const {
 }
 
 void Painting::refresh(void) const {
-  auto converter = Painting_converter{original_image};
+  auto cropped_source = original_image.crop(
+      static_cast<size_t>(crop_x * original_image.width()),
+      static_cast<size_t>(crop_y * original_image.height()),
+      static_cast<size_t>(crop_w * original_image.width()),
+      static_cast<size_t>(crop_h * original_image.height()));
+
+  auto converter = Painting_converter{cropped_source};
   icon = converter.miniatureise();
   painting =
       converter.convert(frame_generator, pixels_per_block, conversion_ratio);
@@ -69,12 +83,26 @@ void Painting::rotate_clockwise(void) {
   original_image = original_image.rotate_clockwise();
   conversion_ratio = opposite_ratio(conversion_ratio);
 
+  // Transform crop coordinates
+  double old_x = crop_x, old_y = crop_y, old_w = crop_w, old_h = crop_h;
+  crop_x = 1.0 - (old_y + old_h);
+  crop_y = old_x;
+  crop_w = old_h;
+  crop_h = old_w;
+
   invalidate_cache();
 }
 
 void Painting::rotate_anticlockwise(void) {
   original_image = original_image.rotate_anticlockwise();
   conversion_ratio = opposite_ratio(conversion_ratio);
+
+  // Transform crop coordinates
+  double old_x = crop_x, old_y = crop_y, old_w = crop_w, old_h = crop_h;
+  crop_x = old_y;
+  crop_y = 1.0 - (old_x + old_w);
+  crop_w = old_h;
+  crop_h = old_w;
 
   invalidate_cache();
 }
@@ -109,7 +137,8 @@ void to_json(nlohmann::json &j, const Painting &p) {
                      {"ratio", p.conversion_ratio},
                      {"sourceImage", p.original_image},
                      {"placeable", p.placeable},
-                     {"hasStonecutterRecipe", p.stonecutter_recipe}};
+                     {"hasStonecutterRecipe", p.stonecutter_recipe},
+                     {"crop", {p.crop_x, p.crop_y, p.crop_w, p.crop_h}}};
 
   std::visit([&j](const auto &gen) { j["frame_generator"] = gen; },
              p.frame_generator);
@@ -132,6 +161,16 @@ void from_json(const nlohmann::json &j, Painting &p) {
 
   if (j.contains("hasStonecutterRecipe"))
     j.at("hasStonecutterRecipe").get_to(p.stonecutter_recipe);
+
+  if (j.contains("crop")) {
+    auto crop = j.at("crop").get<std::vector<double>>();
+    if (crop.size() == 4) {
+      p.crop_x = crop[0];
+      p.crop_y = crop[1];
+      p.crop_w = crop[2];
+      p.crop_h = crop[3];
+    }
+  }
 
   if (j.contains("frame_generator")) {
     const auto &j_gen = j.at("frame_generator");
@@ -191,6 +230,12 @@ EMSCRIPTEN_BINDINGS(painting) {
       .property("author", &Painting::get_author, &Painting::set_author)
       .function("stringId", &Painting::string_id)
 
+      .function("setCrop", &Painting::set_crop)
+      .property("cropX", &Painting::get_crop_x)
+      .property("cropY", &Painting::get_crop_y)
+      .property("cropW", &Painting::get_crop_w)
+      .property("cropH", &Painting::get_crop_h)
+
       .property(
           "ratio",
           // Getter
@@ -207,6 +252,7 @@ EMSCRIPTEN_BINDINGS(painting) {
       // These return Image_data by value, which works because
       // Image_data is also registered in Javascript
       .function("originalData", &Painting::original_data)
+      .function("croppedOriginalData", &Painting::cropped_original_data)
       .function("paintingData", &Painting::painting_data)
       .function("iconData", &Painting::icon_data)
 

@@ -7,6 +7,8 @@
   export let rotateAnticlockwise: ButtonClickHandler;
   export let clone: ButtonClickHandler;
   export let remove: ButtonClickHandler;
+  export let crop: ButtonClickHandler;
+  export let isCropped = false;
 
   let deletePaintingDialog: HTMLDialogElement;
 </script>
@@ -40,9 +42,13 @@
   <div class="first"></div>
 
   <div>
-    {#if import.meta.env.DEV}
-      <Button grow disabled onclick={() => {}} title="Crop image" icon="Crop" />
-    {/if}
+    <Button
+      grow
+      onclick={crop}
+      title="Crop image"
+      icon="Crop"
+      hugeBorder={isCropped}
+    />
 
     <div class="actions-pack">
       <Button
