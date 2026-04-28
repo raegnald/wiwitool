@@ -22,6 +22,18 @@ Music_disc::Music_disc(void) : disc_id{next_disc_id++} {}
 
 void Music_disc::set_cover(Image_data c) {
   cover = c.empty() ? Image_data{} : c.crop(1, 1).scale(256, 256);
+  cover_modified = true;
+}
+
+void Music_disc::set_original_cover(Image_data c) {
+  original_cover = c.empty() ? Image_data{} : c.crop(1, 1).scale(256, 256);
+  cover = original_cover;
+  cover_modified = false;
+}
+
+void Music_disc::restore_original_cover(void) {
+  cover = original_cover;
+  cover_modified = false;
 }
 
 std::string Music_disc::description(void) const {
@@ -282,6 +294,8 @@ void to_json(nlohmann::json &j, const Music_disc &d) {
                      {"artist", d.artist},
                      {"comparator_output", d.comparator_output},
                      {"cover", d.cover},
+                     {"original_cover", d.original_cover},
+                     {"cover_modified", d.cover_modified},
                      {"cached_waveform", d.cached_waveform},
                      {"sample_rate", d.sample_rate},
                      {"duration_seconds", d.duration_seconds},
@@ -308,6 +322,11 @@ void from_json(const nlohmann::json &j, Music_disc &d) {
     j.at("hasStonecutterRecipe").get_to(d.stonecutter_recipe);
 
   j.at("cover").get_to(d.cover);
+  if (j.contains("original_cover"))
+    j.at("original_cover").get_to(d.original_cover);
+
+  if (j.contains("cover_modified"))
+    j.at("cover_modified").get_to(d.cover_modified);
 
   {
     auto &ogg = j.at("ogg_data");
@@ -394,6 +413,23 @@ EMSCRIPTEN_BINDINGS(music_disc) {
             std::vector<uint8_t> vec(ptr, ptr + image_bytes.size());
             self.set_cover(Image_data{vec});
           }))
+
+      .function(
+          "setOriginalCoverFromBytes",
+          optional_override([](Music_disc &self, std::string image_bytes) {
+            const uint8_t *ptr =
+                reinterpret_cast<const uint8_t *>(image_bytes.data());
+            std::vector<uint8_t> vec(ptr, ptr + image_bytes.size());
+            self.set_original_cover(Image_data{vec});
+          }))
+
+      .function("restoreOriginalCover", &Music_disc::restore_original_cover)
+
+      .function("isCoverModified", &Music_disc::is_cover_modified)
+
+      .function("hasOriginalCover", optional_override([](const Music_disc &self) {
+                  return not self.get_original_cover().empty();
+                }))
 
       .function("removeCover", optional_override([](Music_disc &self) {
                   self.set_cover(Image_data{});

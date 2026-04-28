@@ -17,6 +17,7 @@
     Zap,
     Timer,
     ImageUpIcon,
+    RotateCcw,
   } from "@lucide/svelte";
   import { workspace } from "../stores/workspaceStore";
   import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
@@ -32,6 +33,7 @@
   let silenceGap: number;
 
   let hasStonecutterRecipe: boolean;
+  let isCoverModified = false;
 
   // Data for the player
   let duration = 0;
@@ -53,6 +55,7 @@
     comparatorOutput = wrapper.cppDisc.comparatorOutput;
     silenceGap = wrapper.cppDisc.silenceGap;
     hasStonecutterRecipe = wrapper.cppDisc.hasStonecutterRecipe;
+    isCoverModified = wrapper.cppDisc.isCoverModified();
   }
 
   function syncMetadataToCpp() {
@@ -93,13 +96,7 @@
     waveformData = new Float32Array(waveView);
 
     // Extract Cover Art
-    const coverImage = wrapper.cppDisc.getDiscItemImage();
-    if (coverImage && !coverImage.empty()) {
-      const pngBytes = coverImage.encodePng();
-      const blob = new Blob([pngBytes], { type: "image/png" });
-      coverImgSrc = URL.createObjectURL(blob);
-      coverImage.delete();
-    }
+    updateCoverImgSrc();
   });
 
   onDestroy(() => {
@@ -107,18 +104,7 @@
     if (coverImgSrc) URL.revokeObjectURL(coverImgSrc);
   });
 
-  function removeCoverImage() {
-    wrapper.cppDisc.removeCover();
-    coverImgSrc = "";
-    wrapper = wrapper;
-  }
-
-  async function loadCover(file: File) {
-    const buffer = await file.arrayBuffer();
-    const uint8View = new Uint8Array(buffer);
-
-    wrapper.cppDisc.setCoverFromBytes(uint8View);
-
+  function updateCoverImgSrc() {
     const coverImage = wrapper.cppDisc.getDiscItemImage();
     if (coverImage && !coverImage.empty()) {
       const pngBytes = coverImage.encodePng();
@@ -127,7 +113,30 @@
       if (coverImgSrc) URL.revokeObjectURL(coverImgSrc);
       coverImgSrc = URL.createObjectURL(blob);
       coverImage.delete();
+    } else {
+      if (coverImgSrc) URL.revokeObjectURL(coverImgSrc);
+      coverImgSrc = "";
     }
+  }
+
+  function removeCoverImage() {
+    wrapper.cppDisc.removeCover();
+    updateCoverImgSrc();
+    wrapper = wrapper;
+  }
+
+  function restoreOriginalCover() {
+    wrapper.cppDisc.restoreOriginalCover();
+    updateCoverImgSrc();
+    wrapper = wrapper;
+  }
+
+  async function loadCover(file: File) {
+    const buffer = await file.arrayBuffer();
+    const uint8View = new Uint8Array(buffer);
+
+    wrapper.cppDisc.setCoverFromBytes(uint8View);
+    updateCoverImgSrc();
 
     wrapper = wrapper;
   }
@@ -314,6 +323,16 @@
           icon="X"
           title="Remove cover"
         />
+
+        {#if wrapper.cppDisc.hasOriginalCover() && isCoverModified}
+          <Button
+            small
+            transparent
+            onclick={restoreOriginalCover}
+            icon="RotateCcw"
+            title="Restore original cover"
+          />
+        {/if}
       </div>
     </div>
   </div>
@@ -343,6 +362,9 @@
     position: absolute;
     top: 8px;
     left: 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
   }
 
   img.cover {

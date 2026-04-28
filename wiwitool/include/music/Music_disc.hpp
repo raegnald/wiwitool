@@ -27,6 +27,14 @@ public:
   void set_cover(Image_data c);
   Image_data get_cover(void) const { return cover; }
 
+  void set_original_cover(Image_data c);
+  Image_data get_original_cover(void) const { return original_cover; }
+
+  void restore_original_cover(void);
+
+  bool is_cover_modified(void) const { return cover_modified; }
+  void set_cover_modified(bool m) { cover_modified = m; }
+
   std::string description(void) const;
 
   void set_comparator_output(size_t x);
@@ -103,6 +111,9 @@ private:
 
   Image_data cover; // cover.empty() means it'll use the default
                     // Minecraft disc image
+  Image_data original_cover;
+
+  bool cover_modified{false};
 
   // Compressed baseline storage
   std::vector<uint8_t> ogg_data;

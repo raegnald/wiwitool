@@ -35,7 +35,7 @@
       const picture = metadata.common.picture?.[0];
       if (picture && picture.data) {
         const cleanBytes = new Uint8Array(picture.data);
-        cppDisc.setCoverFromBytes(cleanBytes);
+        cppDisc.setOriginalCoverFromBytes(cleanBytes);
       }
     } catch (e) {
       console.warn("Could not parse audio metadata:", e);
