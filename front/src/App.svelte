@@ -80,10 +80,6 @@
 </div>
 
 <style>
-  main {
-    margin-bottom: 200px;
-  }
-
   #wiwi-logo-wide {
     display: flex;
     justify-content: center;
