@@ -28,8 +28,6 @@
   export let move: (id: string) => void;
   export let module: MainModule;
 
-  const isInitialVisit = $firstTimeUser;
-
   $: showDropZone = false;
 
   async function importPacks(file: File) {
@@ -85,10 +83,6 @@
 
     musicDiscsStore.set(newWrappers);
   }
-
-  onMount(() => {
-    if ($firstTimeUser && !import.meta.env.DEV) firstTimeUser.set(false);
-  });
 </script>
 
 <div class="app-card">
@@ -114,27 +108,44 @@
     ]}
   />
 
-  <p>
-    {#if isInitialVisit}
-      Your first time!
-    {:else}
-      Welcome back!
-    {/if}
-  </p>
+  {#if import.meta.env.DEV}
+    <div class="dev-controls">
+      <span class="pill">Dev controls</span>
+      <div class="dev-control-row">
+        <Button onclick={() => firstTimeUser.set(!$firstTimeUser)}>
+          {#if $firstTimeUser}
+            Remember user
+          {:else}
+            Forget user
+          {/if}
+        </Button>
+        <span
+          ><code>firstTimeUser</code>:
+          <b>{$firstTimeUser ? "yes" : "no"}</b></span
+        >
+      </div>
+    </div>
+  {/if}
 
-  <p>
-    Welcome to <span class="jb9">The Wiwitool</span>! The Wiwitool is a
-    mix-and-match Minecraft resource pack and data pack generator that allows
-    you to turn your photos into Minecraft paintings, to <i>block out</i> to
-    your favourite tunes and choose from other simple
-    <abbr title="Quality of Life">QOL</abbr> features. You can either create a new
-    pack or import an existing one.
-  </p>
+  {#if $firstTimeUser}
+    <p>
+      Welcome to <span class="jb9">The Wiwitool</span>! The Wiwitool is a
+      mix-and-match Minecraft resource pack and data pack generator that allows
+      you to turn your photos into Minecraft paintings, to <i>block out</i> to
+      your favourite tunes and choose from other simple
+      <abbr title="Quality of Life">QOL</abbr> features. You can either create a new
+      pack or import an existing one.
+    </p>
+  {:else}
+    <p>
+      Welcome back to <span class="jb9">The Wiwitool</span>!
+    </p>
+  {/if}
 
   <div id="center">
     <Button
       large
-      intense
+      intense={$firstTimeUser}
       loading={!$wasmReady}
       icon="BadgePlus"
       onclick={() => move("paintings")}
@@ -144,11 +155,12 @@
 
     <Button
       large
+      intense={!$firstTimeUser}
       loading={!$wasmReady}
       icon="FileUp"
       onclick={() => (showDropZone = !showDropZone)}
     >
-      Import an existing pack
+      Import {$firstTimeUser ? "an" : "your"} existing pack
     </Button>
   </div>
   <div
@@ -238,5 +250,26 @@
     justify-content: center;
     align-items: center;
     gap: 10px;
+  }
+
+  .dev-controls {
+    border-radius: 12px;
+    border: 1px solid lightgrey;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    @media (prefers-color-scheme: dark) {
+      border-color: #555;
+    }
+
+    .dev-control-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 12px;
+    }
   }
 </style>
