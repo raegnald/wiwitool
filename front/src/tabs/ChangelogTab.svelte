@@ -187,8 +187,8 @@
 
     <p>
       Initial public release. This version of the Wiwitool includes generation
-      for custom custom painting frames and invisible item frames. All of this
-      locally in your browser.
+      for custom painting frames and invisible item frames. All of this locally
+      in your browser.
     </p>
 
     <dl>
