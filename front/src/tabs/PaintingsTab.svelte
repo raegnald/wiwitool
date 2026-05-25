@@ -61,7 +61,7 @@
       <div class="empty-state">
         <ImageUpIcon size="80" strokeWidth="1.5" class="empty-icon" />
 
-        <h2>Load your images</h2>
+        <h2>Load {$paintingsStore.length < 1 ? "your" : "more"} images</h2>
         <center class="with-title pills-horizontal-container">
           <span class="pill">jpeg</span>
           <span class="pill">png</span>

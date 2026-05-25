@@ -151,6 +151,8 @@
     border-radius: 0;
     border: 2px solid transparent;
     border-radius: 23px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   button.active {
     color: hsl(237 100% 55.5%);

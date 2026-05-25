@@ -106,11 +106,7 @@
       <div class="empty-state">
         <FileMusic size="80" strokeWidth="1.5" class="empty-icon" />
 
-        <h2>Load your songs</h2>
-        <!-- <p>
-          Drag and drop your audio files or select them from the file explorer
-          to turn them into Minecraft music discs.
-        </p> -->
+        <h2>Load {$musicDiscsStore.length < 1 ? "your" : "more"} songs</h2>
         <center class="with-title pills-horizontal-container">
           {#each Object.entries(getSupportedAudioFormats()) as format}
             {#if format[1] != ""}
