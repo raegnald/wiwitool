@@ -11,20 +11,34 @@
   import { musicDiscsStore } from "../stores/musicDiscsStore";
   import { formatSeconds } from "../music/seconds";
   import { PackageOpenIcon } from "@lucide/svelte";
+  import { onMount } from "svelte";
 
   export let module: MainModule;
   export let move: (id: string) => void;
 
+  let workspaceName: string = null;
   let generating = false;
+
+  $: if (workspaceName != null) {
+    $workspace.workspaceName = workspaceName = workspaceName
+      .replace(/[^(\w|\s)]/g, "")
+      .replace(/[\s]/g, "_");
+  }
 
   $: validGeneratableConfig =
     $paintingsStore.length > 0 ||
     $musicDiscsStore.length > 0 ||
     ($workspace && $workspace.invisibleItemFrames);
 
+  onMount(() => {
+    workspaceName = $workspace.workspaceName;
+  });
+
   async function generatePacks() {
     generating = true;
     await new Promise((resolve) => setTimeout(resolve, 50));
+
+    $workspace.workspaceName = workspaceName;
 
     try {
       const zipPath = $workspace.generateZip();
@@ -75,6 +89,11 @@
 
 <div class="app-card">
   {#if validGeneratableConfig}
+    <div style="margin-bottom: 20px;">
+      <span>Workspace name &nbsp;</span>
+      <input type="text" bind:value={workspaceName} />
+    </div>
+
     <h3 style="margin-top: 0">Summary of your pack</h3>
 
     <p>Your pack will contain these new items:</p>

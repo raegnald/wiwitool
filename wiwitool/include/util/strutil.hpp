@@ -1,8 +1,10 @@
 #pragma once
 
 #include <algorithm>
+#include <cstddef>
 #include <ctime>
 #include <format>
+#include <random>
 #include <string>
 
 inline std::string nospaces(std::string s) {
@@ -29,4 +31,17 @@ inline std::string tolower(std::string s) {
 inline std::string timestamped(std::string s) {
   const time_t timestamp = time(nullptr);
   return std::format("{}_{}", s, timestamp);
+}
+
+inline std::string generate_random_alphabetic_string(size_t chars) {
+  std::string s(chars, 'a');
+
+  std::random_device rd;
+  std::default_random_engine rng{rd()};
+  std::uniform_int_distribution<int> random{0, 'z' - 'a'};
+
+  for (size_t i = 0; i < chars; i++)
+    s[i] = 'a' + static_cast<char>(random(rng));
+
+  return s;
 }

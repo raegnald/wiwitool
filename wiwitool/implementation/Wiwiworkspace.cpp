@@ -10,9 +10,11 @@
 #include "Invisible_item_frame_pack.hpp"
 
 #include "util/memstat.hpp"
+#include "util/wiwidebug.hpp"
 
 #include <filesystem>
 #include <memory>
+#include <print>
 #include <vector>
 
 #include "nlohmann/json.hpp"
@@ -67,6 +69,8 @@ bool Wiwiworkspace::get_invisible_item_frames(void) const {
 std::vector<uint8_t> Wiwiworkspace::serialise(void) const {
   json j;
 
+  j["workspace_name"] = workspace_name;
+
   // Paintings
     for (const auto &painting : paintings)
       j["paintings"].push_back(*painting);
@@ -86,6 +90,11 @@ void Wiwiworkspace::deserialise(const std::vector<uint8_t> &binary_msgpack) {
   discs.clear();
 
   json j = nlohmann::json::from_msgpack(binary_msgpack);
+
+  if (j.contains("workspace_name"))
+    j.at("workspace_name").get_to(workspace_name);
+  else
+    wiwidebug std::println("This workspace does not have a name");
 
   // Paintings
   if (j.contains("paintings")) {
@@ -113,6 +122,10 @@ std::filesystem::path Wiwiworkspace::generate_zip(void) {
   Paintings_pack paintings_pack;
   Music_discs_pack music_discs_pack;
   Invisible_item_frame_pack iif_pack;
+
+  paintings_pack.set_workspace_name(workspace_name);
+  music_discs_pack.set_workspace_name(workspace_name);
+  iif_pack.set_workspace_name(workspace_name);
 
   print_memory_stats("Start generate_zip");
 
@@ -157,6 +170,9 @@ EMSCRIPTEN_BINDINGS(wiwiworkspace) {
 
   class_<Wiwiworkspace>("Wiwiworkspace")
       .constructor<>()
+
+      .property("workspaceName", &Wiwiworkspace::get_workspace_name,
+                &Wiwiworkspace::set_workspace_name)
 
       .function("addPainting", &Wiwiworkspace::add_painting)
       .function("removePainting", &Wiwiworkspace::remove_painting)

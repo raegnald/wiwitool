@@ -4,14 +4,20 @@
 
 #include "Minecraft_pack.hpp"
 #include "music/Music_disc.hpp"
+#include <format>
 #include <memory>
 
-static std::string default_music_discs_namespace{"custommusicdiscs"};
+static std::string default_music_discs_namespace{"music_discs"};
 
 class Music_discs_pack : public Minecraft_pack {
 public:
   Music_discs_pack(void);
   virtual ~Music_discs_pack(void) = default;
+
+  void set_workspace_name(std::string workspace_name) {
+    music_discs_namespace =
+        std::format("{}_{}", workspace_name, default_music_discs_namespace);
+  }
 
   void set_discs(std::vector<std::shared_ptr<Music_disc>> discs);
 
