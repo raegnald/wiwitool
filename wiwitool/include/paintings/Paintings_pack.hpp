@@ -1,5 +1,6 @@
 #pragma once
 
+#include <format>
 #include <string>
 #include <vector>
 #include <memory>
@@ -8,12 +9,17 @@
 #include "Minecraft_pack.hpp"
 #include "paintings/Painting.hpp"
 
-static std::string default_paintings_namespace{"custompaintings"};
+static std::string default_paintings_namespace{"paintings"};
 
 class Paintings_pack : public Minecraft_pack {
 public:
   Paintings_pack(void);
   virtual ~Paintings_pack(void) = default;
+
+  void set_workspace_name(std::string workspace_name) {
+    paintings_namespace =
+        std::format("{}_{}", workspace_name, default_paintings_namespace);
+  }
 
   void set_paintings(std::vector<std::shared_ptr<Painting>> paintings);
 

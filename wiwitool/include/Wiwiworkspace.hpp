@@ -5,7 +5,9 @@
 
 #include "music/Music_disc.hpp"
 #include "paintings/Painting.hpp"
+#include "util/strutil.hpp"
 
+#include <cstddef>
 #include <filesystem>
 #include <memory>
 #include <vector>
@@ -13,6 +15,11 @@
 class Wiwiworkspace {
 public:
   Wiwiworkspace(void) = default;
+
+  // Workspace name
+
+  inline std::string get_workspace_name(void) const { return workspace_name; }
+  inline void set_workspace_name(std::string name) { workspace_name = name; }
 
   // Paintings
 
@@ -33,6 +40,9 @@ public:
   void set_invisible_item_frames(bool);
   bool get_invisible_item_frames() const;
 
+  // Is workspace new?
+  bool inline is_workspace_new(void) const { return export_count == 0; }
+
   // Serialisation and generation
 
   std::vector<uint8_t> serialise(void) const;
@@ -44,4 +54,11 @@ private:
   std::vector<std::shared_ptr<Painting>> paintings;
   std::vector<std::shared_ptr<Music_disc>> discs;
   bool invisible_item_frames{false};
+
+  static constexpr size_t default_workspace_name_length{6};
+  std::string workspace_name{
+      generate_random_alphabetic_string(default_workspace_name_length)};
+
+  // Workspace is newly created (0), or reimported (>0)
+  int export_count{0};
 };
