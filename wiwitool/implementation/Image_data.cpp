@@ -286,9 +286,8 @@ Image_data Image_data::adjust_contrast_brightness(float contrast_factor,
   Image_data out{width(), height()};
 
   const auto adjust_channel = [&](uint8_t value) -> uint8_t {
-    const int x = static_cast<int>((value - 128) * contrast_factor + 128 +
-                                   brightness_shift);
-    return static_cast<uint8_t>(std::clamp(x, 0, 255));
+    const int x = (value - 128) * contrast_factor + 128 + brightness_shift;
+    return std::clamp(x, 0, 255);
   };
 
   foreach ([&](size_t x, size_t y, const Pixel src) {
