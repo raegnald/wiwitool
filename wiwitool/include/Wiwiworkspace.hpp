@@ -40,6 +40,9 @@ public:
   void set_invisible_item_frames(bool);
   bool get_invisible_item_frames() const;
 
+  // Is workspace new?
+  bool inline is_workspace_new(void) const { return export_count == 0; }
+
   // Serialisation and generation
 
   std::vector<uint8_t> serialise(void) const;
@@ -56,4 +59,6 @@ private:
   std::string workspace_name{
       generate_random_alphabetic_string(default_workspace_name_length)};
 
+  // Workspace is newly created (0), or reimported (>0)
+  int export_count{0};
 };

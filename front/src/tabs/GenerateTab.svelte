@@ -17,6 +17,7 @@
   export let move: (id: string) => void;
 
   let workspaceName: string = null;
+  let firstTimePack: boolean = false;
   let generating = false;
 
   $: if (workspaceName != null) {
@@ -32,6 +33,7 @@
 
   onMount(() => {
     workspaceName = $workspace.workspaceName;
+    firstTimePack = $workspace.isWorkspaceNew();
   });
 
   async function generatePacks() {
@@ -87,13 +89,36 @@
   }
 </script>
 
+{#if validGeneratableConfig}
+  <div class="app-card project-details">
+    <div>
+      <span>Project name &nbsp;</span>
+      <input type="text" bind:value={workspaceName} disabled={!firstTimePack} />
+      <div style="margin-top: 20px">
+        {#if firstTimePack}
+          <span>
+            The name of the pack is permanent. Once set, every item from this
+            pack that you place in your world will have the project name as part
+            of its identifier. Changing it afterwards would break your existing
+            items. Choose wisely as it can't be changed later.
+          </span>
+        {:else}
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <span>
+              The pack name should not be changed after your first export.
+            </span>
+            <Button small secondary onclick={() => (firstTimePack = true)}>
+              I know what I'm doing
+            </Button>
+          </div>
+        {/if}
+      </div>
+    </div>
+  </div>
+{/if}
+
 <div class="app-card">
   {#if validGeneratableConfig}
-    <div style="margin-bottom: 20px;">
-      <span>Workspace name &nbsp;</span>
-      <input type="text" bind:value={workspaceName} />
-    </div>
-
     <h3 style="margin-top: 0">Summary of your pack</h3>
 
     <p>Your pack will contain these new items:</p>
@@ -248,6 +273,10 @@
 </div>
 
 <style>
+  .project-details {
+    margin-bottom: 12px;
+  }
+
   h3 {
     margin-bottom: 0;
   }

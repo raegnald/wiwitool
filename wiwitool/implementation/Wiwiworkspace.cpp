@@ -96,6 +96,9 @@ void Wiwiworkspace::deserialise(const std::vector<uint8_t> &binary_msgpack) {
   else
     wiwidebug std::println("This workspace does not have a name");
 
+  if (j.contains("export_count"))
+    j.at("export_count").get_to(export_count);
+
   // Paintings
   if (j.contains("paintings")) {
     auto flat_paintings = j["paintings"].get<std::vector<Painting>>();
@@ -129,9 +132,8 @@ std::filesystem::path Wiwiworkspace::generate_zip(void) {
 
   print_memory_stats("Start generate_zip");
 
-  Serialiser::serialise(serialise()); // FOTUT: I don't like current
-                                      // way I am injecting the
-                                      // serialised workspace data.
+  export_count++;
+  Serialiser::serialise(serialise());
 
   print_memory_stats("After workspace serialisation");
 
@@ -185,6 +187,8 @@ EMSCRIPTEN_BINDINGS(wiwiworkspace) {
       .property("invisibleItemFrames",
                 &Wiwiworkspace::get_invisible_item_frames,
                 &Wiwiworkspace::set_invisible_item_frames)
+
+      .function("isWorkspaceNew", &Wiwiworkspace::is_workspace_new)
 
       .function("serialise", &Wiwiworkspace::serialise)
       .function("deserialise", optional_override([](Wiwiworkspace &self,
