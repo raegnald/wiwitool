@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <print>
 #include <stdexcept>
+#include <type_traits>
 #include <vector>
 
 #include "nlohmann/json.hpp"
@@ -34,7 +35,6 @@ Image_data::Image_data(std::filesystem::path filepath) : path_{filepath} {
 
   data_ = Stb_image{reinterpret_cast<Pixel *>(imgdata), stbi_image_free};
 }
-
 
 Image_data::Image_data(std::vector<uint8_t> data) {
   wiwidebug std::println("Loading image data from data");
@@ -119,7 +119,6 @@ Image_data::Pixel &Image_data::at(size_t x, size_t y) {
   return data_.get()[y * width_ + x];
 }
 
-
 const Image_data::Pixel &Image_data::at(size_t x, size_t y) const {
   if (x >= width_ or y >= height_)
     throw std::invalid_argument(std::format(
@@ -127,6 +126,52 @@ const Image_data::Pixel &Image_data::at(size_t x, size_t y) const {
         y, width_, height_));
 
   return data_.get()[y * width_ + x];
+}
+
+template <typename Fun> void Image_data::foreach(Fun f) {
+  constexpr bool x_y_pixel = std::is_invocable_v<Fun, size_t, size_t, Pixel &>;
+  constexpr bool x_y = std::is_invocable_v<Fun, size_t, size_t>;
+  constexpr bool pixel_only = std::is_invocable_v<Fun, Pixel &>;
+
+  for (size_t y = 0; y < height(); ++y) {
+    for (size_t x = 0; x < width(); ++x) {
+      auto &pixel = at(x, y);
+
+      if constexpr (x_y_pixel)
+        f(x, y, pixel);
+      else if constexpr (x_y)
+        f(x, y);
+      else if constexpr (pixel_only)
+        f(pixel);
+      else
+        static_assert(x_y_pixel or x_y or pixel_only,
+                      "for_each_pixel(f) requires f(pixel &), f(size_t, "
+                      "size_t, pixel &), f(size_t, size_t)");
+    }
+  }
+}
+
+template <typename Fun> void Image_data::foreach(Fun f) const {
+  constexpr bool x_y_pixel = std::is_invocable_v<Fun, size_t, size_t, Pixel>;
+  constexpr bool x_y = std::is_invocable_v<Fun, size_t, size_t>;
+  constexpr bool pixel_only = std::is_invocable_v<Fun, Pixel>;
+
+  for (size_t y = 0; y < height(); ++y) {
+    for (size_t x = 0; x < width(); ++x) {
+      const auto pixel = at(x, y);
+
+      if constexpr (x_y_pixel)
+        f(x, y, pixel);
+      else if constexpr (x_y)
+        f(x, y);
+      else if constexpr (pixel_only)
+        f(pixel);
+      else
+        static_assert(x_y_pixel or x_y or pixel_only,
+                      "for_each_pixel(f) requires f(pixel), f(size_t, "
+                      "size_t, pixel), f(size_t, size_t)");
+    }
+  }
 }
 
 Image_data Image_data::scale(float factor) const {
@@ -140,18 +185,16 @@ Image_data Image_data::scale(size_t target_w, size_t target_h) const {
 
   Image_data out{target_w, target_h};
 
-  const auto sample = [&](int x, int y) {
+  const auto sample = [&](size_t x, size_t y, rgba &pixel) {
     int src_y = y * step_y, src_x = x * step_x;
 
     if (src_y >= height()) src_y = height() - 1;
     if (src_x >= width()) src_x = width() - 1;
 
-    return at(src_x, src_y);
+    pixel = at(src_x, src_y);
   };
 
-  for (size_t y = 0; y < target_h; ++y)
-    for (size_t x = 0; x < target_w; ++x)
-      out.at(x, y) = sample(x, y);
+  out.foreach (sample);
 
   return out;
 }
@@ -159,9 +202,9 @@ Image_data Image_data::scale(size_t target_w, size_t target_h) const {
 Image_data Image_data::crop(size_t x0, size_t y0, size_t w, size_t h) const {
   Image_data out{w, h};
 
-  for (size_t y = 0; y < h; ++y)
-    for (size_t x = 0; x < w; ++x)
-      out.at(x, y) = this->at(x0 + x, y0 + y);
+  out.foreach ([&](size_t x, size_t y, Pixel &pixel) {
+    pixel = this->at(x0 + x, y0 + y);
+  });
 
   return out;
 }
@@ -248,17 +291,14 @@ Image_data Image_data::adjust_contrast_brightness(float contrast_factor,
     return static_cast<uint8_t>(std::clamp(x, 0, 255));
   };
 
-  for (size_t y = 0; y < height(); ++y) {
-    for (size_t x = 0; x < width(); ++x) {
-      const auto src = at(x, y);
-      auto &dst = out.at(x, y);
-
-      dst.r = adjust_channel(src.r);
-      dst.g = adjust_channel(src.g);
-      dst.b = adjust_channel(src.b);
-      dst.a = src.a;
-    }
-  }
+  foreach ([&](size_t x, size_t y, const Pixel src) {
+    out.at(x, y) = Pixel{
+      adjust_channel(src.r),
+      adjust_channel(src.g),
+      adjust_channel(src.b),
+      src.a
+    };
+  });
 
   return out;
 }
