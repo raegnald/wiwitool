@@ -64,6 +64,19 @@ public:
   [[nodiscard]] Image_data flip_vertically(void) const;
   [[nodiscard]] Image_data flip_horizontally(void) const;
 
+  // Tweak brightness and/or contrast
+
+  [[nodiscard]] Image_data
+  adjust_contrast_brightness(float contrast_factor, int brightness_shift) const;
+
+  [[nodiscard]] Image_data inline adjust_contrast(float contrast_factor) const {
+    return adjust_contrast_brightness(contrast_factor, 0);
+  }
+
+  [[nodiscard]] Image_data inline adjust_brightness(float brightness_shift) const {
+    return adjust_contrast_brightness(1.0f, brightness_shift);
+  }
+
   // Export to data
 
   [[nodiscard]] std::vector<uint8_t> encode_png(void) const;

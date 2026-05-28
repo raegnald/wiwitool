@@ -8,7 +8,8 @@ struct Painting_converter {
   const Image_data &image;
 
   Image_data convert(const Painting_frame_generator &frame_generator,
-                     size_t pixels_per_block, Painting_ratio ratio = Nearest);
+                     size_t pixels_per_block, Painting_ratio ratio = Nearest,
+                     float contrast = 1.0f, int brightness = 0);
 
   Image_data miniatureise(void);
 };

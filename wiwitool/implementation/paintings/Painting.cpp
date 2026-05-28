@@ -73,8 +73,8 @@ void Painting::refresh(void) const {
 
   auto converter = Painting_converter{cropped_source};
   icon = converter.miniatureise();
-  painting =
-      converter.convert(frame_generator, pixels_per_block, conversion_ratio);
+  painting = converter.convert(frame_generator, pixels_per_block,
+                               conversion_ratio, contrast, brightness);
 
   wiwidebug std::println("Painting and icon image data computed!");
 }
@@ -138,7 +138,9 @@ void to_json(nlohmann::json &j, const Painting &p) {
                      {"sourceImage", p.original_image},
                      {"placeable", p.placeable},
                      {"hasStonecutterRecipe", p.stonecutter_recipe},
-                     {"crop", {p.crop_x, p.crop_y, p.crop_w, p.crop_h}}};
+                     {"crop", {p.crop_x, p.crop_y, p.crop_w, p.crop_h}},
+                     {"contrast", p.contrast},
+                     {"brightness", p.brightness}};
 
   std::visit([&j](const auto &gen) { j["frame_generator"] = gen; },
              p.frame_generator);
@@ -171,6 +173,12 @@ void from_json(const nlohmann::json &j, Painting &p) {
       p.crop_h = crop[3];
     }
   }
+
+  if (j.contains("contrast"))
+    j.at("contrast").get_to(p.contrast);
+
+  if (j.contains("brightness"))
+    j.at("brightness").get_to(p.brightness);
 
   if (j.contains("frame_generator")) {
     const auto &j_gen = j.at("frame_generator");
@@ -259,6 +267,9 @@ EMSCRIPTEN_BINDINGS(painting) {
       // Transformations
       .function("rotateClockwise", &Painting::rotate_clockwise)
       .function("rotateAnticlockwise", &Painting::rotate_anticlockwise)
+
+      .property("contrast", &Painting::get_contrast, &Painting::set_contrast)
+      .property("brightness", &Painting::get_brightness, &Painting::set_brightness)
 
       .function("useProceduralFrame", &Painting::use_procedural_frame)
       .function("useNoFrame", &Painting::use_no_frame)

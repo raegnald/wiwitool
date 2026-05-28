@@ -14,7 +14,7 @@
   import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
   import SelectableCard from "../components/SelectableCard.svelte";
   import Button from "../components/Button.svelte";
-  import { RulerIcon, SquareIcon, WrenchIcon } from "@lucide/svelte";
+  import { RulerIcon, SquareIcon, WandIcon, WrenchIcon } from "@lucide/svelte";
 
   export let wrapper: PaintingWrapper;
 
@@ -39,6 +39,8 @@
   let frameSeed: string;
   let placeable: boolean;
   let hasStonecutterRecipe: boolean;
+  let brightness: number;
+  let contrast: number;
 
   let downscalePower: number;
 
@@ -70,6 +72,16 @@
     let currentDownscale = Math.log2(w.cppPainting.pixelPerBlock);
     if (downscalePower !== currentDownscale) {
       downscalePower = currentDownscale;
+      canvasNeedsUpdate = true;
+    }
+
+    if (brightness !== w.cppPainting.brightness) {
+      brightness = w.cppPainting.brightness;
+      canvasNeedsUpdate = true;
+    }
+
+    if (contrast !== w.cppPainting.contrast) {
+      contrast = w.cppPainting.contrast;
       canvasNeedsUpdate = true;
     }
 
@@ -118,6 +130,9 @@
     // Since setting the ratio in C++ automatically triggers a C++ refresh(),
     // we do this last.
     wrapper.cppPainting.ratio = currentRatio;
+
+    wrapper.cppPainting.brightness = brightness;
+    wrapper.cppPainting.contrast = contrast;
 
     // Safety net in case ratio didn't change but the seed/scale did
     wrapper.cppPainting.refresh();
@@ -325,6 +340,66 @@
         <span class="pill">
           {Math.pow(2, downscalePower)} pixels / block
         </span>
+      </div>
+    </div>
+
+    <div class="more-options-section">
+      <span class="more-options-section-label">
+        <WandIcon size="1.5em" />
+        Visual tweaks
+      </span>
+
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          align-items: center;
+          gap: 10px"
+      >
+        <Button
+          small
+          transparent
+          disabled={brightness == 0}
+          icon="Undo"
+          onclick={() => {
+            brightness = 0;
+            syncVisualsAndRefresh();
+          }}
+        >
+          Brightness
+        </Button>
+        <input
+          id="range"
+          type="range"
+          min="-255"
+          max="255"
+          bind:value={brightness}
+          oninput={syncVisualsAndRefresh}
+          step="1"
+        />
+
+        <Button
+          small
+          transparent
+          disabled={contrast == 1}
+          icon="Undo"
+          onclick={() => {
+            contrast = 1;
+            syncVisualsAndRefresh();
+          }}
+        >
+          Contrast
+        </Button>
+        <input
+          id="range"
+          type="range"
+          min="0"
+          max="10"
+          bind:value={contrast}
+          oninput={syncVisualsAndRefresh}
+          step="0.01"
+        />
       </div>
     </div>
 

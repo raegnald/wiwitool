@@ -235,6 +235,34 @@ Image_data Image_data::flip_horizontally(void) const {
   return out;
 }
 
+Image_data Image_data::adjust_contrast_brightness(float contrast_factor,
+                                                  int brightness_shift) const {
+  if (contrast_factor == 1.0f and brightness_shift == 0)
+    return Image_data{*this};
+
+  Image_data out{width(), height()};
+
+  const auto adjust_channel = [&](uint8_t value) -> uint8_t {
+    const int x = static_cast<int>((value - 128) * contrast_factor + 128 +
+                                   brightness_shift);
+    return static_cast<uint8_t>(std::clamp(x, 0, 255));
+  };
+
+  for (size_t y = 0; y < height(); ++y) {
+    for (size_t x = 0; x < width(); ++x) {
+      const auto src = at(x, y);
+      auto &dst = out.at(x, y);
+
+      dst.r = adjust_channel(src.r);
+      dst.g = adjust_channel(src.g);
+      dst.b = adjust_channel(src.b);
+      dst.a = src.a;
+    }
+  }
+
+  return out;
+}
+
 void Image_data::save_png(std::filesystem::path name) const {
   const auto stride = width_ * sizeof(Pixel);
   stbi_write_png(name.c_str(), width_, height_, channels_, data_.get(), stride);
@@ -365,6 +393,10 @@ EMSCRIPTEN_BINDINGS(image_data) {
     .function("rotateAnticlockwise", &Image_data::rotate_anticlockwise)
     .function("flipVertically", &Image_data::flip_vertically)
     .function("flipHorizontally", &Image_data::flip_horizontally)
+
+    .function("adjustContrastBrightness", &Image_data::adjust_contrast_brightness)
+    .function("adjustContrast", &Image_data::adjust_contrast)
+    .function("adjustBrightness", &Image_data::adjust_brightness)
 
     // Export to memory buffer
     .function("encodePng", optional_override([](const Image_data& self) {

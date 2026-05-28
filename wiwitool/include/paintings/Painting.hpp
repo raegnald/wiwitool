@@ -100,6 +100,16 @@ public:
   void set_pixels_per_block(size_t ppb) { pixels_per_block = ppb; }
   size_t get_pixels_per_block(void) const { return pixels_per_block; }
 
+  // Contrast
+
+  void set_contrast(float c) { contrast = c; invalidate_cache(); }
+  float get_contrast(void) const { return contrast; }
+
+  // Brightness
+
+  void set_brightness(int b) { brightness = b; invalidate_cache(); }
+  int get_brightness(void) const { return brightness; }
+
   // Serialisation
 
   friend void to_json(nlohmann::json &j, const Painting &p);
@@ -118,6 +128,9 @@ private:
   size_t pixels_per_block{default_resolution};
 
   double crop_x{0.0}, crop_y{0.0}, crop_w{1.0}, crop_h{1.0};
+
+  int brightness{0};
+  float contrast{1.0f};
 
   Painting_frame_generator frame_generator = Procedural_frame_generator{};
 

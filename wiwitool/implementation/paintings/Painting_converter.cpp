@@ -63,11 +63,15 @@ Image_data Painting_converter::miniatureise(void) {
 
 Image_data
 Painting_converter::convert(const Painting_frame_generator &frame_generator,
-                            size_t pixels_per_block, Painting_ratio ratio) {
+                            size_t pixels_per_block, Painting_ratio ratio,
+                            float contrast, int brightness) {
   if (ratio == Nearest) ratio = nearest_ratio(image.width(), image.height());
 
   auto cropped = crop(image, ratio);
-  auto downscaled = downscale(std::move(cropped), ratio, pixels_per_block);
+
+  auto downscaled = downscale(std::move(cropped), ratio, pixels_per_block)
+                        .adjust_contrast_brightness(contrast, brightness);
+
   auto framed = frame(frame_generator, std::move(downscaled), ratio, pixels_per_block);
 
   return framed;
