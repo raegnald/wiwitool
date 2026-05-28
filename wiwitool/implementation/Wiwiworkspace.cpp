@@ -70,10 +70,11 @@ std::vector<uint8_t> Wiwiworkspace::serialise(void) const {
   json j;
 
   j["workspace_name"] = workspace_name;
+  j["export_count"] = export_count;
 
   // Paintings
-    for (const auto &painting : paintings)
-      j["paintings"].push_back(*painting);
+  for (const auto &painting : paintings)
+    j["paintings"].push_back(*painting);
 
   // Music discs
   for (const auto &disc : discs)
@@ -115,7 +116,7 @@ void Wiwiworkspace::deserialise(const std::vector<uint8_t> &binary_msgpack) {
       discs.push_back(std::make_shared<Music_disc>(d));
   }
 
-  // Invislbe item frames
+  // Invisible item frames
   invisible_item_frames = j.value("invisible_item_frames", false);
 }
 
