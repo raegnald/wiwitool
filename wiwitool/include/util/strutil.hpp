@@ -7,6 +7,8 @@
 #include <random>
 #include <string>
 
+#include "util/english.hpp"
+
 inline std::string nospaces(std::string s) {
   const auto upperchar = [](unsigned char c) {
     if (c == ' ') return '_';
@@ -44,4 +46,10 @@ inline std::string generate_random_alphabetic_string(size_t chars) {
     s[i] = 'a' + static_cast<char>(random(rng));
 
   return s;
+}
+
+inline std::string get_random_adjective_underscore_noun(void) {
+  return std::format("{}_{}",
+                     english_adjectives[rand() % english_adjectives.size()],
+                     english_nouns[rand() % english_nouns.size()]);
 }

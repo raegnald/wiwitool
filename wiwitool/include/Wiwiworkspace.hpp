@@ -55,9 +55,7 @@ private:
   std::vector<std::shared_ptr<Music_disc>> discs;
   bool invisible_item_frames{false};
 
-  static constexpr size_t default_workspace_name_length{6};
-  std::string workspace_name{
-      generate_random_alphabetic_string(default_workspace_name_length)};
+  std::string workspace_name{get_random_adjective_underscore_noun()};
 
   // Workspace is newly created (0), or reimported (>0)
   int export_count{0};
