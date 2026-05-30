@@ -48,6 +48,10 @@ public:
 
   // Image manipulation
 
+  // Pixelwise manipulation
+  template <typename Fun> void foreach(Fun f);
+  template <typename Fun> void foreach(Fun f) const;
+
   // Nearest-neighbour scaling
   [[nodiscard]] Image_data scale(float factor) const;
   [[nodiscard]] Image_data scale(size_t target_w, size_t target_h) const;
