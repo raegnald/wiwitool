@@ -1,10 +1,12 @@
 #include "Minecraft_packer.hpp"
 
 #include "Minecraft_pack.hpp"
+#include "util/wiwidebug.hpp"
 
 #include <cstddef>
 #include <filesystem>
 #include <memory>
+#include <print>
 #include <string>
 
 #ifdef EMSCRIPTEN
@@ -24,6 +26,9 @@ std::filesystem::path Minecraft_packer::get_zip(void) {
 
   // We will suppose no two packs produce the same file. Otherwise,
   // this simplistic approach totally breaks apart!
+  //
+  // ... And it does (only with pack.mcmeta file).
+  // The descriptions should be combined.
 
   for (auto pack : packs)
     pack->generate(false);

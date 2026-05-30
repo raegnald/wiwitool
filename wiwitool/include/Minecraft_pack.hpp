@@ -18,6 +18,9 @@ private:
 public:
   static inline std::filesystem::path genpath{"/"};
 
+  static inline const std::filesystem::path data_subfolder{"data/"};
+  static inline const std::filesystem::path assets_subfolder{"assets/"};
+
   virtual ~Minecraft_pack(void) = default;
 
   void generate(bool fresh = true);
@@ -37,11 +40,8 @@ protected:
   /// folder.
   std::filesystem::path in_data_folder(std::filesystem::path name = std::filesystem::path{});
 
-  static inline const std::filesystem::path data_subfolder{"data/"};
-
   /// Get existing or create new subfolder relative to resource pack
   /// folder.
   std::filesystem::path in_resource_folder(std::filesystem::path = std::filesystem::path{});
 
-  static inline const std::filesystem::path assets_subfolder{"assets/"};
 };

@@ -1,5 +1,7 @@
 #include "Wiwiworkspace.hpp"
 
+#include "Image_data.hpp"
+#include "Minecraft_pack.hpp"
 #include "Serialiser.hpp"
 #include "Minecraft_packer.hpp"
 
@@ -19,6 +21,16 @@
 
 #include "nlohmann/json.hpp"
 using json = nlohmann::json;
+
+void Wiwiworkspace::set_workspace_image(Image_data im) {
+  if (im.empty()) return;
+
+  workspace_image = im.crop(1, 1).scale(256, 256);
+}
+
+Image_data Wiwiworkspace::get_workspace_icon(void) const {
+  return workspace_image;
+}
 
 // Paintings
 
@@ -70,6 +82,7 @@ std::vector<uint8_t> Wiwiworkspace::serialise(void) const {
   json j;
 
   j["workspace_name"] = workspace_name;
+  j["workspace_image"] = workspace_image;
   j["export_count"] = export_count;
 
   // Paintings
@@ -96,6 +109,9 @@ void Wiwiworkspace::deserialise(const std::vector<uint8_t> &binary_msgpack) {
     j.at("workspace_name").get_to(workspace_name);
   else
     wiwidebug std::println("This workspace does not have a name");
+
+  if (j.contains("workspace_image"))
+    j.at("workspace_image").get_to(workspace_image);
 
   if (j.contains("export_count"))
     j.at("export_count").get_to(export_count);
@@ -155,6 +171,11 @@ std::filesystem::path Wiwiworkspace::generate_zip(void) {
     packer.add(iif_pack);
   }
 
+  // Add pack.png from workspace
+  if (not workspace_image.empty()) {
+    workspace_image.save_png(Minecraft_pack::genpath / "pack.png");
+  }
+
   const auto zip_path = packer.get_zip();
   print_memory_stats("End generate_zip");
 
@@ -176,6 +197,20 @@ EMSCRIPTEN_BINDINGS(wiwiworkspace) {
 
       .property("workspaceName", &Wiwiworkspace::get_workspace_name,
                 &Wiwiworkspace::set_workspace_name)
+
+      .property("workspaceImage", &Wiwiworkspace::get_workspace_icon,
+                &Wiwiworkspace::set_workspace_image)
+
+      .function("resetWorkspaceImage", &Wiwiworkspace::reset_workspace_image)
+
+      .function(
+          "setWorkspaceIconFromBytes",
+          optional_override([](Wiwiworkspace &self, std::string image_bytes) {
+            const uint8_t *ptr =
+                reinterpret_cast<const uint8_t *>(image_bytes.data());
+            std::vector<uint8_t> vec(ptr, ptr + image_bytes.size());
+            self.set_workspace_image(Image_data{vec});
+          }))
 
       .function("addPainting", &Wiwiworkspace::add_painting)
       .function("removePainting", &Wiwiworkspace::remove_painting)

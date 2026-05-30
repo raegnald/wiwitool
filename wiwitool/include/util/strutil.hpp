@@ -48,7 +48,10 @@ inline std::string generate_random_alphabetic_string(size_t chars) {
   return s;
 }
 
-inline std::string get_random_adjective_underscore_noun(void) {
+inline std::string get_random_adjective_underscore_noun(bool set_seed = true) {
+  if (set_seed)
+    srand(time(NULL));
+
   return std::format("{}_{}",
                      english_adjectives[rand() % english_adjectives.size()],
                      english_nouns[rand() % english_nouns.size()]);

@@ -81,6 +81,16 @@ void Minecraft_pack::compress_genpath(std::filesystem::path packs_zip) {
   const auto datapack_zip = genpath / "datapack.zip";
   const auto respack_zip = genpath / "respack.zip";
 
+  // If we have a workspace icon.png, we will copy it to
+  // both the data pack and resource pack directories.
+  if (std::filesystem::exists(genpath / "pack.png")) {
+    std::filesystem::copy(genpath / "pack.png",
+                          genpath / "datapack" / "pack.png");
+
+    std::filesystem::copy(genpath / "pack.png",
+                          genpath / "respack" / "pack.png");
+  }
+
   compress_directory(genpath / "datapack", datapack_zip);
   compress_directory(genpath / "respack", respack_zip);
 

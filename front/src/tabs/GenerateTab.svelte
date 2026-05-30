@@ -10,13 +10,16 @@
   import { formatRatio } from "../paintings/ratios";
   import { musicDiscsStore } from "../stores/musicDiscsStore";
   import { formatSeconds } from "../music/seconds";
-  import { PackageOpenIcon } from "@lucide/svelte";
-  import { onMount } from "svelte";
+  import { ImageUpIcon, PackageOpenIcon } from "@lucide/svelte";
+  import { onDestroy, onMount } from "svelte";
+  import DropZone from "../components/DropZone.svelte";
 
   export let module: MainModule;
   export let move: (id: string) => void;
 
   let workspaceName: string = null;
+  let workspaceIconSrc: string = "";
+
   let firstTimePack: boolean = false;
   let generating = false;
 
@@ -34,6 +37,12 @@
   onMount(() => {
     workspaceName = $workspace.workspaceName;
     firstTimePack = $workspace.isWorkspaceNew();
+
+    updateWorkspaceIcon();
+  });
+
+  onDestroy(() => {
+    if (workspaceIconSrc) URL.revokeObjectURL(workspaceIconSrc);
   });
 
   async function generatePacks() {
@@ -58,6 +67,30 @@
     } finally {
       generating = false;
     }
+  }
+
+  function updateWorkspaceIcon() {
+    const icon = $workspace.workspaceImage;
+
+    if (icon && !icon.empty()) {
+      const pngBytes = icon.encodePng();
+      const blob = new Blob([pngBytes], { type: "image/png" });
+
+      if (workspaceIconSrc) URL.revokeObjectURL(workspaceIconSrc);
+      workspaceIconSrc = URL.createObjectURL(blob);
+      icon.delete();
+    } else {
+      if (workspaceIconSrc) URL.revokeObjectURL(workspaceIconSrc);
+      workspaceIconSrc = "";
+    }
+  }
+
+  async function loadWorkspaceIcon(file: File) {
+    const buffer = await file.arrayBuffer();
+    const uint8View = new Uint8Array(buffer);
+
+    $workspace.setWorkspaceIconFromBytes(uint8View);
+    updateWorkspaceIcon();
   }
 
   function download(zipPath: string) {
@@ -91,28 +124,104 @@
 
 {#if validGeneratableConfig}
   <div class="app-card project-details">
-    <div>
-      <span>Project name &nbsp;</span>
-      <input type="text" bind:value={workspaceName} disabled={!firstTimePack} />
-      <div style="margin-top: 20px">
-        {#if firstTimePack}
-          <span>
-            The name of the pack is permanent. Once set, every item from this
-            pack that you place in your world will have the project name as part
-            of its identifier. Changing it afterwards would break your existing
-            items. Choose wisely as it can't be changed later.
-          </span>
-        {:else}
-          <div style="display: flex; gap: 10px; align-items: center;">
+    <div
+      style={`
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        justify-content: space-between;
+      `}
+    >
+      <div style="flex: 1">
+        <span>Project name &nbsp;</span>
+        <input
+          type="text"
+          bind:value={workspaceName}
+          disabled={!firstTimePack}
+        />
+
+        <div style="margin-top: 20px">
+          {#if firstTimePack}
             <span>
-              The pack name should not be changed after your first export.
+              The name of the pack is permanent. Once set, every item from this
+              pack that you place in your world will have the project name as
+              part of its identifier. Changing it afterwards would break your
+              existing items. Choose wisely as it can't be changed later.
             </span>
-            <Button small secondary onclick={() => (firstTimePack = true)}>
-              I know what I'm doing
-            </Button>
-          </div>
+          {:else}
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span>
+                The pack name should not be changed after your first export.
+              </span>
+              <Button small secondary onclick={() => (firstTimePack = true)}>
+                I know what I'm doing
+              </Button>
+            </div>
+          {/if}
+        </div>
+      </div>
+
+      <div style="margin-top: 20px">
+        {#if workspaceIconSrc}
+          <Button
+            transparent
+            small
+            destructive
+            onclick={() => {
+              $workspace.resetWorkspaceImage();
+              updateWorkspaceIcon();
+            }}
+          >
+            Reset project icon
+          </Button>
         {/if}
       </div>
+    </div>
+
+    <div>
+      <DropZone
+        style={`
+        width: 256px;
+        height: 256px;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size:120%;
+        ${workspaceIconSrc ? "background-color: transparent;" : ""}
+        overflow: hidden;
+      `}
+        handler={loadWorkspaceIcon}
+        let:filePicker
+      >
+        {#if workspaceIconSrc}
+          <img
+            src={workspaceIconSrc}
+            class="workspace-icon"
+            alt="Workspace icon"
+            style={`
+              width: 100%;
+              height: 100%;
+            `}
+          />
+        {:else}
+          <div>
+            <ImageUpIcon
+              size="90"
+              strokeWidth="1.5"
+              class="empty-icon"
+              style="margin-bottom: 10px;"
+            />
+
+            <center>
+              <Button icon="FolderInput" onclick={filePicker}>
+                Select pack icon
+              </Button>
+            </center>
+          </div>
+        {/if}
+      </DropZone>
     </div>
   </div>
 {/if}
@@ -275,6 +384,8 @@
 <style>
   .project-details {
     margin-bottom: 12px;
+    display: flex;
+    flex-direction: row;
   }
 
   h3 {
