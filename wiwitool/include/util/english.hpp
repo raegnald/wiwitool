@@ -5,6 +5,9 @@
 #include <array>
 
 constexpr static inline std::array english_nouns = {
+  "wiwi",
+  "croissant",
+  "cappuccino",
   "people",
   "history",
   "way",
@@ -1533,6 +1536,14 @@ constexpr static inline std::array english_nouns = {
 };
 
 constexpr static inline std::array english_adjectives = {
+  "floppy",
+  "jiggly",
+  "deceitful",
+  "nibbleable",
+  "funky",
+  "quantum",
+  "smelly",
+  "zesty",
   "abandoned",
   "able",
   "absolute",
