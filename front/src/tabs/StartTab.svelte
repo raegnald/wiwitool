@@ -42,7 +42,7 @@
       retrieveMusicDiscs();
 
       toasts.set([]);
-      toast(INFO, "Configuration was imported");
+      toast(INFO, `${$workspace.workspaceName ?? "Workspace"} was imported`);
       move("paintings");
     } catch (e: any) {
       console.error("Deserialisation failed:", e);
