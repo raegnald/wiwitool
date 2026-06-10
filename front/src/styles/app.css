@@ -77,6 +77,11 @@ dialog {
   padding: 20px;
 }
 
+.app-card {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
 #app {
   padding: 2rem 0;
 }
