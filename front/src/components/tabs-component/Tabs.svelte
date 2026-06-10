@@ -130,6 +130,10 @@
     justify-content: space-between;
     z-index: 10;
   }
+  .tabs-container {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
   .normal-tabs-container,
   .coloured {
     margin: 0 10px;
