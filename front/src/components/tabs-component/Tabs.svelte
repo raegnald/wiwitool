@@ -28,6 +28,11 @@
 
     selectTab: (id: string) => {
       selectedTab.set(id);
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
     },
   };
 
