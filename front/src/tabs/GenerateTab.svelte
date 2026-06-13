@@ -5,7 +5,7 @@
     type MainModule,
     type MinecraftPacker,
   } from "../bindings/wiwitool";
-  import { workspace } from "../stores/workspaceStore";
+  import { formatWorkspaceName, workspace } from "../stores/workspaceStore";
   import Button from "../components/Button.svelte";
   import { formatRatio } from "../paintings/ratios";
   import { musicDiscsStore } from "../stores/musicDiscsStore";
@@ -24,9 +24,8 @@
   let generating = false;
 
   $: if (workspaceName != null) {
-    $workspace.workspaceName = workspaceName = workspaceName
-      .replace(/[^(\w|\s)]/g, "")
-      .replace(/[\s]/g, "_");
+    $workspace.workspaceName = workspaceName =
+      formatWorkspaceName(workspaceName);
   }
 
   $: validGeneratableConfig =
@@ -235,10 +234,14 @@
     <ul class="pack-contents">
       {#if $paintingsStore.length > 0}
         <li class="pack-content-one">
-          <b class="bold-section">
-            {$paintingsStore.length}
-            painting{$paintingsStore.length != 1 ? "s" : ""}
-          </b>
+          <span class="bold-section">
+            <b>
+              {$paintingsStore.length}
+              painting{$paintingsStore.length != 1 ? "s" : ""}
+            </b>
+            <br />
+            <span>{$workspace.getPaintingsNamespaceOverride().get()}</span>
+          </span>
           <ul>
             {#each [...$paintingsStore].reverse() as wrapper (wrapper.cppPainting.stringId())}
               <li class="centered">
@@ -254,16 +257,31 @@
                 ({formatRatio(wrapper.cppPainting.ratio)} ratio)
               </li>
             {/each}
+
+            <li style="margin-top: 15px">
+              <Button
+                secondary
+                small
+                icon="Image"
+                onclick={() => move("paintings")}
+              >
+                Add more paintings
+              </Button>
+            </li>
           </ul>
         </li>
       {/if}
 
       {#if $musicDiscsStore.length > 0}
         <li class="pack-content-one">
-          <b class="bold-section">
-            {$musicDiscsStore.length}
-            music disc{$musicDiscsStore.length != 1 ? "s" : ""}
-          </b>
+          <span class="bold-section">
+            <b>
+              {$musicDiscsStore.length}
+              music disc{$musicDiscsStore.length != 1 ? "s" : ""}
+            </b>
+            <br />
+            <span>{$workspace.getMusicDiscsNamespaceOverride().get()}</span>
+          </span>
           <ul>
             {#each [...$musicDiscsStore].reverse() as wrapper (wrapper.cppDisc.stringId())}
               <li class="centered">
@@ -279,13 +297,28 @@
                 ({formatSeconds(wrapper.cppDisc.getTrimmedDuration())})
               </li>
             {/each}
+
+            <li style="margin-top: 15px">
+              <Button
+                secondary
+                small
+                icon="Disc3"
+                onclick={() => move("discs")}
+              >
+                Add more discs
+              </Button>
+            </li>
           </ul>
         </li>
       {/if}
 
       {#if $workspace && $workspace.invisibleItemFrames}
         <li class="pack-content-one">
-          <b class="bold-section">Invisible item frames</b>
+          <span class="bold-section">
+            <b>Invisible item frames</b>
+            <br />
+            <span>{$workspace.getIIFNamespaceOverride().get()}</span>
+          </span>
           <ul>
             <li class="centered">
               <img
@@ -320,10 +353,10 @@
 
       <div class="empty-actions">
         <Button large icon="Image" onclick={() => move("paintings")}>
-          Add Paintings
+          Add paintings
         </Button>
         <Button large icon="Disc3" onclick={() => move("discs")}>
-          Add Music Discs
+          Add music discs
         </Button>
       </div>
     </div>

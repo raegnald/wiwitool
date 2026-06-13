@@ -86,14 +86,17 @@ std::vector<uint8_t> Wiwiworkspace::serialise(void) const {
   j["export_count"] = export_count;
 
   // Paintings
+  j["paintings_namespace_override"] = *paintings_namespace_override;
   for (const auto &painting : paintings)
     j["paintings"].push_back(*painting);
 
   // Music discs
+  j["music_discs_namespace_override"] = *music_discs_namespace_override;
   for (const auto &disc : discs)
     j["music_discs"].push_back(*disc);
 
   // Invisible item frames
+  j["invisible_item_frames_namespace_override"] = *iif_namespace_override;
   j["invisible_item_frames"] = invisible_item_frames;
 
   return nlohmann::json::to_msgpack(j);
@@ -117,6 +120,10 @@ void Wiwiworkspace::deserialise(const std::vector<uint8_t> &binary_msgpack) {
     j.at("export_count").get_to(export_count);
 
   // Paintings
+
+  if (j.contains("paintings_namespace_override"))
+    j.at("paintings_namespace_override").get_to(*paintings_namespace_override);
+
   if (j.contains("paintings")) {
     auto flat_paintings = j["paintings"].get<std::vector<Painting>>();
 
@@ -125,6 +132,11 @@ void Wiwiworkspace::deserialise(const std::vector<uint8_t> &binary_msgpack) {
   }
 
   // Music discs
+
+  if (j.contains("music_discs_namespace_override"))
+    j.at("music_discs_namespace_override")
+        .get_to(*music_discs_namespace_override);
+
   if (j.contains("music_discs")) {
     auto flat_discs = j["music_discs"].get<std::vector<Music_disc>>();
 
@@ -133,6 +145,11 @@ void Wiwiworkspace::deserialise(const std::vector<uint8_t> &binary_msgpack) {
   }
 
   // Invisible item frames
+
+  if (j.contains("invisible_item_frames_namespace_override"))
+    j.at("invisible_item_frames_namespace_override")
+        .get_to(*iif_namespace_override);
+
   invisible_item_frames = j.value("invisible_item_frames", false);
 }
 
@@ -143,9 +160,15 @@ std::filesystem::path Wiwiworkspace::generate_zip(void) {
   Music_discs_pack music_discs_pack;
   Invisible_item_frame_pack iif_pack;
 
-  paintings_pack.set_workspace_name(workspace_name);
-  music_discs_pack.set_workspace_name(workspace_name);
-  iif_pack.set_workspace_name(workspace_name);
+
+  paintings_pack.set_workspace_name(
+      paintings_namespace_override->get().value_or(workspace_name));
+
+  music_discs_pack.set_workspace_name(
+      music_discs_namespace_override->get().value_or(workspace_name));
+
+  iif_pack.set_workspace_name(
+      iif_namespace_override->get().value_or(workspace_name));
 
   print_memory_stats("Start generate_zip");
 
@@ -183,6 +206,23 @@ std::filesystem::path Wiwiworkspace::generate_zip(void) {
 }
 
 
+// Namespace overrides
+
+void to_json(nlohmann::json &j, const Namespace_override &n) {
+  if (not n.namespace_override)
+    return;
+
+  j = n.namespace_override.value();
+}
+
+void from_json(const nlohmann::json &j, Namespace_override &n) {
+  if (not j.is_string())
+    return;
+
+  n.namespace_override = j.get<std::string>();
+}
+
+
 #ifdef EMSCRIPTEN
 #include <emscripten/bind.h>
 
@@ -191,6 +231,22 @@ using namespace emscripten;
 EMSCRIPTEN_BINDINGS(wiwiworkspace) {
   register_vector<std::shared_ptr<Painting>>("WorkspacePaintingsVector");
   register_vector<std::shared_ptr<Music_disc>>("WorkspaceMusicDiscsVector");
+
+  class_<Namespace_override>("NamespaceOverride")
+      .smart_ptr<std::shared_ptr<Namespace_override>>("NamespaceOverride")
+      .constructor<>()
+      .constructor<std::string>()
+
+      .function("get", optional_override(
+                           [](Namespace_override &self) -> emscripten::val {
+                             auto opt = self.get();
+                             if (opt.has_value()) {
+                               return emscripten::val(opt.value());
+                             }
+                             return emscripten::val("");
+                           }))
+      .function("set", &Namespace_override::set)
+      .function("reset", &Namespace_override::reset);
 
   class_<Wiwiworkspace>("Wiwiworkspace")
       .constructor<>()
@@ -223,6 +279,13 @@ EMSCRIPTEN_BINDINGS(wiwiworkspace) {
       .property("invisibleItemFrames",
                 &Wiwiworkspace::get_invisible_item_frames,
                 &Wiwiworkspace::set_invisible_item_frames)
+
+      .function("getPaintingsNamespaceOverride",
+                &Wiwiworkspace::get_paintings_namespace_override)
+      .function("getMusicDiscsNamespaceOverride",
+                &Wiwiworkspace::get_music_discs_namespace_override)
+      .function("getIIFNamespaceOverride",
+                &Wiwiworkspace::get_iif_namespace_override)
 
       .function("isWorkspaceNew", &Wiwiworkspace::is_workspace_new)
 

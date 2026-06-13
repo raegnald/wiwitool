@@ -1,18 +1,34 @@
 <script lang="ts">
   import { paintingsStore } from "../stores/paintingsStore";
   import type { MainModule } from "../bindings/wiwitool";
-  import { workspace } from "../stores/workspaceStore";
+  import {
+    formatWorkspaceName,
+    MAX_WORKSPACE_NAME_LENGTH,
+    workspace,
+  } from "../stores/workspaceStore";
 
   import HelpUsingPaintingsTool from "../paintings/HelpUsingPaintingsTool.svelte";
   import DropZone from "../components/DropZone.svelte";
   import PaintingCard from "../paintings/PaintingCard.svelte";
   import BulkActions from "../paintings/BulkActions.svelte";
-  import { ImageUpIcon, InfoIcon } from "@lucide/svelte";
+  import {
+    ImageUpIcon,
+    InfoIcon,
+    LogOut,
+    Settings,
+    User,
+  } from "@lucide/svelte";
   import { onMount } from "svelte";
   import Button from "../components/Button.svelte";
+  import ButtonListOptions from "../components/button-list/ButtonListOptions.svelte";
+  import ListOption from "../components/button-list/ListOption.svelte";
+  import ListSectionTitle from "../components/button-list/ListSectionTitle.svelte";
 
   export let module: MainModule;
   export let move: (id: string) => void;
+
+  let paintingsNamespaceOverride: string = "";
+  let namespaceOverrideDialog: HTMLDialogElement;
 
   $: showingInfo = false;
   $: allSelected = $paintingsStore.every((painting) => painting.selected);
@@ -24,6 +40,10 @@
       event.preventDefault();
       event.returnValue = false;
     });
+
+    paintingsNamespaceOverride = $workspace
+      .getPaintingsNamespaceOverride()
+      .get();
   });
 
   async function handleImageDrop(file: File) {
@@ -55,6 +75,71 @@
   }
 </script>
 
+<dialog bind:this={namespaceOverrideDialog}>
+  <div class="modal-content">
+    {#if paintingsNamespaceOverride.length > 0}
+      <span>Custom namespace will be used</span>
+    {:else}
+      <span>Using default namespace</span>
+    {/if}
+
+    <div>
+      <input
+        type="text"
+        placeholder="Paintings namespace override"
+        bind:value={paintingsNamespaceOverride}
+        on:input={() => {
+          paintingsNamespaceOverride = formatWorkspaceName(
+            paintingsNamespaceOverride,
+          );
+        }}
+        on:change={() =>
+          $workspace
+            .getPaintingsNamespaceOverride()
+            .set(paintingsNamespaceOverride)}
+      />
+
+      <span
+        style={"display: inline-block; width: 60px;" +
+          (paintingsNamespaceOverride.length >= MAX_WORKSPACE_NAME_LENGTH
+            ? "color: orange"
+            : "")}
+      >
+        {#if paintingsNamespaceOverride.length > 0}
+          <span style="display: inline-block; width: 25px; text-align: right;">
+            {paintingsNamespaceOverride.length}
+          </span>
+          / {MAX_WORKSPACE_NAME_LENGTH}
+        {/if}
+      </span>
+    </div>
+
+    <div class="modal-actions">
+      <Button
+        secondary
+        onclick={() => {
+          paintingsNamespaceOverride = "";
+          $workspace
+            .getPaintingsNamespaceOverride()
+            .set(paintingsNamespaceOverride);
+        }}
+        disabled={paintingsNamespaceOverride == ""}
+      >
+        Clear
+      </Button>
+
+      <Button
+        primary
+        onclick={() => {
+          namespaceOverrideDialog.close();
+        }}
+      >
+        Close
+      </Button>
+    </div>
+  </div>
+</dialog>
+
 <main>
   <div class="app-card drop-zone-container">
     <DropZone handler={handleImageDrop} let:filePicker>
@@ -69,13 +154,6 @@
           <span class="pill">gif</span>
           <span class="pill">hdr</span>
         </center>
-
-        <!--
-        <p>
-          Drag and drop your images or select them from the file explorer to
-          turn them into Minecraft paintings.
-        </p>
-        -->
 
         <div class="empty-actions">
           <Button icon="FolderInput" onclick={filePicker}>
@@ -108,17 +186,24 @@
     <div class="title-component" style="margin-top: 2em">
       <h2>Customise your paintings</h2>
 
-      <div style="display: flex; align-items: center; gap: 20px">
+      <div style="display: flex; align-items: center; gap: 15px;">
         {#if selectedCount > 0}
           <span style="font-size: 110%">{selectedCount} selected</span>
         {/if}
 
-        <Button
-          onclick={toggleSelectAll}
-          icon={allSelected ? "CircleMinus" : "CircleCheck"}
-        >
-          {allSelected ? "Deselect" : "Select"} all
-        </Button>
+        <ButtonListOptions rightAligned icon="Ellipsis">
+          <ListOption
+            icon={allSelected ? "CircleMinus" : "CircleCheck"}
+            onclick={toggleSelectAll}
+          >
+            {allSelected ? "Deselect" : "Select"} all
+          </ListOption>
+
+          <ListSectionTitle>Advanced options</ListSectionTitle>
+          <ListOption onclick={() => namespaceOverrideDialog.showModal()}>
+            Set custom namespace
+          </ListOption>
+        </ButtonListOptions>
       </div>
     </div>
 

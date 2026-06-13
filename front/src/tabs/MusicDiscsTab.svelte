@@ -1,6 +1,10 @@
 <script lang="ts">
   import type { MainModule } from "../bindings/wiwitool";
-  import { workspace } from "../stores/workspaceStore";
+  import {
+    formatWorkspaceName,
+    MAX_WORKSPACE_NAME_LENGTH,
+    workspace,
+  } from "../stores/workspaceStore";
 
   import { musicDiscsStore } from "../stores/musicDiscsStore";
 
@@ -12,14 +16,27 @@
   import { FileMusic } from "@lucide/svelte";
   import HelpUsingMusicDiscsTool from "../music/HelpUsingMusicDiscsTool.svelte";
   import BulkMusicDiscsActions from "../music/BulkMusicDiscsActions.svelte";
+  import { onMount } from "svelte";
+  import ButtonListOptions from "../components/button-list/ButtonListOptions.svelte";
+  import ListOption from "../components/button-list/ListOption.svelte";
+  import ListSectionTitle from "../components/button-list/ListSectionTitle.svelte";
 
   export let module: MainModule;
   export let move: (id: string) => void;
+
+  let musicDiscsNamespaceOverride: string = "";
+  let namespaceOverrideDialog: HTMLDialogElement;
 
   let showingInfo = false;
 
   $: allSelected = $musicDiscsStore.every((musicDisc) => musicDisc.selected);
   $: selectedCount = $musicDiscsStore.filter((disc) => disc.selected).length;
+
+  onMount(() => {
+    musicDiscsNamespaceOverride = $workspace
+      .getMusicDiscsNamespaceOverride()
+      .get();
+  });
 
   async function handleDrop(file: File) {
     if (!module || !$workspace) return;
@@ -93,12 +110,77 @@
   }
 
   function toggleSelectAll() {
-    $musicDiscsStore.forEach((painting) => {
-      painting.selected = !allSelected;
+    $musicDiscsStore.forEach((disc) => {
+      disc.selected = !allSelected;
     });
     musicDiscsStore.update((it) => it);
   }
 </script>
+
+<dialog bind:this={namespaceOverrideDialog}>
+  <div class="modal-content">
+    {#if musicDiscsNamespaceOverride.length > 0}
+      <span>Custom namespace will be used</span>
+    {:else}
+      <span>Using default namespace</span>
+    {/if}
+
+    <div>
+      <input
+        type="text"
+        placeholder="Music discs namespace override"
+        bind:value={musicDiscsNamespaceOverride}
+        on:input={() => {
+          musicDiscsNamespaceOverride = formatWorkspaceName(
+            musicDiscsNamespaceOverride,
+          );
+        }}
+        on:change={() =>
+          $workspace
+            .getMusicDiscsNamespaceOverride()
+            .set(musicDiscsNamespaceOverride)}
+      />
+
+      <span
+        style={"display: inline-block; width: 60px;" +
+          (musicDiscsNamespaceOverride.length >= MAX_WORKSPACE_NAME_LENGTH
+            ? "color: orange"
+            : "")}
+      >
+        {#if musicDiscsNamespaceOverride.length > 0}
+          <span style="display: inline-block; width: 25px; text-align: right;">
+            {musicDiscsNamespaceOverride.length}
+          </span>
+          / {MAX_WORKSPACE_NAME_LENGTH}
+        {/if}
+      </span>
+    </div>
+
+    <div class="modal-actions">
+      <Button
+        secondary
+        onclick={() => {
+          musicDiscsNamespaceOverride = "";
+          $workspace
+            .getMusicDiscsNamespaceOverride()
+            .set(musicDiscsNamespaceOverride);
+        }}
+        disabled={musicDiscsNamespaceOverride == ""}
+      >
+        Clear
+      </Button>
+
+      <Button
+        primary
+        onclick={() => {
+          namespaceOverrideDialog.close();
+        }}
+      >
+        Close
+      </Button>
+    </div>
+  </div>
+</dialog>
 
 <main>
   <div class="app-card drop-zone-container">
@@ -107,10 +189,6 @@
         <FileMusic size="80" strokeWidth="1.5" class="empty-icon" />
 
         <h2>Load your songs</h2>
-        <!-- <p>
-          Drag and drop your audio files or select them from the file explorer
-          to turn them into Minecraft music discs.
-        </p> -->
         <center class="with-title pills-horizontal-container">
           {#each Object.entries(getSupportedAudioFormats()) as format}
             {#if format[1] != ""}
@@ -156,12 +234,19 @@
             <span style="font-size: 110%">{selectedCount} selected</span>
           {/if}
 
-          <Button
-            onclick={toggleSelectAll}
-            icon={allSelected ? "CircleMinus" : "CircleCheck"}
-          >
-            {allSelected ? "Deselect" : "Select"} all
-          </Button>
+          <ButtonListOptions rightAligned icon="Ellipsis">
+            <ListOption
+              icon={allSelected ? "CircleMinus" : "CircleCheck"}
+              onclick={toggleSelectAll}
+            >
+              {allSelected ? "Deselect" : "Select"} all
+            </ListOption>
+
+            <ListSectionTitle>Advanced options</ListSectionTitle>
+            <ListOption onclick={() => namespaceOverrideDialog.showModal()}>
+              Set custom namespace
+            </ListOption>
+          </ButtonListOptions>
         </div>
       </div>
     {/if}
