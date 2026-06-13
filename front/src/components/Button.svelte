@@ -2,6 +2,8 @@
   import * as icons from "@lucide/svelte";
   import { LoaderCircleIcon } from "@lucide/svelte";
 
+  import { tiks } from "@rexa-developer/tiks";
+
   let {
     icon = "",
 
@@ -48,8 +50,45 @@
     large ? "largeSize" : small ? "smallSize" : "normalSize",
   );
 
+  let isMounted = false;
+
+  $effect(() => {
+    // We wrap 'intense' in the effect so Svelte tracks it.
+    // Whenever 'intense' changes, this block re-runs.
+    const isHugeBorder = hugeBorder;
+
+    // We skip the very first run on mount to prevent the browser from
+    // throwing an AudioContext warning before the user has clicked anything.
+    if (!isMounted) {
+      isMounted = true;
+      return;
+    }
+
+    tiks.toggle(isHugeBorder);
+  });
+
+  function makeSound() {
+    switch (buttonType) {
+      case "primary":
+      case "secondary":
+      case "transparent":
+        tiks.click();
+        return;
+      case "destructive":
+        tiks.warning();
+        return;
+      default:
+        tiks.click();
+        console.info("No specific sound associated with this button");
+        return;
+    }
+  }
+
   function performAction(e: MouseEvent) {
-    if (!disabled && !loading) onclick(e);
+    if (!disabled && !loading) {
+      makeSound();
+      onclick(e);
+    }
   }
 
   function iconSize() {
@@ -71,6 +110,7 @@
   class:hugeBorder
   class:intense
   disabled={disabled || loading}
+  onpointerdown={() => tiks.init()}
   onclick={performAction}
   {...props}
 >

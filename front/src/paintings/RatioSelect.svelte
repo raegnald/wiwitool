@@ -1,11 +1,22 @@
 <script lang="ts">
+  import { tiks } from "@rexa-developer/tiks";
+
   export let value: string;
 
   export let oninput: (e?: Event) => void = () => {};
   export let onchange: (e?: Event) => void = () => {};
 </script>
 
-<select id="painting-ratio" bind:value {oninput} {onchange}>
+<select
+  id="painting-ratio"
+  bind:value
+  onpointerdown={() => tiks.init()}
+  {oninput}
+  onchange={(e) => {
+    tiks.click();
+    onchange(e);
+  }}
+>
   <optgroup label="Square">
     <option value="ONE_ONE">1:1</option>
     <option value="TWO_TWO">2:2</option>

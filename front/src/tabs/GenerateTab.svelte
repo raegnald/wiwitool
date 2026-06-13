@@ -13,6 +13,7 @@
   import { ImageUpIcon, PackageOpenIcon } from "@lucide/svelte";
   import { onDestroy, onMount } from "svelte";
   import DropZone from "../components/DropZone.svelte";
+  import { tiks } from "@rexa-developer/tiks";
 
   export let module: MainModule;
   export let move: (id: string) => void;
@@ -53,6 +54,7 @@
     try {
       const zipPath = $workspace.generateZip();
       download(zipPath);
+      tiks.notify();
     } catch (e: any) {
       // Check if the error is a C++ memory pointer
       if (typeof e === "number" && module.getExceptionMessage) {

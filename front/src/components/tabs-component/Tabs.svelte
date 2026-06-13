@@ -5,6 +5,7 @@
   import type { TabInfo } from "./types";
   import { DownloadIcon, HouseIcon } from "@lucide/svelte";
   import Button from "../Button.svelte";
+  import { tiks } from "@rexa-developer/tiks";
 
   export let resetApp: () => void;
 
@@ -83,7 +84,10 @@
             {#if !tab.hidden && tab.id != "start" && tab.id != "generate"}
               <button
                 class:active={$selectedTab === tab.id}
-                onclick={() => context.selectTab(tab.id)}
+                onclick={() => {
+                  tiks.hover();
+                  context.selectTab(tab.id);
+                }}
               >
                 {tab.title}
               </button>

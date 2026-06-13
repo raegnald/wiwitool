@@ -20,6 +20,8 @@
   import MusicDiscsTab from "./tabs/MusicDiscsTab.svelte";
   import { musicDiscsStore } from "./stores/musicDiscsStore";
 
+  import { tiks } from "@rexa-developer/tiks";
+
   let module: MainModule | null = $state.raw(null);
 
   function resetApp() {
@@ -32,6 +34,16 @@
   onMount(async () => {
     module = await getWasmModule();
     $workspace = new module.Wiwiworkspace();
+
+    window.addEventListener(
+      "pointerdown",
+      () => {
+        tiks.init();
+      },
+      {
+        once: true,
+      },
+    );
   });
 </script>
 

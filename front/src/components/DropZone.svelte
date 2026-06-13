@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tiks } from "@rexa-developer/tiks";
   import { ERROR, toast } from "../stores/toastsStore";
   import { LoaderCircleIcon } from "@lucide/svelte";
 
@@ -24,9 +25,11 @@
       try {
         await handler(file);
         loadedFiles++;
+        tiks.hover();
       } catch (e) {
         toast(ERROR, "Could not load file " + file.name);
         totalFiles--;
+        tiks.error();
       }
     }
 
