@@ -1,12 +1,4 @@
 <script lang="ts">
-  import {
-    ProportionsIcon,
-    RotateCcwIcon,
-    RotateCwIcon,
-    UserIcon,
-    TextCursorIcon,
-    Trash2Icon,
-  } from "@lucide/svelte";
   import { paintingsStore } from "../stores/paintingsStore";
   import RatioSelect from "./RatioSelect.svelte";
   import Button from "../components/Button.svelte";
@@ -17,18 +9,20 @@
     $paintingsStore.forEach((painting) => {
       if (painting.selected) {
         painting.cppPainting.rotateAnticlockwise();
+        painting.cachedOriginalJS = painting.cachedPaintingJS = undefined;
       }
     });
-    paintingsStore.update((paintings) => paintings);
+    paintingsStore.set($paintingsStore);
   }
 
   function rotateSelectedCW() {
     $paintingsStore.forEach((painting) => {
       if (painting.selected) {
         painting.cppPainting.rotateClockwise();
+        painting.cachedOriginalJS = painting.cachedPaintingJS = undefined;
       }
     });
-    paintingsStore.update((paintings) => paintings);
+    paintingsStore.set($paintingsStore);
   }
 
   function deleteSelected() {
