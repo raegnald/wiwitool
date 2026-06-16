@@ -23,6 +23,7 @@
   import ButtonListOptions from "../components/button-list/ButtonListOptions.svelte";
   import ListOption from "../components/button-list/ListOption.svelte";
   import ListSectionTitle from "../components/button-list/ListSectionTitle.svelte";
+  import { ERROR, toast } from "../stores/toastsStore";
 
   export let module: MainModule;
   export let move: (id: string) => void;
@@ -46,25 +47,52 @@
       .get();
   });
 
+  const validImageExtensions = [
+    "png",
+    "jpeg",
+    "jpg",
+    "tga",
+    "bmp",
+    "psd",
+    "gif",
+    "hdr",
+    "pic",
+    "ppm",
+    "pgm",
+    "bin",
+  ];
+
   async function handleImageDrop(file: File) {
     if (!module || !$workspace) return;
 
-    const buffer = await file.arrayBuffer();
-    const uint8View = new Uint8Array(buffer);
+    try {
+      if (
+        !validImageExtensions.includes(
+          file.name.split(".").at(-1).toLowerCase(),
+        )
+      )
+        throw new Error();
 
-    const cppPainting = new module.Painting(uint8View as any);
+      const buffer = await file.arrayBuffer();
+      const uint8View = new Uint8Array(buffer);
 
-    cppPainting.title = file.name.split(".")[0];
-    cppPainting.author = "";
+      const cppPainting = new module.Painting(uint8View as any);
 
-    // Add to C++ workspace
-    $workspace.addPainting(cppPainting);
+      cppPainting.title = file.name.split(".")[0];
+      cppPainting.author = "";
 
-    // Add to Svelte store
-    paintingsStore.update((current) => [
-      ...current,
-      { cppPainting, selected: false },
-    ]);
+      // Add to C++ workspace
+      $workspace.addPainting(cppPainting);
+
+      // Add to Svelte store
+      paintingsStore.update((current) => [
+        ...current,
+        { cppPainting, selected: false },
+      ]);
+    } catch (e) {
+      console.error(e);
+      toast(ERROR, `Could not load ${file.name}`);
+    }
   }
 
   function toggleSelectAll() {
