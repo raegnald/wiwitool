@@ -24,7 +24,7 @@ void Minecraft_pack::generate_pack_skeletons(void) {
     in_data_folder(data_subfolder);
 
     pack["pack"]["min_format"] = data_ver.min;
-    pack["pack"]["max_format"] = data_ver.max;
+    // pack["pack"]["max_format"] = data_ver.max;
 
     std::ofstream{in_data_folder() / "pack.mcmeta"} << pack.dump(4) << std::endl;
   }
@@ -34,7 +34,7 @@ void Minecraft_pack::generate_pack_skeletons(void) {
     in_resource_folder(assets_subfolder);
 
     pack["pack"]["min_format"] = res_ver.min;
-    pack["pack"]["max_format"] = res_ver.max;
+    // pack["pack"]["max_format"] = res_ver.max;
 
     std::ofstream{in_resource_folder() / "pack.mcmeta"} << pack.dump(4) << std::endl;
   }
