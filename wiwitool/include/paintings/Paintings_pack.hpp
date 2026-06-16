@@ -16,9 +16,12 @@ public:
   Paintings_pack(void);
   virtual ~Paintings_pack(void) = default;
 
-  void set_workspace_name(std::string workspace_name) {
-    paintings_namespace =
-        std::format("{}_{}", workspace_name, default_paintings_namespace);
+  void set_workspace_name(std::string workspace_name, bool add_suffix = true) {
+    if (add_suffix)
+      paintings_namespace =
+          std::format("{}_{}", workspace_name, default_paintings_namespace);
+    else
+      paintings_namespace = workspace_name;
   }
 
   void set_paintings(std::vector<std::shared_ptr<Painting>> paintings);

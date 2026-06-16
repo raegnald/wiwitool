@@ -12,9 +12,12 @@ public:
   Invisible_item_frame_pack(
       std::string mc_namespace = default_invisible_item_frame_namespace);
 
-  void set_workspace_name(std::string workspace_name) {
-    item_frame_namespace_ = std::format("{}_{}", workspace_name,
-                                        default_invisible_item_frame_namespace);
+  void set_workspace_name(std::string workspace_name, bool add_suffix = true) {
+    if (add_suffix)
+      item_frame_namespace_ = std::format(
+          "{}_{}", workspace_name, default_invisible_item_frame_namespace);
+    else
+      item_frame_namespace_ = workspace_name;
   }
 
 protected:

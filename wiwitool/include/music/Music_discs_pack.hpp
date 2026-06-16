@@ -14,9 +14,12 @@ public:
   Music_discs_pack(void);
   virtual ~Music_discs_pack(void) = default;
 
-  void set_workspace_name(std::string workspace_name) {
-    music_discs_namespace =
-        std::format("{}_{}", workspace_name, default_music_discs_namespace);
+  void set_workspace_name(std::string workspace_name, bool add_suffix = true) {
+    if (add_suffix)
+      music_discs_namespace =
+          std::format("{}_{}", workspace_name, default_music_discs_namespace);
+    else
+      music_discs_namespace = workspace_name;
   }
 
   void set_discs(std::vector<std::shared_ptr<Music_disc>> discs);

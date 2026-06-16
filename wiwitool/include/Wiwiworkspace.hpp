@@ -27,6 +27,8 @@ public:
     return std::make_shared<Namespace_override>();
   }
 
+  bool has_value(void) const { return namespace_override.has_value(); }
+
   // Setter, getter, reset
 
   void set(std::string n) {

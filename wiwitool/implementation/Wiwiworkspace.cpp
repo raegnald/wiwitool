@@ -160,22 +160,24 @@ std::filesystem::path Wiwiworkspace::generate_zip(void) {
   Music_discs_pack music_discs_pack;
   Invisible_item_frame_pack iif_pack;
 
-
   paintings_pack.set_workspace_name(
-      paintings_namespace_override->get().value_or(workspace_name));
+      paintings_namespace_override->get().value_or(workspace_name),
+      not paintings_namespace_override->has_value());
 
   music_discs_pack.set_workspace_name(
-      music_discs_namespace_override->get().value_or(workspace_name));
+      music_discs_namespace_override->get().value_or(workspace_name),
+      not music_discs_namespace_override->has_value());
 
   iif_pack.set_workspace_name(
-      iif_namespace_override->get().value_or(workspace_name));
+      iif_namespace_override->get().value_or(workspace_name),
+      not iif_namespace_override->has_value());
 
-  print_memory_stats("Start generate_zip");
+  wiwidebug print_memory_stats("Start generate_zip");
 
   export_count++;
   Serialiser::serialise(serialise());
 
-  print_memory_stats("After workspace serialisation");
+  wiwidebug print_memory_stats("After workspace serialisation");
 
   // Paintings pack
   if (not paintings.empty()) {
@@ -200,7 +202,7 @@ std::filesystem::path Wiwiworkspace::generate_zip(void) {
   }
 
   const auto zip_path = packer.get_zip();
-  print_memory_stats("End generate_zip");
+  wiwidebug print_memory_stats("End generate_zip");
 
   return zip_path;
 }
