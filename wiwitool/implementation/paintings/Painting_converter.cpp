@@ -1,5 +1,6 @@
 #include "paintings/Painting_converter.hpp"
 
+#include "Image_data.hpp"
 #include "paintings/Painting_frame_generator.hpp"
 #include "paintings/Painting_ratio.hpp"
 
@@ -42,17 +43,20 @@ Image_data frame(const Painting_frame_generator &frame_generator,
 }
 
 Image_data miniature_frame(Image_data image) {
-  auto frame_data = Image_data{frames_directory / "painting.png"};
+  static const std::filesystem::path frames_directory{"frames/"};
+  static const auto frame_data = Image_data{frames_directory / "painting.png"};
   constexpr auto x0 = 3, y0 = 5;
+
+  Image_data out{frame_data};
 
   if (frame_data.width() != 16 or frame_data.height() != 16)
     throw std::runtime_error("painting.png template is not 16x16");
 
   for (int y{0}; y < 8; y++)
     for (int x{0}; x < 11; x++)
-      frame_data.at(x0 + x, y0 + y) = image.at(x, y);
+      out.at(x0 + x, y0 + y) = image.at(x, y);
 
-  return frame_data;
+  return out;
 }
 
 Image_data Painting_converter::miniatureise(void) {

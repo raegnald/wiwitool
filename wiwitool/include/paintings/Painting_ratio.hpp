@@ -7,7 +7,6 @@
 
 #include "nlohmann/json.hpp"
 
-const inline std::filesystem::path frames_directory{"frames/"};
 class Painting_ratio {
 public:
   static const Painting_ratio nearest;
