@@ -20,8 +20,7 @@ Painting::Painting(std::vector<uint8_t> image_data)
 
 Painting::Painting(Image_data image_data)
     : painting_id{next_painting_id++}, original_image{image_data},
-      conversion_ratio{
-          nearest_ratio(original_image.width(), original_image.height())} {
+      conversion_ratio{Painting_ratio::nearest_to(original_image.size())} {
 
   wiwidebug std::println("Loaded image from image data (painting id = {})",
                          painting_id);
@@ -34,8 +33,8 @@ std::shared_ptr<Painting> Painting::clone(void) const {
   cloned->painting_id = next_painting_id++;
 
   wiwidebug {
-    auto [ow, oh] = ratio_sizes(this->get_ratio());
-    auto [w, h] = ratio_sizes(cloned->get_ratio());
+    auto [ow, oh] = this->get_ratio().sizes();
+    auto [w, h] = cloned->get_ratio().sizes();
 
     std::println("Cloned painting with ratio {}x{}, while original has {}x{}",
                  w, h, ow, oh);
@@ -81,7 +80,7 @@ void Painting::refresh(void) const {
 
 void Painting::rotate_clockwise(void) {
   original_image = original_image.rotate_clockwise();
-  conversion_ratio = opposite_ratio(conversion_ratio);
+  conversion_ratio = conversion_ratio.opposite();
 
   // Transform crop coordinates
   double old_x = crop_x, old_y = crop_y, old_w = crop_w, old_h = crop_h;
@@ -95,7 +94,7 @@ void Painting::rotate_clockwise(void) {
 
 void Painting::rotate_anticlockwise(void) {
   original_image = original_image.rotate_anticlockwise();
-  conversion_ratio = opposite_ratio(conversion_ratio);
+  conversion_ratio = conversion_ratio.opposite();
 
   // Transform crop coordinates
   double old_x = crop_x, old_y = crop_y, old_w = crop_w, old_h = crop_h;
@@ -228,7 +227,11 @@ EMSCRIPTEN_BINDINGS(painting) {
         wiwidebug std::println("Scaling image by factor of {} (maxlen = {})",
                                newmaxlen / maxlen, maxlen);
 
-        return std::make_shared<Painting>(hires.scale(newmaxlen / maxlen));
+        auto downscaled = hires.scale(newmaxlen / maxlen);
+
+        wiwidebug std::println("Scaled image successfully");
+
+        return std::make_shared<Painting>(downscaled);
       }))
 
       .function("clone", &Painting::clone)
@@ -246,14 +249,11 @@ EMSCRIPTEN_BINDINGS(painting) {
 
       .property(
           "ratio",
-          // Getter
           +[](const Painting &self) -> std::string {
-            return string_of_ratio(self.get_ratio());
+            return self.get_ratio().to_string();
           },
-          // Setter
           +[](Painting &self, std::string ratio_str) {
-            wiwidebug std::println("Setting ratio to ", ratio_str);
-            self.set_ratio(ratio_of_string(ratio_str));
+            self.set_ratio(Painting_ratio::from_string(ratio_str));
           })
 
       // Image Accessors

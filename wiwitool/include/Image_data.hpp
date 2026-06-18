@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <filesystem>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "colour.hpp"
@@ -32,6 +33,7 @@ public:
 
   // Image attributes
   inline std::filesystem::path path(void) const noexcept { return path_; };
+  inline std::pair<size_t, size_t> size(void) const noexcept { return {width_, height_}; }
   inline size_t width(void) const noexcept { return width_; }
   inline size_t height(void) const noexcept { return height_; }
   inline size_t channels(void) const noexcept { return channels_; }

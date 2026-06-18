@@ -27,7 +27,7 @@ Image_data No_frame_generator::get(Painting_ratio, size_t) const {
 Image_data Procedural_frame_generator::get(Painting_ratio ratio,
                                            size_t pixels_per_block) const {
   // Block size
-  const auto [bw, bh] = ratio_sizes(ratio);
+  const auto [bw, bh] = ratio.sizes();
   // Pixel size of the painting
   const size_t pw = static_cast<size_t>(pixels_per_block * bw);
   const size_t ph = static_cast<size_t>(pixels_per_block * bh);

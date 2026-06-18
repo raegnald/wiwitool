@@ -1,87 +1,125 @@
 
 #include "paintings/Painting_ratio.hpp"
 #include "util/wiwidebug.hpp"
+#include "util/strutil.hpp"
 
 #include <algorithm>
 #include <array>
+#include <cctype>
 #include <cstdlib>
 #include <format>
 #include <print>
-#include <stdexcept>
+#include <string_view>
 #include <utility>
 
 #include "nlohmann/json.hpp"
 
-std::array<Painting_ratio, 16> all_ratios(void) noexcept {
-  return {  ONE_ONE,   ONE_TWO,   ONE_THREE,   ONE_FOUR,
-            TWO_ONE,   TWO_TWO,   TWO_THREE,   TWO_FOUR,
-          THREE_ONE, THREE_TWO, THREE_THREE, THREE_FOUR,
-           FOUR_ONE,  FOUR_TWO,  FOUR_THREE,  FOUR_FOUR};
-}
+const Painting_ratio Painting_ratio::nearest{Painting_ratio::nearest_ratio};
 
-std::pair<int, int> ratio_sizes(Painting_ratio r) noexcept {
-  return {(static_cast<int>(r) >> 8) & 0xFF, static_cast<int>(r) & 0xFF};
-}
+const std::vector<Painting_ratio> Painting_ratio::available {
+  {1, 1}, {1, 2}, {1, 3}, {1, 4},
+  {2, 1}, {2, 2}, {2, 3}, {2, 4},
+  {3, 1}, {3, 2}, {3, 3}, {3, 4},
+  {4, 1}, {4, 2}, {4, 3}, {4, 4},
+};
 
-double ratio_value(Painting_ratio r) noexcept {
-  const auto [w, h] = ratio_sizes(r);
-  return static_cast<double>(w) / h;
-}
-
-Painting_ratio nearest_ratio(int width, int height) noexcept {
-  const auto ratios = all_ratios();
+Painting_ratio Painting_ratio::nearest_to(int width, int height) noexcept {
   const double target_ratio = static_cast<double>(width) / height;
 
   const auto it = std::ranges::min_element(
-      ratios, std::ranges::less{}, [&](Painting_ratio r) {
-        return std::abs(target_ratio - ratio_value(r));
-      });
+      available, std::ranges::less{},
+      [&](Painting_ratio r) { return std::abs(target_ratio - r.value()); });
 
   return *it;
 }
 
-std::string string_of_ratio(Painting_ratio r) {
-  if (r == Painting_ratio::Nearest) return "nearest";
+bool Painting_ratio::using_nearest_ratio(void) const noexcept {
+  return ratio == nearest_ratio;
+}
 
-  const auto digit = [](int i) {
-    switch (i) {
-    case 1: return "ONE";
-    case 2: return "TWO";
-    case 3: return "THREE";
-    case 4: return "FOUR";
-    default:
-      throw std::invalid_argument(
-          std::format("string_of_ratio: digit {} is invalid", i));
-    }
+std::pair<size_t, size_t> Painting_ratio::sizes(void) const noexcept {
+  return ratio;
+}
+
+double Painting_ratio::value(void) const noexcept {
+  const auto [w, h] = sizes();
+  return static_cast<double>(w) / h;
+}
+
+std::string Painting_ratio::to_string(void) const noexcept {
+  if (using_nearest_ratio())
+    return "ratio_nearest";
+
+  auto [w, h] = sizes();
+  return std::format("ratio_{}x{}", w, h);
+}
+
+Painting_ratio parse_ratio_old_format(std::string s) {
+  if (s == "nearest")
+    return Painting_ratio::nearest;
+
+  // Old format goes from sizes 1x1 up to 4x4, so we will only consider
+  // digits ONE, TWO, THREE, and FOUR, separated by an underscore.
+  //
+  // For example, the old format is encodes the ratio 3x4 as THREE_FOUR.
+
+  constexpr static std::array<std::string_view, 4> digits = {
+    "ONE", "TWO", "THREE", "FOUR"
   };
 
-  // ratio_sizes extracts the high/low bytes from the enum value
-  auto [w, h] = ratio_sizes(r);
-  return std::format("{}_{}", digit(w), digit(h));
+  constexpr auto str_value = [&](const std::string &str) -> size_t {
+    for (int i = 1; const auto &s : digits)
+      if (s == str)
+        return i;
+      else
+        i++;
+
+    return 0;
+  };
+
+  const auto sep = s.find('_');
+
+  if (sep == std::string::npos)
+    // not old format
+    return Painting_ratio::nearest;
+
+  const auto first = s.substr(0, sep);
+  const auto second = s.substr(sep + 1, s.size() - sep - 1);
+
+  const auto w = str_value(first);
+  const auto h = str_value(second);
+
+  if (w == 0 or h == 0)
+    return Painting_ratio::nearest;
+
+  return {w, h};
 }
 
+Painting_ratio Painting_ratio::from_string(std::string s) {
+  if (s == "ratio_nearest")
+    return nearest_ratio;
 
-Painting_ratio ratio_of_string(std::string s) {
-  if (s == "nearest" || s == "Nearest") return Painting_ratio::Nearest;
-
-  for (auto r : all_ratios())
-    if (string_of_ratio(r) == s) return r;
+  // FOTUT: change this loop that goes through all 256 possibilities
+  // to a smarter loop that goes first through the preferred ratios
+  for (auto r : available)
+    if (r.to_string() == s)
+      return r;
 
   wiwidebug std::println(
-      "Warning: Invalid ratio string '{}', defaulting to Nearest", s);
+      "Warning: Invalid ratio string '{}', trying old format", s);
 
-  return Painting_ratio::Nearest;
+  return parse_ratio_old_format(s);
 }
 
-Painting_ratio opposite_ratio(Painting_ratio r) noexcept {
-  const auto [w, h] = ratio_sizes(r);
-  return static_cast<Painting_ratio>((h << 8) | w);
+Painting_ratio Painting_ratio::opposite(void) const noexcept {
+  const auto [w, h] = sizes();
+  return {h, w};
 }
 
 void to_json(nlohmann::json &j, const Painting_ratio &r) {
-    j = string_of_ratio(r);
+  j = r.to_string();
 }
 
 void from_json(const nlohmann::json &j, Painting_ratio &r) {
-  r = ratio_of_string(j.get<std::string>());
+  r = Painting_ratio::from_string(j.get<std::string>());
 }

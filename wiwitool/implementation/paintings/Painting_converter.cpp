@@ -6,13 +6,15 @@
 #include <print>
 #include <stdexcept>
 
+static constexpr auto icon_ratio = Painting_ratio{11, 8};
+
 Image_data crop(Image_data image, Painting_ratio ratio) {
-  auto [rw, rh] = ratio_sizes(ratio);
+  auto [rw, rh] = ratio.sizes();
   return image.crop(rw, rh);
 }
 
 Image_data downscale(Image_data image, Painting_ratio ratio, int scale = 16) {
-  auto [rw, rh] = ratio_sizes(ratio);
+  auto [rw, rh] = ratio.sizes();
   return image.scale(rw * scale, rh * scale);
 }
 
@@ -54,7 +56,7 @@ Image_data miniature_frame(Image_data image) {
 }
 
 Image_data Painting_converter::miniatureise(void) {
-  auto cropped = crop(image, ICON_RATIO); // 11:8 aspect ratio
+  auto cropped = crop(image, icon_ratio);
   auto downscaled = cropped.scale(11, 8); // 11x8 pixels
   auto miniaturised = miniature_frame(std::move(downscaled));
 
@@ -65,7 +67,8 @@ Image_data
 Painting_converter::convert(const Painting_frame_generator &frame_generator,
                             size_t pixels_per_block, Painting_ratio ratio,
                             float contrast, int brightness) {
-  if (ratio == Nearest) ratio = nearest_ratio(image.width(), image.height());
+  if (ratio.using_nearest_ratio())
+    ratio = Painting_ratio::nearest_to(image.size());
 
   auto cropped = crop(image, ratio);
 

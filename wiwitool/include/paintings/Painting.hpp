@@ -134,7 +134,7 @@ private:
 
   Painting_frame_generator frame_generator = Procedural_frame_generator{};
 
-  Painting_ratio conversion_ratio{Nearest};
+  Painting_ratio conversion_ratio = Painting_ratio::nearest;
 
   bool placeable{true};
   bool stonecutter_recipe{true};

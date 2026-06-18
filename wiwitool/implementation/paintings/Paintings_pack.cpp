@@ -203,7 +203,7 @@ void Paintings_pack::generate_painting_variant_json(
 
   data["asset_id"] = painting_id(painting);
 
-  const auto [width, height] = ratio_sizes(painting.get_ratio());
+  const auto [width, height] = painting.get_ratio().sizes();
   data["width"] = width;
   data["height"] = height;
 
