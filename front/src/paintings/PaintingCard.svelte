@@ -115,9 +115,25 @@
     wrapper.cppPainting.hasStonecutterRecipe = hasStonecutterRecipe;
   }
 
-  // Heavy sync for visual parameters (slider, ratio, colors)
+  function hasWrapperChanged() {
+    if (wrapper.cppPainting.pixelPerBlock !== Math.pow(2, downscalePower))
+      return true;
+    if (wrapper.cppPainting.ratio !== currentRatio) return true;
+    if (wrapper.cppPainting.brightness !== brightness) return true;
+
+    // Use a small epsilon for contrast to prevent floating point mismatch loops
+    if (Math.abs(wrapper.cppPainting.contrast - contrast) > 0.001) return true;
+
+    const settings = wrapper.cppPainting.getProceduralSettings();
+    if (settings) {
+      if (String(settings.seed) !== frameSeed) return true;
+      if (settings.tintHex !== frameTint) return true;
+    }
+  }
+
+  // Heavy sync for visual parameters (slider, ratio, colours)
   function syncVisualsAndRefresh() {
-    if (!wrapper.cppPainting) return;
+    if (!wrapper.cppPainting || !hasWrapperChanged()) return;
 
     wrapper.cppPainting.pixelPerBlock = Math.pow(2, downscalePower);
 
@@ -127,14 +143,11 @@
       settings.tintHex = frameTint;
     }
 
-    // Since setting the ratio in C++ automatically triggers a C++ refresh(),
-    // we do this last.
     wrapper.cppPainting.ratio = currentRatio;
 
     wrapper.cppPainting.brightness = brightness;
     wrapper.cppPainting.contrast = contrast;
 
-    // Safety net in case ratio didn't change but the seed/scale did
     wrapper.cppPainting.refresh();
 
     wrapper.cachedPaintingJS = undefined;
