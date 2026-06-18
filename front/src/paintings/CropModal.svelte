@@ -111,7 +111,7 @@
   `);
 </script>
 
-<dialog bind:this={dialog} onclose={cancel}>
+<dialog bind:this={dialog}>
   <div class="modal-content">
     <h3>Crop Painting</h3>
     <p>Click and drag on the image to select the area you want to use.</p>
