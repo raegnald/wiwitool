@@ -1,15 +1,12 @@
 
 #include "paintings/Painting_ratio.hpp"
 #include "util/wiwidebug.hpp"
-#include "util/strutil.hpp"
 
 #include <algorithm>
-#include <array>
 #include <cctype>
 #include <cstdlib>
 #include <format>
 #include <print>
-#include <string_view>
 #include <utility>
 
 #include "nlohmann/json.hpp"
@@ -61,18 +58,14 @@ Painting_ratio parse_ratio_old_format(std::string s) {
   // Old format goes from sizes 1x1 up to 4x4, so we will only consider
   // digits ONE, TWO, THREE, and FOUR, separated by an underscore.
   //
-  // For example, the old format is encodes the ratio 3x4 as THREE_FOUR.
+  // For example, the old format is encodes the ratio 3x4 as "THREE_FOUR",
+  // and 2x1 as "TWO_ONE".
 
-  constexpr static std::array<std::string_view, 4> digits = {
-    "ONE", "TWO", "THREE", "FOUR"
-  };
-
-  constexpr auto str_value = [&](const std::string &str) -> size_t {
-    for (int i = 1; const auto &s : digits)
-      if (s == str)
-        return i;
-      else
-        i++;
+  constexpr auto str_value = [](const std::string &str) -> size_t {
+    if (str == "ONE")   return 1;
+    if (str == "TWO")   return 2;
+    if (str == "THREE") return 3;
+    if (str == "FOUR")  return 4;
 
     return 0;
   };
@@ -80,7 +73,7 @@ Painting_ratio parse_ratio_old_format(std::string s) {
   const auto sep = s.find('_');
 
   if (sep == std::string::npos)
-    // not old format
+    // no underscore found: not old format
     return Painting_ratio::nearest;
 
   const auto first = s.substr(0, sep);
