@@ -103,7 +103,7 @@
       const a = document.createElement("a");
 
       a.href = url;
-      a.download = "wiwipacks.zip";
+      a.download = $workspace.workspaceName + ".zip";
       a.click();
 
       URL.revokeObjectURL(url);
