@@ -5,7 +5,7 @@
 #include "paintings/Painting_ratio.hpp"
 
 struct Painting_converter {
-  const Image_data &image;
+  Image_data image;
 
   Image_data convert(const Painting_frame_generator &frame_generator,
                      size_t pixels_per_block,

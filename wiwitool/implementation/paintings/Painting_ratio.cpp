@@ -116,3 +116,22 @@ void to_json(nlohmann::json &j, const Painting_ratio &r) {
 void from_json(const nlohmann::json &j, Painting_ratio &r) {
   r = Painting_ratio::from_string(j.get<std::string>());
 }
+
+#ifdef EMSCRIPTEN
+#include <emscripten/bind.h>
+#include <emscripten/val.h>
+
+using namespace emscripten;
+
+EMSCRIPTEN_BINDINGS(painting_ratio) {
+  class_<Painting_ratio>("PaintingRatio")
+      .class_function("getAvailable", optional_override([]() {
+                        emscripten::val js_array = emscripten::val::array();
+
+                        for (const auto &ratio : Painting_ratio::available)
+                          js_array.call<void>("push", ratio.to_string());
+
+                        return js_array;
+                      }));
+}
+#endif

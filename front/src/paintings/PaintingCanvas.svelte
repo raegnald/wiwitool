@@ -19,6 +19,7 @@
     align-items: center;
     background: #eee;
     border-radius: 8px;
+    z-index: 1;
   }
 
   canvas {

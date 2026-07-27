@@ -20,7 +20,7 @@ Painting::Painting(std::vector<uint8_t> image_data)
 
 Painting::Painting(Image_data image_data)
     : painting_id{next_painting_id++}, original_image{image_data},
-      conversion_ratio{Painting_ratio::nearest_to(original_image.size())} {
+      conversion_ratios{Painting_ratio::nearest_to(original_image.size())} {
 
   wiwidebug std::println("Loaded image from image data (painting id = {})",
                          painting_id);
@@ -32,55 +32,67 @@ std::shared_ptr<Painting> Painting::clone(void) const {
   auto cloned = std::make_shared<Painting>(*this);
   cloned->painting_id = next_painting_id++;
 
-  wiwidebug {
-    auto [ow, oh] = this->get_ratio().sizes();
-    auto [w, h] = cloned->get_ratio().sizes();
-
-    std::println("Cloned painting with ratio {}x{}, while original has {}x{}",
-                 w, h, ow, oh);
-  }
-
   return cloned;
 }
 
-const Image_data Painting::original_data(void) const { return original_image; }
+Image_data Painting::original_data(void) const { return original_image; }
 
-const Image_data Painting::cropped_original_data(void) const {
-  return original_image.crop(
-      static_cast<size_t>(crop_x * original_image.width()),
-      static_cast<size_t>(crop_y * original_image.height()),
-      static_cast<size_t>(crop_w * original_image.width()),
-      static_cast<size_t>(crop_h * original_image.height()));
+Image_data Painting::cropped_original_data(void) const {
+  const auto [ow, oh] = original_image.size();
+
+  const auto x = static_cast<size_t>(crop_x * ow),
+             y = static_cast<size_t>(crop_y * oh),
+             w = static_cast<size_t>(crop_w * ow),
+             h = static_cast<size_t>(crop_h * oh);
+
+  return original_image.crop(x, y, w, h);
 }
 
-const Image_data Painting::painting_data(void) const {
+Image_data Painting::painting_data(Painting_ratio ratio) const {
   compute_painting_and_icon_if_necessary();
-  return painting;
+
+  if (not paintings.contains(ratio)) {
+    wiwidebug {
+      const auto [w, h] = ratio.sizes();
+      std::println("Painting {} does not have ratio {}x{}", painting_id, w, h);
+    }
+
+    return Image_data{};
+  }
+
+  return paintings[ratio];
 }
 
-const Image_data Painting::icon_data(void) const {
+Image_data Painting::icon_data(void) const {
   compute_painting_and_icon_if_necessary();
   return icon;
 }
 
 void Painting::refresh(void) const {
-  auto cropped_source = original_image.crop(
-      static_cast<size_t>(crop_x * original_image.width()),
-      static_cast<size_t>(crop_y * original_image.height()),
-      static_cast<size_t>(crop_w * original_image.width()),
-      static_cast<size_t>(crop_h * original_image.height()));
+  auto converter = Painting_converter{cropped_original_data()};
 
-  auto converter = Painting_converter{cropped_source};
   icon = converter.miniatureise();
-  painting = converter.convert(frame_generator, pixels_per_block,
-                               conversion_ratio, contrast, brightness);
+  wiwidebug std::println("Image data for icon {} computed", painting_id);
 
-  wiwidebug std::println("Painting and icon image data computed!");
+  for (paintings.clear(); auto ratio : conversion_ratios) {
+    paintings.emplace(ratio,
+                      converter.convert(frame_generator, pixels_per_block,
+                                        ratio, contrast, brightness));
+
+    wiwidebug {
+      const auto [w, h] = ratio.sizes();
+
+      std::println("Image data for image {} with ratio {}x{} computed",
+                   painting_id, w, h);
+    }
+  }
 }
 
 void Painting::rotate_clockwise(void) {
   original_image = original_image.rotate_clockwise();
-  conversion_ratio = conversion_ratio.opposite();
+
+  for (auto &ratio : conversion_ratios)
+    ratio = ratio.opposite();
 
   // Transform crop coordinates
   double old_x = crop_x, old_y = crop_y, old_w = crop_w, old_h = crop_h;
@@ -94,7 +106,9 @@ void Painting::rotate_clockwise(void) {
 
 void Painting::rotate_anticlockwise(void) {
   original_image = original_image.rotate_anticlockwise();
-  conversion_ratio = conversion_ratio.opposite();
+
+  for (auto &ratio : conversion_ratios)
+    ratio = ratio.opposite();
 
   // Transform crop coordinates
   double old_x = crop_x, old_y = crop_y, old_w = crop_w, old_h = crop_h;
@@ -106,12 +120,12 @@ void Painting::rotate_anticlockwise(void) {
   invalidate_cache();
 }
 
-void Painting::use_procedural_frame() {
+void Painting::use_procedural_frame(void) {
   frame_generator = Procedural_frame_generator{};
   invalidate_cache();
 }
 
-void Painting::use_no_frame() {
+void Painting::use_no_frame(void) {
   frame_generator = No_frame_generator{};
   invalidate_cache();
 }
@@ -133,7 +147,7 @@ void to_json(nlohmann::json &j, const Painting &p) {
   j = nlohmann::json{{"id", p.painting_id},
                      {"title", p.title},
                      {"author", p.author},
-                     {"ratio", p.conversion_ratio},
+                     {"ratios", p.conversion_ratios},
                      {"sourceImage", p.original_image},
                      {"placeable", p.placeable},
                      {"hasStonecutterRecipe", p.stonecutter_recipe},
@@ -154,7 +168,7 @@ void from_json(const nlohmann::json &j, Painting &p) {
 
   j.at("title").get_to(p.title);
   j.at("author").get_to(p.author);
-  j.at("ratio").get_to(p.conversion_ratio);
+  j.at("ratios").get_to(p.conversion_ratios);
   j.at("sourceImage").get_to(p.original_image);
 
   if (j.contains("placeable"))
@@ -247,22 +261,40 @@ EMSCRIPTEN_BINDINGS(painting) {
       .property("cropW", &Painting::get_crop_w)
       .property("cropH", &Painting::get_crop_h)
 
-      .property(
-          "ratio",
-          +[](const Painting &self) -> std::string {
-            return self.get_ratio().to_string();
-          },
+      // Ratio Management (JS Native Arrays and Strings)
+      .function(
+          "getRatios",
+          +[](const Painting &self) {
+            emscripten::val js_array = emscripten::val::array();
+            for (const auto &ratio : self.get_ratios()) {
+              // Assumes Painting_ratio has a to_string() method
+              js_array.call<void>("push", ratio.to_string());
+            }
+            return js_array;
+          })
+      .function(
+          "addRatio",
           +[](Painting &self, std::string ratio_str) {
-            self.set_ratio(Painting_ratio::from_string(ratio_str));
+            self.add_ratio(Painting_ratio::from_string(ratio_str));
+          })
+      .function(
+          "removeRatio",
+          +[](Painting &self, std::string ratio_str) -> bool {
+            return self.remove_ratio(Painting_ratio::from_string(ratio_str));
+          })
+      .function(
+          "hasRatio",
+          +[](const Painting &self, std::string ratio_str) -> bool {
+            return self.has_ratio(Painting_ratio::from_string(ratio_str));
           })
 
       // Image Accessors
-      // These return Image_data by value, which works because
-      // Image_data is also registered in Javascript
       .function("originalData", &Painting::original_data)
       .function("croppedOriginalData", &Painting::cropped_original_data)
-      .function("paintingData", &Painting::painting_data)
       .function("iconData", &Painting::icon_data)
+      .function("paintingData", +[](const Painting &self, std::string ratio_str) {
+        return self.painting_data(Painting_ratio::from_string(ratio_str));
+      })
 
       // Transformations
       .function("rotateClockwise", &Painting::rotate_clockwise)

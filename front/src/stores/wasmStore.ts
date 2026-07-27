@@ -50,3 +50,10 @@ export async function getWasmModule(): Promise<MainModule> {
 
   return wasmModule;
 }
+
+export function getLoadedModule(): MainModule {
+  if (!wasmModule)
+    throw new Error("WASM module was accessed before it finished loading");
+
+  return wasmModule;
+}

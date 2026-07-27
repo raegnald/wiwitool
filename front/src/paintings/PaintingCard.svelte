@@ -14,7 +14,14 @@
   import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
   import SelectableCard from "../components/SelectableCard.svelte";
   import Button from "../components/Button.svelte";
-  import { RulerIcon, SquareIcon, WandIcon, WrenchIcon } from "@lucide/svelte";
+  import {
+    RulerIcon,
+    SquareIcon,
+    WandIcon,
+    WrenchIcon,
+    LayoutGridIcon,
+  } from "@lucide/svelte";
+  import { getLoadedModule } from "../stores/wasmStore";
 
   export let wrapper: PaintingWrapper;
 
@@ -28,7 +35,10 @@
   // Local UI state
   let title: string;
   let author: string;
-  let currentRatio: string;
+
+  const ALL_RATIOS = getLoadedModule().PaintingRatio.getAvailable();
+  let activeRatios: string[] = [];
+  let previewRatio: string = "";
 
   let selected: boolean;
 
@@ -44,7 +54,6 @@
 
   let downscalePower: number;
 
-  // React to wrapper changes
   $: pullFromCpp(wrapper);
 
   function pullFromCpp(w: PaintingWrapper) {
@@ -64,8 +73,17 @@
 
     let canvasNeedsUpdate = false;
 
-    if (currentRatio !== w.cppPainting.ratio) {
-      currentRatio = w.cppPainting.ratio;
+    const cppRatios = w.cppPainting.getRatios();
+    if (
+      cppRatios.join(",") !== activeRatios.join(",") // oh my wiwi, this is so nasty
+    ) {
+      activeRatios = cppRatios;
+      canvasNeedsUpdate = true;
+    }
+
+    // Ensuring the preview tab is looking at a valid ratio
+    if (!activeRatios.includes(previewRatio) && activeRatios.length > 0) {
+      previewRatio = activeRatios[0];
       canvasNeedsUpdate = true;
     }
 
@@ -105,7 +123,6 @@
     }
   }
 
-  // Fast sync for typing metadata
   function syncMetadata() {
     if (!wrapper.cppPainting) return;
     wrapper.cppPainting.title = title;
@@ -118,10 +135,7 @@
   function hasWrapperChanged() {
     if (wrapper.cppPainting.pixelPerBlock !== Math.pow(2, downscalePower))
       return true;
-    if (wrapper.cppPainting.ratio !== currentRatio) return true;
     if (wrapper.cppPainting.brightness !== brightness) return true;
-
-    // Use a small epsilon for contrast to prevent floating point mismatch loops
     if (Math.abs(wrapper.cppPainting.contrast - contrast) > 0.001) return true;
 
     const settings = wrapper.cppPainting.getProceduralSettings();
@@ -129,9 +143,9 @@
       if (String(settings.seed) !== frameSeed) return true;
       if (settings.tintHex !== frameTint) return true;
     }
+    return false;
   }
 
-  // Heavy sync for visual parameters (slider, ratio, colours)
   function syncVisualsAndRefresh() {
     if (!wrapper.cppPainting || !hasWrapperChanged()) return;
 
@@ -143,8 +157,6 @@
       settings.tintHex = frameTint;
     }
 
-    wrapper.cppPainting.ratio = currentRatio;
-
     wrapper.cppPainting.brightness = brightness;
     wrapper.cppPainting.contrast = contrast;
 
@@ -152,6 +164,26 @@
 
     wrapper.cachedPaintingJS = undefined;
     updateCanvases();
+  }
+
+  function toggleRatio(ratio: string) {
+    if (activeRatios.includes(ratio)) {
+      if (activeRatios.length === 1) return;
+      wrapper.cppPainting.removeRatio(ratio);
+    } else {
+      wrapper.cppPainting.addRatio(ratio);
+    }
+
+    wrapper.cachedPaintingJS = undefined;
+    paintingsStore.set($paintingsStore);
+  }
+
+  function setPreviewRatio(ratio: string) {
+    if (previewRatio === ratio) return;
+    previewRatio = ratio;
+
+    wrapper.cachedPaintingJS = undefined;
+    renderPainting();
   }
 
   function scalePixelCanvas(c: HTMLCanvasElement, imgW: number, imgH: number) {
@@ -166,24 +198,6 @@
 
     c.style.width = `${cssW}px`;
     c.style.height = `${cssH}px`;
-  }
-
-  function renderCppImage(canvas: HTMLCanvasElement, img: ImageData) {
-    if (!wrapper.cppPainting || !canvas) return;
-
-    const width = img.width;
-    const height = img.height;
-
-    const pixelView = img.getPixels();
-    const clampedArray = new Uint8ClampedArray(pixelView); // copies data
-    const imageData = new ImageData(clampedArray, width, height);
-
-    // Draw to Canvas
-    scalePixelCanvas(canvas, width, height);
-    const ctx = canvas.getContext("2d");
-    ctx.putImageData(imageData, 0, 0);
-
-    img.delete();
   }
 
   function extractJSImageData(img: ImageData) {
@@ -217,31 +231,30 @@
   }
 
   function renderPainting() {
-    if (!wrapper.cachedPaintingJS) {
-      const img = wrapper.cppPainting.paintingData();
+    if (!wrapper.cachedPaintingJS && activeRatios.length > 0) {
+      const img = wrapper.cppPainting.paintingData(previewRatio);
       wrapper.cachedPaintingJS = extractJSImageData(img);
       img.delete();
     }
-    drawJSImageData(paintingCanvas, wrapper.cachedPaintingJS);
+
+    if (wrapper.cachedPaintingJS)
+      drawJSImageData(paintingCanvas, wrapper.cachedPaintingJS);
   }
 
   function rotateClockwise() {
     wrapper.cppPainting.rotateClockwise();
     wrapper.cachedOriginalJS = wrapper.cachedPaintingJS = undefined;
-    paintingsStore.set($paintingsStore); // This triggers pullFromCpp
+    paintingsStore.set($paintingsStore);
   }
 
   function rotateAnticlockwise() {
     wrapper.cppPainting.rotateAnticlockwise();
     wrapper.cachedOriginalJS = wrapper.cachedPaintingJS = undefined;
-    paintingsStore.set($paintingsStore); // This triggers pullFromCpp
+    paintingsStore.set($paintingsStore);
   }
 
   function remove() {
-    const idToRemove = wrapper.cppPainting.stringId();
-
-    $workspace.removePainting(idToRemove);
-
+    $workspace.removePainting(wrapper.cppPainting.stringId());
     paintingsStore.update((list) => list.filter((p) => p !== wrapper));
 
     wrapper.cppPainting.delete();
@@ -253,8 +266,7 @@
 
   function handleCropConfirm() {
     showCropModal = false;
-    wrapper.cachedPaintingJS = undefined;
-    wrapper.cachedOriginalJS = undefined;
+    wrapper.cachedPaintingJS = wrapper.cachedOriginalJS = undefined;
     updateCanvases();
   }
 
@@ -277,6 +289,10 @@
 
       return newList;
     });
+  }
+
+  function prettyRatio(cpp_ratio: string) {
+    return cpp_ratio.replace("ratio_", "").replace("x", ":");
   }
 
   function updateCanvases() {
@@ -312,15 +328,29 @@
       {isCropped}
     />
     <PaintingCanvas bind:canvas={originalImageCanvas} />
+
     <PaintingParams
-      bind:currentRatio
       bind:title
       bind:author
       bind:showMoreOptions
       onMetadataChange={syncMetadata}
-      onVisualChange={syncVisualsAndRefresh}
     />
-    <PaintingCanvas bind:canvas={paintingCanvas} />
+
+    <div class="preview-container">
+      <PaintingCanvas bind:canvas={paintingCanvas} />
+
+      <div class="ratio-tabs">
+        {#each activeRatios as ratio}
+          <button
+            class="ratio-tab"
+            class:active={previewRatio === ratio}
+            onclick={() => setPreviewRatio(ratio)}
+          >
+            {prettyRatio(ratio)}
+          </button>
+        {/each}
+      </div>
+    </div>
   </div>
 
   <div
@@ -329,20 +359,29 @@
   >
     <div class="more-options-section">
       <span class="more-options-section-label">
+        <LayoutGridIcon size="1.5em" />
+        Ratios
+      </span>
+      <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+        {#each ALL_RATIOS as r}
+          <Button
+            small
+            transparent={!activeRatios.includes(r)}
+            onclick={() => toggleRatio(r)}
+          >
+            {prettyRatio(r)}
+          </Button>
+        {/each}
+      </div>
+    </div>
+
+    <div class="more-options-section">
+      <span class="more-options-section-label">
         <RulerIcon size="1.5em" />
         Resolution
       </span>
-
-      <div
-        style="
-          display: flex;
-          flex-direction: row;
-          justify-content: center;
-          align-items: center;
-          gap: 10px"
-      >
+      <div style="display: flex; align-items: center; gap: 10px">
         <input
-          id="range"
           type="range"
           min="3"
           max="8"
@@ -383,7 +422,6 @@
           Brightness
         </Button>
         <input
-          id="range"
           type="range"
           min="-255"
           max="255"
@@ -405,7 +443,6 @@
           Contrast
         </Button>
         <input
-          id="range"
           type="range"
           min="0"
           max="10"
@@ -472,12 +509,12 @@
         <WrenchIcon size="1.5em" />
         Other options
       </span>
-      <Wiwicheckbox bind:checked={placeable} onclick={syncMetadata}>
-        Painting is placeable
-      </Wiwicheckbox>
-      <Wiwicheckbox bind:checked={hasStonecutterRecipe} onclick={syncMetadata}>
-        Painting has stonecutter recipe
-      </Wiwicheckbox>
+      <Wiwicheckbox bind:checked={placeable} onclick={syncMetadata}
+        >Painting is placeable</Wiwicheckbox
+      >
+      <Wiwicheckbox bind:checked={hasStonecutterRecipe} onclick={syncMetadata}
+        >Painting has stonecutter recipe</Wiwicheckbox
+      >
     </div>
   </div>
 </SelectableCard>
@@ -487,6 +524,60 @@
     display: flex;
     align-items: stretch;
     gap: 10px;
+  }
+
+  .preview-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .ratio-tabs {
+    width: 100%;
+    max-width: calc(256px + 10px);
+    padding: 4px;
+    /*padding: 30px 4px 4px 4px;
+    margin-top: -26px;*/
+    display: flex;
+    justify-content: center;
+    overflow-x: scroll;
+    gap: 4px;
+    /*background: #f0f0f0;*/
+    border-radius: 8px;
+    z-index: 0;
+  }
+
+  .ratio-tab {
+    background: transparent;
+    border: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 600;
+    color: #666;
+    transition: all 0.1s ease;
+  }
+
+  .ratio-tab.active {
+    background: white;
+    color: #000;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .ratio-tabs {
+      /*background: #333;*/
+    }
+    .ratio-tab {
+      color: #aaa;
+    }
+    .ratio-tab.active {
+      background: #555;
+      color: #fff;
+    }
   }
 
   .more-options {

@@ -119,6 +119,10 @@
     const blob = new Blob([imgData.encodePng()], { type: "image/png" });
     return URL.createObjectURL(blob);
   }
+
+  function prettyRatio(cpp_ratio: string) {
+    return cpp_ratio.replace("ratio_", "").replace("x", ":");
+  }
 </script>
 
 {#if validGeneratableConfig}
@@ -254,7 +258,13 @@
                   {wrapper.cppPainting.author} &ndash;
                 {/if}
                 {wrapper.cppPainting.title}
-                ({formatRatio(wrapper.cppPainting.ratio)} ratio)
+                ({#each wrapper.cppPainting.getRatios() as ratio, index}
+                  {#if index > 0},&nbsp;
+                  {/if}{prettyRatio(ratio)}
+                {/each}
+                {wrapper.cppPainting.getRatios().length === 1
+                  ? "ratio"
+                  : "ratios"})
               </li>
             {/each}
 

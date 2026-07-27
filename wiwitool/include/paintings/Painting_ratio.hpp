@@ -37,6 +37,10 @@ public:
 
   bool using_nearest_ratio(void) const noexcept;
 
+  // Comparison and equality
+
+  constexpr auto operator<=>(const Painting_ratio &) const noexcept = default;
+
   // Get properties
 
   std::pair<size_t, size_t> sizes(void) const noexcept;

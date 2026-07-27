@@ -3,11 +3,10 @@
   import RatioSelect from "./RatioSelect.svelte";
   import Button from "../components/Button.svelte";
 
-  export let currentRatio: string, title: string, author: string;
+  export let title: string, author: string;
   export let showMoreOptions: boolean;
 
   export let onMetadataChange: (e?: Event) => void = () => {};
-  export let onVisualChange: (e?: Event) => void = () => {};
 </script>
 
 <div class="transformation-ratio-selection">
@@ -35,18 +34,6 @@
   </div>
 
   <img class="rightarrow" src="rightarrow.svg" alt="Right arrow" />
-
-  <div class="inputs">
-    <label>
-      <ProportionsIcon />
-      <span> Aspect ratio&nbsp; </span>
-      <RatioSelect
-        bind:value={currentRatio}
-        oninput={onVisualChange}
-        onchange={onVisualChange}
-      />
-    </label>
-  </div>
 
   <Button
     secondary

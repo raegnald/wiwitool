@@ -50,8 +50,7 @@ private:
                                          painting.string_id());
   }
 
-  void generate_painting_json(const Painting &painting,
-                              std::filesystem::path directory);
+  void generate_painting_json(std::filesystem::path directory);
 
   // Define a new painting type
   void generate_painting_variant_json(const Painting &painting,
