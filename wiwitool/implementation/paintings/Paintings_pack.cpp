@@ -242,7 +242,9 @@ void Paintings_pack::generate_painting_variant_json(
     data["width"] = width;
     data["height"] = height;
 
-    data["title"].push_back({{"text", painting.get_title()}});
+    data["title"].push_back(
+        {{"text",
+          std::format("{} ({}:{})", painting.get_title(), width, height)}});
     data["author"].push_back({{"text", painting.get_author()}});
 
     jsonfile << data.dump(4) << std::endl;
