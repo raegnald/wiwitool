@@ -19,9 +19,10 @@
     SquareIcon,
     WandIcon,
     WrenchIcon,
-    LayoutGridIcon,
+    ProportionsIcon,
   } from "@lucide/svelte";
   import { getLoadedModule } from "../stores/wasmStore";
+  import { slide } from "svelte/transition";
 
   export let wrapper: PaintingWrapper;
 
@@ -353,170 +354,170 @@
     </div>
   </div>
 
-  <div
-    style={`display: ${showMoreOptions ? "flex" : "none"}`}
-    class="more-options"
-  >
-    <div class="more-options-section">
-      <span class="more-options-section-label">
-        <LayoutGridIcon size="1.5em" />
-        Ratios
-      </span>
-      <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-        {#each ALL_RATIOS as r}
-          <Button
-            small
-            transparent={!activeRatios.includes(r)}
-            onclick={() => toggleRatio(r)}
-          >
-            {prettyRatio(r)}
-          </Button>
-        {/each}
-      </div>
-    </div>
-
-    <div class="more-options-section">
-      <span class="more-options-section-label">
-        <RulerIcon size="1.5em" />
-        Resolution
-      </span>
-      <div style="display: flex; align-items: center; gap: 10px">
-        <input
-          type="range"
-          min="3"
-          max="8"
-          bind:value={downscalePower}
-          oninput={syncVisualsAndRefresh}
-          step="1"
-        />
-        <span class="pill">
-          {Math.pow(2, downscalePower)} pixels / block
+  {#if showMoreOptions}
+    <div class="more-options" transition:slide={{ duration: 100 }}>
+      <div class="more-options-section">
+        <span class="more-options-section-label">
+          <ProportionsIcon size="1.5em" />
+          Ratios
         </span>
+        <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+          {#each ALL_RATIOS as r}
+            <Button
+              small
+              transparent={!activeRatios.includes(r)}
+              onclick={() => toggleRatio(r)}
+            >
+              {prettyRatio(r)}
+            </Button>
+          {/each}
+        </div>
       </div>
-    </div>
 
-    <div class="more-options-section">
-      <span class="more-options-section-label">
-        <WandIcon size="1.5em" />
-        Visual tweaks
-      </span>
+      <div class="more-options-section">
+        <span class="more-options-section-label">
+          <RulerIcon size="1.5em" />
+          Resolution
+        </span>
+        <div style="display: flex; align-items: center; gap: 10px">
+          <input
+            type="range"
+            min="3"
+            max="8"
+            bind:value={downscalePower}
+            oninput={syncVisualsAndRefresh}
+            step="1"
+          />
+          <span class="pill">
+            {Math.pow(2, downscalePower)} pixels / block
+          </span>
+        </div>
+      </div>
 
-      <div
-        style="
+      <div class="more-options-section">
+        <span class="more-options-section-label">
+          <WandIcon size="1.5em" />
+          Visual tweaks
+        </span>
+
+        <div
+          style="
           display: flex;
           flex-direction: row;
           justify-content: center;
           align-items: center;
           gap: 10px"
-      >
-        <Button
-          small
-          transparent
-          disabled={brightness == 0}
-          icon="Undo"
-          onclick={() => {
-            brightness = 0;
-            syncVisualsAndRefresh();
-          }}
         >
-          Brightness
-        </Button>
-        <input
-          type="range"
-          min="-255"
-          max="255"
-          bind:value={brightness}
-          oninput={syncVisualsAndRefresh}
-          step="1"
-        />
+          <Button
+            small
+            transparent
+            disabled={brightness == 0}
+            icon="Undo"
+            onclick={() => {
+              brightness = 0;
+              syncVisualsAndRefresh();
+            }}
+          >
+            Brightness
+          </Button>
+          <input
+            type="range"
+            min="-255"
+            max="255"
+            bind:value={brightness}
+            oninput={syncVisualsAndRefresh}
+            step="1"
+          />
 
-        <Button
-          small
-          transparent
-          disabled={contrast == 1}
-          icon="Undo"
-          onclick={() => {
-            contrast = 1;
-            syncVisualsAndRefresh();
-          }}
-        >
-          Contrast
-        </Button>
-        <input
-          type="range"
-          min="0"
-          max="10"
-          bind:value={contrast}
-          oninput={syncVisualsAndRefresh}
-          step="0.01"
-        />
+          <Button
+            small
+            transparent
+            disabled={contrast == 1}
+            icon="Undo"
+            onclick={() => {
+              contrast = 1;
+              syncVisualsAndRefresh();
+            }}
+          >
+            Contrast
+          </Button>
+          <input
+            type="range"
+            min="0"
+            max="10"
+            bind:value={contrast}
+            oninput={syncVisualsAndRefresh}
+            step="0.01"
+          />
+        </div>
       </div>
-    </div>
 
-    <div class="more-options-section">
-      <span class="more-options-section-label">
-        <SquareIcon size="1.5em" />
-        Frame options
-      </span>
-      <Wiwicheckbox
-        bind:checked={disableFrame}
-        onclick={() => {
-          if (disableFrame) wrapper.cppPainting.useNoFrame();
-          else wrapper.cppPainting.useProceduralFrame();
+      <div class="more-options-section">
+        <span class="more-options-section-label">
+          <SquareIcon size="1.5em" />
+          Frame options
+        </span>
+        <Wiwicheckbox
+          bind:checked={disableFrame}
+          onclick={() => {
+            if (disableFrame) wrapper.cppPainting.useNoFrame();
+            else wrapper.cppPainting.useProceduralFrame();
 
-          wrapper.cachedPaintingJS = undefined;
-          updateCanvases();
-        }}
-      >
-        Disable frame
-      </Wiwicheckbox>
+            wrapper.cachedPaintingJS = undefined;
+            updateCanvases();
+          }}
+        >
+          Disable frame
+        </Wiwicheckbox>
 
-      <div class="colour-container">
+        <div class="colour-container">
+          <Button
+            disabled={disableFrame}
+            onclick={() => colourPicker.showPicker()}
+          >
+            Frame colour
+            <div
+              style={`width: 15px; height: 15px; background: ${frameTint}; border-radius: 100%; border: 1px solid #ccc`}
+            ></div>
+          </Button>
+
+          <input
+            bind:this={colourPicker}
+            name="frame-colour"
+            type="color"
+            bind:value={frameTint}
+            oninput={syncVisualsAndRefresh}
+            onchange={syncVisualsAndRefresh}
+          />
+        </div>
+
         <Button
           disabled={disableFrame}
-          onclick={() => colourPicker.showPicker()}
+          icon="Dices"
+          onclick={() => {
+            frameSeed =
+              "" + Math.floor(Number.MAX_SAFE_INTEGER * Math.random());
+            syncVisualsAndRefresh();
+          }}
         >
-          Frame colour
-          <div
-            style={`width: 15px; height: 15px; background: ${frameTint}; border-radius: 100%; border: 1px solid #ccc`}
-          ></div>
+          Frame seed
         </Button>
-
-        <input
-          bind:this={colourPicker}
-          name="frame-colour"
-          type="color"
-          bind:value={frameTint}
-          oninput={syncVisualsAndRefresh}
-          onchange={syncVisualsAndRefresh}
-        />
       </div>
 
-      <Button
-        disabled={disableFrame}
-        icon="Dices"
-        onclick={() => {
-          frameSeed = "" + Math.floor(Number.MAX_SAFE_INTEGER * Math.random());
-          syncVisualsAndRefresh();
-        }}
-      >
-        Frame seed
-      </Button>
+      <div class="more-options-section">
+        <span class="more-options-section-label">
+          <WrenchIcon size="1.5em" />
+          Other options
+        </span>
+        <Wiwicheckbox bind:checked={placeable} onclick={syncMetadata}
+          >Painting is placeable</Wiwicheckbox
+        >
+        <Wiwicheckbox bind:checked={hasStonecutterRecipe} onclick={syncMetadata}
+          >Painting has stonecutter recipe</Wiwicheckbox
+        >
+      </div>
     </div>
-
-    <div class="more-options-section">
-      <span class="more-options-section-label">
-        <WrenchIcon size="1.5em" />
-        Other options
-      </span>
-      <Wiwicheckbox bind:checked={placeable} onclick={syncMetadata}
-        >Painting is placeable</Wiwicheckbox
-      >
-      <Wiwicheckbox bind:checked={hasStonecutterRecipe} onclick={syncMetadata}
-        >Painting has stonecutter recipe</Wiwicheckbox
-      >
-    </div>
-  </div>
+  {/if}
 </SelectableCard>
 
 <style>
