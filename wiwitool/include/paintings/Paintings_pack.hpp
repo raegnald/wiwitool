@@ -8,6 +8,7 @@
 #include "Minecraft_identifiable.hpp"
 #include "Minecraft_pack.hpp"
 #include "paintings/Painting.hpp"
+#include "paintings/Painting_ratio.hpp"
 
 static std::string default_paintings_namespace{"paintings"};
 
@@ -40,9 +41,13 @@ private:
   // IDEA: Show tree file structure and assign every file the method
   // that generates it.
 
-  inline std::string item_id(const Painting &painting) const {
-    return Minecraft_identifiable::adhoc_item(paintings_namespace,
-                                              painting.string_id());
+  inline std::string item_id(const Painting &painting,
+                             Painting_ratio ratio) const {
+    const auto [width, height] = ratio.sizes();
+    const auto item_name =
+        std::format("{}_{}x{}", painting.string_id(), width, height);
+
+    return Minecraft_identifiable::adhoc_item(paintings_namespace, item_name);
   }
 
   inline std::string painting_id(const Painting &painting) const {

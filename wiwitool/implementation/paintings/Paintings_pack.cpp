@@ -83,14 +83,14 @@ void Paintings_pack::generate_painting_resource(
   for (const auto ratio : painting.get_ratios()) {
     const auto [width, height] = ratio.sizes();
     const auto output_filename =
-      std::format("{}_{}x{}.json", painting.string_id(), width, height);
+        std::format("{}_{}x{}.png", painting.string_id(), width, height);
 
     wiwidebug std::println("Generating painting {}...", output_filename);
 
     auto painting_image = painting.painting_data(ratio);
 
     painting_image.save_png(directory / output_filename);
-    wiwidebug std::println("Saved painting to ",
+    wiwidebug std::println("Saved painting to {}",
                            (directory / output_filename).string());
   }
 }
@@ -152,8 +152,7 @@ void Paintings_pack::generate_resource(void) {
   const auto painting_to_icon_json_folder =
       in_resource_folder(assets_subfolder / "minecraft" / "items");
 
-  size_t count = 0;
-  for (const auto &painting : paintings) {
+  for (size_t count = 0; const auto &painting : paintings) {
     generate_painting_resource(*painting, paintings_image_folder); // FOTUT: must run before generating JSON
 
     // Miniature (aka. item)
@@ -163,7 +162,8 @@ void Paintings_pack::generate_resource(void) {
     wiwidebug {
       count++;
       if (count % 3 == 0)
-        print_memory_stats("Paintings Loop: Processed " + std::to_string(count));
+        print_memory_stats("Paintings Loop: Processed " +
+                           std::to_string(count));
     }
   }
 
@@ -188,7 +188,8 @@ void Paintings_pack::generate_painting_json(std::filesystem::path directory) {
       data["model"]["cases"].push_back(
           {{"when", variant_id},
            {"model",
-            {{"type", "minecraft:model"}, {"model", item_id(*painting)}}}});
+            {{"type", "minecraft:model"},
+             {"model", item_id(*painting, ratio)}}}});
     }
   }
 
@@ -201,26 +202,34 @@ void Paintings_pack::generate_painting_json(std::filesystem::path directory) {
 void Paintings_pack::generate_miniature_resource(
     const Painting &painting, std::filesystem::path directory) {
 
-  const auto output_filename = std::format("{}.png", painting.string_id());
-  wiwidebug std::println("Generating painting miniature {}...", output_filename);
+  for (const auto ratio : painting.get_ratios()) {
+    const auto [width, height] = ratio.sizes();
+    const auto output_filename =
+        std::format("{}_{}x{}.png", painting.string_id(), width, height);
 
-  const auto item_image = painting.icon_data();
-  item_image.save_as(directory / output_filename);
+    wiwidebug std::println("Generating painting miniature {}...", output_filename);
+
+    const auto item_image = painting.icon_data();
+    item_image.save_as(directory / output_filename);
+  }
 }
-
 
 void Paintings_pack::generate_respack_item_json(
     const Painting &painting, std::filesystem::path directory) {
 
-  const auto json_name = painting.string_id() + ".json";
-  std::ofstream jsonfile{directory / json_name};
+  for (const auto ratio : painting.get_ratios()) {
+    const auto [width, height] = ratio.sizes();
+    const auto json_name =
+        std::format("{}_{}x{}.json", painting.string_id(), width, height);
 
-  json data;
+    std::ofstream jsonfile{directory / json_name};
+    json data;
 
-  data["parent"] = "minecraft:item/generated";
-  data["textures"] = {{"layer0", item_id(painting)}};
+    data["parent"] = "minecraft:item/generated";
+    data["textures"] = {{"layer0", item_id(painting, ratio)}};
 
-  jsonfile << data.dump(4) << std::endl;
+    jsonfile << data.dump(4) << std::endl;
+  }
 }
 
 void Paintings_pack::generate_painting_variant_json(
