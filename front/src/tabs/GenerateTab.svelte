@@ -121,7 +121,7 @@
   }
 
   function prettyRatio(cpp_ratio: string) {
-    return cpp_ratio.replace("ratio_", "").replace("x", ":");
+    return cpp_ratio.replace("ratio_", "").replace("x", "×");
   }
 </script>
 
@@ -258,13 +258,11 @@
                   {wrapper.cppPainting.author} &ndash;
                 {/if}
                 {wrapper.cppPainting.title}
-                ({#each wrapper.cppPainting.getRatios() as ratio, index}
-                  {#if index > 0},&nbsp;
-                  {/if}{prettyRatio(ratio)}
-                {/each}
-                {wrapper.cppPainting.getRatios().length === 1
-                  ? "ratio"
-                  : "ratios"})
+                <div class="pill-container">
+                  {#each wrapper.cppPainting.getRatios() as ratio, index}
+                    <span class="pill">{prettyRatio(ratio)}</span>
+                  {/each}
+                </div>
               </li>
             {/each}
 
@@ -425,6 +423,13 @@
 </div>
 
 <style>
+  .pill-container {
+    display: flex;
+    gap: 6px;
+    margin: 0 10px;
+    font-size: 85%;
+  }
+
   .project-details {
     margin-bottom: 12px;
     display: flex;
