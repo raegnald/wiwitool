@@ -224,7 +224,7 @@
             icon={allSelected ? "CircleMinus" : "CircleCheck"}
             onclick={toggleSelectAll}
           >
-            {allSelected ? "Deselect" : "Select"} all
+            {allSelected ? "Deselect all" : "Select all"}
           </ListOption>
 
           <ListSectionTitle>Advanced options</ListSectionTitle>

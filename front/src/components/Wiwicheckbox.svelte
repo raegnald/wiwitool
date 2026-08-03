@@ -37,6 +37,8 @@
   }
 
   button {
+    width: 48px;
+    height: 48px;
     border-radius: 8px;
     border: 1px solid transparent;
     background-color: #f9f9f9;
@@ -45,7 +47,8 @@
     border: 1px solid #ccc;
     display: flex;
     justify-content: center;
-    padding: 0.5em;
+    align-items: center;
+    padding: 10px;
     line-height: 0.9;
     color: #ddd;
   }

@@ -5,6 +5,8 @@
     disabled = false,
     icon = "",
     onclick = (_: MouseEvent) => {},
+    destructive = false,
+    hovered = false,
     children,
     ...props
   } = $props();
@@ -19,6 +21,8 @@
 <button
   type="button"
   class={disabled ? "disabled" : "enabled"}
+  class:destructive
+  class:hovered
   onclick={clickfun}
   {...props}
 >
@@ -48,12 +52,29 @@
     transition: background-color 100ms ease-in;
   }
 
+  button.destructive {
+    color: #e21f1f;
+  }
+
+  button.destructive:hover {
+    background-color: #e21f1f !important;
+    color: white !important;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    button.destructive {
+      background-color: #e21f1f;
+      color: #f4d9d9;
+    }
+  }
+
   button.disabled {
     color: #999;
     cursor: default;
   }
 
-  button.enabled:hover {
+  button.enabled:hover,
+  button.hovered {
     background-color: rgba(100, 108, 255, 0.1);
     color: #646cff;
   }

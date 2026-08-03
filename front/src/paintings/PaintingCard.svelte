@@ -41,7 +41,7 @@
   let activeRatios: string[] = [];
   let previewRatio: string = "";
 
-  let selected: boolean;
+  let selected: boolean = false;
 
   let isCropped = false;
   let disableFrame = false;
@@ -293,7 +293,7 @@
   }
 
   function prettyRatio(cpp_ratio: string) {
-    return cpp_ratio.replace("ratio_", "").replace("x", ":");
+    return cpp_ratio.replace("ratio_", "").replace("x", "×");
   }
 
   function updateCanvases() {
@@ -314,44 +314,72 @@
 
 <SelectableCard
   bind:selected
+  showCheckbox={false}
   onToggle={() => {
     wrapper.selected = selected;
     $paintingsStore = $paintingsStore;
   }}
 >
   <div class="transformation">
-    <PaintingActions
-      {rotateClockwise}
-      {rotateAnticlockwise}
-      {clone}
-      {remove}
-      {crop}
-      {isCropped}
-    />
-    <PaintingCanvas bind:canvas={originalImageCanvas} />
+    <div class="painting-card-main-content-container">
+      <div class="original-painting-container">
+        <PaintingCanvas bind:canvas={originalImageCanvas} />
+        <div class="original-painting-actions">
+          <Button
+            onclick={crop}
+            title="Crop image"
+            icon="Crop"
+            hugeBorder={isCropped}
+          />
 
-    <PaintingParams
-      bind:title
-      bind:author
-      bind:showMoreOptions
-      onMetadataChange={syncMetadata}
-    />
+          <Button
+            onclick={rotateAnticlockwise}
+            title="Rotate anticlockwise"
+            icon="RotateCcw"
+          />
 
-    <div class="preview-container">
-      <PaintingCanvas bind:canvas={paintingCanvas} />
+          <Button
+            onclick={rotateClockwise}
+            title="Rotate clockwise"
+            icon="RotateCw"
+          />
+        </div>
+      </div>
 
-      <div class="ratio-tabs">
-        {#each activeRatios as ratio}
-          <button
-            class="ratio-tab"
-            class:active={previewRatio === ratio}
-            onclick={() => setPreviewRatio(ratio)}
-          >
-            {prettyRatio(ratio)}
-          </button>
-        {/each}
+      <PaintingParams
+        bind:title
+        bind:author
+        bind:showMoreOptions
+        onMetadataChange={syncMetadata}
+      />
+
+      <div class="preview-container">
+        <PaintingCanvas bind:canvas={paintingCanvas} />
+
+        <div class="ratio-tabs">
+          {#each activeRatios as ratio}
+            <button
+              class="ratio-tab"
+              class:active={previewRatio === ratio}
+              onclick={() => setPreviewRatio(ratio)}
+            >
+              {prettyRatio(ratio)}
+            </button>
+          {/each}
+        </div>
       </div>
     </div>
+
+    <PaintingActions
+      bind:selected
+      {clone}
+      {remove}
+      updateSelected={() => {
+        console.info("Miauuu");
+        wrapper.selected = selected;
+        $paintingsStore = $paintingsStore;
+      }}
+    />
   </div>
 
   {#if showMoreOptions}
@@ -363,13 +391,15 @@
         </span>
         <div style="display: flex; gap: 4px; flex-wrap: wrap;">
           {#each ALL_RATIOS as r}
-            <Button
-              small
-              transparent={!activeRatios.includes(r)}
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <span
+              class="pill ratio-pill"
+              class:pill-inactive={!activeRatios.includes(r)}
               onclick={() => toggleRatio(r)}
             >
               {prettyRatio(r)}
-            </Button>
+            </span>
           {/each}
         </div>
       </div>
@@ -521,10 +551,32 @@
 </SelectableCard>
 
 <style>
+  .ratio-pill {
+    cursor: pointer;
+    background-color: #646cff;
+    color: white;
+  }
+
+  .pill-inactive {
+    background-color: transparent !important;
+    color: #888 !important;
+  }
+
   .transformation {
     display: flex;
     align-items: stretch;
     gap: 10px;
+  }
+
+  .painting-card-main-content-container {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    flex: 1;
+
+    /*& > * {
+      flex: 1;
+    }*/
   }
 
   .preview-container {
@@ -632,5 +684,17 @@
     border: 0;
     pointer-events: none;
     z-index: -1;
+  }
+
+  .original-painting-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .original-painting-actions {
+    display: flex;
+    gap: 10px;
   }
 </style>

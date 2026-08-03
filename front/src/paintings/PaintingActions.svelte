@@ -1,16 +1,21 @@
 <script lang="ts">
+  import ButtonListOptions from "../components/button-list/ButtonListOptions.svelte";
+  import ListOption from "../components/button-list/ListOption.svelte";
+  import ListSectionTitle from "../components/button-list/ListSectionTitle.svelte";
   import Button from "../components/Button.svelte";
+  import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
+  import { paintingsStore } from "../stores/paintingsStore";
 
   type ButtonClickHandler = () => void;
 
-  export let rotateClockwise: ButtonClickHandler;
-  export let rotateAnticlockwise: ButtonClickHandler;
+  export let selected: boolean;
   export let clone: ButtonClickHandler;
   export let remove: ButtonClickHandler;
-  export let crop: ButtonClickHandler;
-  export let isCropped = false;
+  export let updateSelected: () => void;
 
   let deletePaintingDialog: HTMLDialogElement;
+
+  $: anySelected = $paintingsStore.some((painting) => painting.selected);
 </script>
 
 <dialog bind:this={deletePaintingDialog}>
@@ -39,40 +44,41 @@
 </dialog>
 
 <div class="actions">
-  <div class="first"></div>
-
   <div>
-    <Button
-      grow
-      onclick={crop}
-      title="Crop image"
-      icon="Crop"
-      hugeBorder={isCropped}
-    />
+    <ButtonListOptions rightAligned icon="EllipsisVertical" transparent>
+      <ListOption
+        icon={selected ? "X" : "Check"}
+        hovered={selected}
+        onclick={() => {
+          selected = !selected;
+          updateSelected();
+        }}
+      >
+        {selected ? "Deselect" : "Select"}
+      </ListOption>
 
-    <div class="actions-pack">
-      <Button
-        onclick={rotateClockwise}
-        title="Rotate clockwise"
-        icon="RotateCw"
+      <ListSectionTitle>Painting options</ListSectionTitle>
+
+      <ListOption icon="Copy" onclick={clone}>Duplicate</ListOption>
+
+      <ListOption
+        icon="Trash2"
+        onclick={() => deletePaintingDialog.showModal()}
+        destructive
+      >
+        Delete
+      </ListOption>
+    </ButtonListOptions>
+
+    {#if anySelected}
+      <Wiwicheckbox
+        checked={selected}
+        onclick={() => {
+          selected = !selected;
+          updateSelected();
+        }}
       />
-
-      <Button
-        onclick={rotateAnticlockwise}
-        title="Rotate anticlockwise"
-        icon="RotateCcw"
-      />
-    </div>
-
-    <Button grow onclick={clone} title="Clone image" icon="Copy" />
-
-    <Button
-      grow
-      destructive
-      onclick={() => deletePaintingDialog.showModal()}
-      title="Delete painting"
-      icon="Trash2"
-    />
+    {/if}
   </div>
 </div>
 
@@ -81,10 +87,6 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-  }
-
-  .actions .first {
-    flex: 1;
   }
 
   .actions > div {

@@ -4,6 +4,7 @@
   let {
     selected = $bindable(),
     onToggle = (() => {}) as () => any,
+    showCheckbox = true,
     children,
     ...props
   } = $props();
@@ -11,9 +12,11 @@
 
 <div class="app-card card">
   <div class="card-padding" class:selected>
-    <div class="floating-checkbox">
-      <Wiwicheckbox bind:checked={selected} onclick={onToggle} />
-    </div>
+    {#if showCheckbox}
+      <div class="floating-checkbox">
+        <Wiwicheckbox bind:checked={selected} onclick={onToggle} />
+      </div>
+    {/if}
 
     {@render children()}
   </div>
@@ -28,6 +31,7 @@
     flex-wrap: nowrap;
     justify-content: space-between;
     padding: 0;
+    z-index: 0;
   }
 
   .card-padding {
