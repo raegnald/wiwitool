@@ -43,7 +43,7 @@
     padding: 15px;
     transition: 100ms;
     border-radius: 11px;
-    overflow-x: scroll;
+    overflow: none;
   }
 
   .card-padding.selected {

@@ -13,7 +13,14 @@
 
 const Painting_ratio Painting_ratio::nearest{Painting_ratio::nearest_ratio};
 
-const std::vector<Painting_ratio> Painting_ratio::available {
+const std::vector<Painting_ratio> Painting_ratio::preferred {
+  {1, 1}, {1, 2},
+  {2, 1}, {2, 2}, {2, 3}, {2, 4},
+  {3, 2}, {3, 3}, {3, 4},
+  {4, 2}, {4, 3}, {4, 4},
+};
+
+const std::vector<Painting_ratio> Painting_ratio::reasonable {
   {1, 1}, {1, 2}, {1, 3}, {1, 4},
   {2, 1}, {2, 2}, {2, 3}, {2, 4},
   {3, 1}, {3, 2}, {3, 3}, {3, 4},
@@ -24,7 +31,7 @@ Painting_ratio Painting_ratio::nearest_to(int width, int height) noexcept {
   const double target_ratio = static_cast<double>(width) / height;
 
   const auto it = std::ranges::min_element(
-      available, std::ranges::less{},
+      reasonable, std::ranges::less{},
       [&](Painting_ratio r) { return std::abs(target_ratio - r.value()); });
 
   return *it;
@@ -94,7 +101,7 @@ Painting_ratio Painting_ratio::from_string(std::string s) {
 
   // FOTUT: change this loop that goes through all 256 possibilities
   // to a smarter loop that goes first through the preferred ratios
-  for (auto r : available)
+  for (auto r : reasonable)
     if (r.to_string() == s)
       return r;
 
@@ -125,10 +132,18 @@ using namespace emscripten;
 
 EMSCRIPTEN_BINDINGS(painting_ratio) {
   class_<Painting_ratio>("PaintingRatio")
-      .class_function("getAvailable", optional_override([]() {
+      .class_function("getPreferred", optional_override([]() {
                         emscripten::val js_array = emscripten::val::array();
 
-                        for (const auto &ratio : Painting_ratio::available)
+                        for (const auto &ratio : Painting_ratio::preferred)
+                          js_array.call<void>("push", ratio.to_string());
+
+                        return js_array;
+                      }))
+      .class_function("getReasonable", optional_override([]() {
+                        emscripten::val js_array = emscripten::val::array();
+
+                        for (const auto &ratio : Painting_ratio::reasonable)
                           js_array.call<void>("push", ratio.to_string());
 
                         return js_array;

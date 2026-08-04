@@ -45,32 +45,32 @@
 
 <div class="actions">
   <div>
-    <ButtonListOptions rightAligned icon="EllipsisVertical" transparent>
-      <ListOption
-        icon={selected ? "X" : "Check"}
-        hovered={selected}
-        onclick={() => {
-          selected = !selected;
-          updateSelected();
-        }}
-      >
-        {selected ? "Deselect" : "Select"}
-      </ListOption>
+    {#if !anySelected}
+      <ButtonListOptions rightAligned icon="Ellipsis" transparent>
+        <ListOption
+          icon={selected ? "X" : "Check"}
+          hovered={selected}
+          onclick={() => {
+            selected = !selected;
+            updateSelected();
+          }}
+        >
+          {selected ? "Deselect" : "Select"}
+        </ListOption>
 
-      <ListSectionTitle>Painting options</ListSectionTitle>
+        <ListSectionTitle>Painting options</ListSectionTitle>
 
-      <ListOption icon="Copy" onclick={clone}>Duplicate</ListOption>
+        <ListOption icon="Copy" onclick={clone}>Duplicate</ListOption>
 
-      <ListOption
-        icon="Trash2"
-        onclick={() => deletePaintingDialog.showModal()}
-        destructive
-      >
-        Delete
-      </ListOption>
-    </ButtonListOptions>
-
-    {#if anySelected}
+        <ListOption
+          icon="Trash2"
+          onclick={() => deletePaintingDialog.showModal()}
+          destructive
+        >
+          Delete
+        </ListOption>
+      </ButtonListOptions>
+    {:else}
       <Wiwicheckbox
         checked={selected}
         onclick={() => {

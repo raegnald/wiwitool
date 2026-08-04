@@ -3,6 +3,7 @@
 
   export let checked: boolean = false;
   export let onclick: () => any = () => {};
+  export let small: boolean = false;
 
   function toggle() {
     checked = !checked;
@@ -21,7 +22,7 @@
   role="checkbox"
   aria-checked={checked}
 >
-  <button class:checked>
+  <button class:checked class:small>
     <CheckIcon />
   </button>
   <slot />
@@ -51,6 +52,12 @@
     padding: 10px;
     line-height: 0.9;
     color: #ddd;
+  }
+
+  button.small {
+    width: 36px;
+    height: 36px;
+    padding: 5px;
   }
 
   button.checked {

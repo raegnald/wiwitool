@@ -8,10 +8,10 @@
 
 <style>
   .canvas-transformation-container {
-    width: 256px;
-    height: 256px;
-    min-width: 256px;
-    min-height: 256px;
+    width: 330px;
+    height: 330px;
+    min-width: 330px;
+    min-height: 330px;
     flex-shrink: 0;
     padding: 10px;
     display: flex;

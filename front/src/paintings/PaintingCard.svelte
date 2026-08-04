@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import {
     paintingsStore,
     type PaintingWrapper,
@@ -20,24 +20,32 @@
     WandIcon,
     WrenchIcon,
     ProportionsIcon,
+    TextCursorIcon,
+    UserIcon,
+    ChevronRightIcon,
+    ChevronLeftIcon,
+    WandSparklesIcon,
   } from "@lucide/svelte";
   import { getLoadedModule } from "../stores/wasmStore";
   import { slide } from "svelte/transition";
+  import Wiwinput from "../components/Wiwinput.svelte";
 
   export let wrapper: PaintingWrapper;
 
   let showMoreOptions = false;
+
   let showCropModal = false;
   let colourPicker: HTMLInputElement;
 
   let originalImageCanvas: HTMLCanvasElement;
   let paintingCanvas: HTMLCanvasElement;
+  let ratioTabsContainer: HTMLDivElement;
 
   // Local UI state
   let title: string;
   let author: string;
 
-  const ALL_RATIOS = getLoadedModule().PaintingRatio.getAvailable();
+  const ALL_RATIOS = getLoadedModule().PaintingRatio.getReasonable();
   let activeRatios: string[] = [];
   let previewRatio: string = "";
 
@@ -86,6 +94,7 @@
     if (!activeRatios.includes(previewRatio) && activeRatios.length > 0) {
       previewRatio = activeRatios[0];
       canvasNeedsUpdate = true;
+      centerActiveRatio();
     }
 
     let currentDownscale = Math.log2(w.cppPainting.pixelPerBlock);
@@ -177,6 +186,7 @@
 
     wrapper.cachedPaintingJS = undefined;
     paintingsStore.set($paintingsStore);
+    centerActiveRatio();
   }
 
   function setPreviewRatio(ratio: string) {
@@ -185,10 +195,43 @@
 
     wrapper.cachedPaintingJS = undefined;
     renderPainting();
+    centerActiveRatio();
+  }
+
+  function prevRatio() {
+    if (activeRatios.length <= 1) return;
+    const idx = activeRatios.indexOf(previewRatio);
+    const newIdx = idx <= 0 ? activeRatios.length - 1 : idx - 1;
+    setPreviewRatio(activeRatios[newIdx]);
+  }
+
+  function nextRatio() {
+    if (activeRatios.length <= 1) return;
+    const idx = activeRatios.indexOf(previewRatio);
+    const newIdx = idx >= activeRatios.length - 1 ? 0 : idx + 1;
+    setPreviewRatio(activeRatios[newIdx]);
+  }
+
+  async function centerActiveRatio() {
+    await tick();
+
+    if (!ratioTabsContainer) return;
+
+    const activeEl = ratioTabsContainer.querySelector(
+      ".ratio-pill:not(.pill-inactive)",
+    ) as HTMLElement;
+
+    if (activeEl) {
+      activeEl.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+    }
   }
 
   function scalePixelCanvas(c: HTMLCanvasElement, imgW: number, imgH: number) {
-    const containerSize = 256;
+    const containerSize = 330;
 
     c.width = imgW;
     c.height = imgH;
@@ -320,10 +363,58 @@
     $paintingsStore = $paintingsStore;
   }}
 >
+  <div class="card-header">
+    <div class="header-left">
+      <div class="inputs">
+        <Wiwinput
+          type="text"
+          placeholder="Title"
+          bind:value={title}
+          oninput={syncMetadata}
+          onchange={syncMetadata}
+        />
+
+        <!-- &mdash; -->
+
+        <Wiwinput
+          type="text"
+          placeholder="Author"
+          bind:value={author}
+          oninput={syncMetadata}
+          onchange={syncMetadata}
+        />
+      </div>
+    </div>
+
+    <div class="header-right">
+      <Button
+        secondary
+        hugeBorder={showMoreOptions}
+        onclick={() => (showMoreOptions = !showMoreOptions)}
+        title="More options for this painting"
+        icon="SlidersHorizontal"
+      >
+        Options
+      </Button>
+
+      <PaintingActions
+        bind:selected
+        {clone}
+        {remove}
+        updateSelected={() => {
+          console.info("Miauuu");
+          wrapper.selected = selected;
+          $paintingsStore = $paintingsStore;
+        }}
+      />
+    </div>
+  </div>
+
   <div class="transformation">
     <div class="painting-card-main-content-container">
       <div class="original-painting-container">
         <PaintingCanvas bind:canvas={originalImageCanvas} />
+
         <div class="original-painting-actions">
           <Button
             onclick={crop}
@@ -356,195 +447,250 @@
       <div class="preview-container">
         <PaintingCanvas bind:canvas={paintingCanvas} />
 
-        <div class="ratio-tabs">
-          {#each activeRatios as ratio}
-            <button
-              class="ratio-tab"
-              class:active={previewRatio === ratio}
-              onclick={() => setPreviewRatio(ratio)}
-            >
-              {prettyRatio(ratio)}
-            </button>
-          {/each}
+        <div class="ratio-tabs-container">
+          <button
+            class="chevron-btn"
+            onclick={prevRatio}
+            disabled={activeRatios.length <= 1}
+            aria-label="Previous Ratio"
+            title="Previous Ratio"
+          >
+            <ChevronLeftIcon size="1.2em" />
+          </button>
+
+          <div class="ratio-tabs" bind:this={ratioTabsContainer}>
+            {#each activeRatios as ratio}
+              <!-- svelte-ignore a11y_click_events_have_key_events -->
+              <!-- svelte-ignore a11y_no_static_element_interactions -->
+              <span
+                class="pill ratio-pill"
+                class:pill-inactive={previewRatio !== ratio}
+                onclick={() => setPreviewRatio(ratio)}
+              >
+                {prettyRatio(ratio)}
+              </span>
+            {/each}
+          </div>
+
+          <button
+            class="chevron-btn"
+            onclick={nextRatio}
+            disabled={activeRatios.length <= 1}
+            aria-label="Next Ratio"
+            title="Next Ratio"
+          >
+            <ChevronRightIcon size="1.2em" />
+          </button>
         </div>
       </div>
     </div>
-
-    <PaintingActions
-      bind:selected
-      {clone}
-      {remove}
-      updateSelected={() => {
-        console.info("Miauuu");
-        wrapper.selected = selected;
-        $paintingsStore = $paintingsStore;
-      }}
-    />
   </div>
 
   {#if showMoreOptions}
     <div class="more-options" transition:slide={{ duration: 100 }}>
-      <div class="more-options-section">
-        <span class="more-options-section-label">
-          <ProportionsIcon size="1.5em" />
-          Ratios
-        </span>
-        <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-          {#each ALL_RATIOS as r}
-            <!-- svelte-ignore a11y_click_events_have_key_events -->
-            <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <span
-              class="pill ratio-pill"
-              class:pill-inactive={!activeRatios.includes(r)}
-              onclick={() => toggleRatio(r)}
-            >
-              {prettyRatio(r)}
-            </span>
-          {/each}
+      <div class="extra-option-card">
+        <div class="title">
+          <RulerIcon size="1.2em" />
+          <span>Sizes and resolution</span>
+        </div>
+
+        <div class="extra-option-card-sections">
+          <div class="section">
+            <div class="section-title">
+              <span>Sizes</span>
+            </div>
+
+            <div class="section-body section-sizes">
+              {#each ALL_RATIOS as r}
+                <!-- svelte-ignore a11y_click_events_have_key_events -->
+                <!-- svelte-ignore a11y_no_static_element_interactions -->
+                <span
+                  class="pill ratio-pill"
+                  class:pill-inactive={!activeRatios.includes(r)}
+                  onclick={() => toggleRatio(r)}
+                >
+                  {prettyRatio(r)}
+                </span>
+              {/each}
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <span>Resolution</span>
+            </div>
+
+            <div class="section-body section-resolution">
+              <input
+                type="range"
+                min="3"
+                max="8"
+                bind:value={downscalePower}
+                oninput={syncVisualsAndRefresh}
+                step="1"
+              />
+              <span>
+                <span
+                  style="
+                    display: inline-block;
+                    min-width: 30px;
+                    text-align: right;"
+                >
+                  {Math.pow(2, downscalePower)}
+                </span> px/block
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="more-options-section">
-        <span class="more-options-section-label">
-          <RulerIcon size="1.5em" />
-          Resolution
-        </span>
-        <div style="display: flex; align-items: center; gap: 10px">
-          <input
-            type="range"
-            min="3"
-            max="8"
-            bind:value={downscalePower}
-            oninput={syncVisualsAndRefresh}
-            step="1"
-          />
-          <span class="pill">
-            {Math.pow(2, downscalePower)} pixels / block
-          </span>
+      <div class="extra-option-card">
+        <div class="title">
+          <WandSparklesIcon size="1.2em" />
+          <span>Appearance</span>
+        </div>
+
+        <div class="extra-option-card-sections">
+          <div class="section">
+            <div class="section-title">
+              <span>Brightness</span>
+            </div>
+
+            <div class="section-body section-brightness">
+              <input
+                type="range"
+                min="-255"
+                max="255"
+                bind:value={brightness}
+                oninput={syncVisualsAndRefresh}
+                step="1"
+              />
+
+              <Button
+                small
+                transparent
+                disabled={brightness == 0}
+                icon="Undo"
+                onclick={() => {
+                  brightness = 0;
+                  syncVisualsAndRefresh();
+                }}
+              >
+                Reset
+              </Button>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <span>Contrast</span>
+            </div>
+
+            <div class="section-body section-contrast">
+              <input
+                type="range"
+                min="0"
+                max="10"
+                bind:value={contrast}
+                oninput={syncVisualsAndRefresh}
+                step="0.01"
+              />
+
+              <Button
+                small
+                transparent
+                disabled={contrast == 1}
+                icon="Undo"
+                onclick={() => {
+                  contrast = 1;
+                  syncVisualsAndRefresh();
+                }}
+              >
+                Reset
+              </Button>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <span>Frame</span>
+            </div>
+
+            <div class="section-body section-frame">
+              <Wiwicheckbox
+                small
+                bind:checked={disableFrame}
+                onclick={() => {
+                  if (disableFrame) wrapper.cppPainting.useNoFrame();
+                  else wrapper.cppPainting.useProceduralFrame();
+
+                  wrapper.cachedPaintingJS = undefined;
+                  updateCanvases();
+                }}
+              >
+                Disable frame
+              </Wiwicheckbox>
+
+              <div class="when-frame-enabled">
+                <div class="colour-container">
+                  <Button
+                    small
+                    disabled={disableFrame}
+                    onclick={() => colourPicker.showPicker()}
+                  >
+                    Frame colour
+                    <div
+                      style={`width: 15px; height: 15px; background: ${frameTint}; border-radius: 100%; border: 1px solid #ccc`}
+                    ></div>
+                  </Button>
+
+                  <input
+                    bind:this={colourPicker}
+                    name="frame-colour"
+                    type="color"
+                    bind:value={frameTint}
+                    oninput={syncVisualsAndRefresh}
+                    onchange={syncVisualsAndRefresh}
+                  />
+                </div>
+
+                <Button
+                  small
+                  disabled={disableFrame}
+                  icon="Dices"
+                  onclick={() => {
+                    frameSeed =
+                      "" + Math.floor(Number.MAX_SAFE_INTEGER * Math.random());
+                    syncVisualsAndRefresh();
+                  }}
+                >
+                  Frame seed
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="more-options-section">
-        <span class="more-options-section-label">
-          <WandIcon size="1.5em" />
-          Visual tweaks
-        </span>
+      <div class="extra-option-card">
+        <div class="title">
+          <WrenchIcon size="1.2em" />
+          <span>Behaviour in game</span>
+        </div>
 
-        <div
-          style="
-          display: flex;
-          flex-direction: row;
-          justify-content: center;
-          align-items: center;
-          gap: 10px"
-        >
-          <Button
+        <div class="extra-option-card-sections">
+          <Wiwicheckbox small bind:checked={placeable} onclick={syncMetadata}>
+            Painting is placeable
+          </Wiwicheckbox>
+
+          <Wiwicheckbox
             small
-            transparent
-            disabled={brightness == 0}
-            icon="Undo"
-            onclick={() => {
-              brightness = 0;
-              syncVisualsAndRefresh();
-            }}
+            bind:checked={hasStonecutterRecipe}
+            onclick={syncMetadata}
           >
-            Brightness
-          </Button>
-          <input
-            type="range"
-            min="-255"
-            max="255"
-            bind:value={brightness}
-            oninput={syncVisualsAndRefresh}
-            step="1"
-          />
-
-          <Button
-            small
-            transparent
-            disabled={contrast == 1}
-            icon="Undo"
-            onclick={() => {
-              contrast = 1;
-              syncVisualsAndRefresh();
-            }}
-          >
-            Contrast
-          </Button>
-          <input
-            type="range"
-            min="0"
-            max="10"
-            bind:value={contrast}
-            oninput={syncVisualsAndRefresh}
-            step="0.01"
-          />
+            Painting has stonecutter recipe
+          </Wiwicheckbox>
         </div>
-      </div>
-
-      <div class="more-options-section">
-        <span class="more-options-section-label">
-          <SquareIcon size="1.5em" />
-          Frame options
-        </span>
-        <Wiwicheckbox
-          bind:checked={disableFrame}
-          onclick={() => {
-            if (disableFrame) wrapper.cppPainting.useNoFrame();
-            else wrapper.cppPainting.useProceduralFrame();
-
-            wrapper.cachedPaintingJS = undefined;
-            updateCanvases();
-          }}
-        >
-          Disable frame
-        </Wiwicheckbox>
-
-        <div class="colour-container">
-          <Button
-            disabled={disableFrame}
-            onclick={() => colourPicker.showPicker()}
-          >
-            Frame colour
-            <div
-              style={`width: 15px; height: 15px; background: ${frameTint}; border-radius: 100%; border: 1px solid #ccc`}
-            ></div>
-          </Button>
-
-          <input
-            bind:this={colourPicker}
-            name="frame-colour"
-            type="color"
-            bind:value={frameTint}
-            oninput={syncVisualsAndRefresh}
-            onchange={syncVisualsAndRefresh}
-          />
-        </div>
-
-        <Button
-          disabled={disableFrame}
-          icon="Dices"
-          onclick={() => {
-            frameSeed =
-              "" + Math.floor(Number.MAX_SAFE_INTEGER * Math.random());
-            syncVisualsAndRefresh();
-          }}
-        >
-          Frame seed
-        </Button>
-      </div>
-
-      <div class="more-options-section">
-        <span class="more-options-section-label">
-          <WrenchIcon size="1.5em" />
-          Other options
-        </span>
-        <Wiwicheckbox bind:checked={placeable} onclick={syncMetadata}
-          >Painting is placeable</Wiwicheckbox
-        >
-        <Wiwicheckbox bind:checked={hasStonecutterRecipe} onclick={syncMetadata}
-          >Painting has stonecutter recipe</Wiwicheckbox
-        >
       </div>
     </div>
   {/if}
@@ -555,6 +701,8 @@
     cursor: pointer;
     background-color: #646cff;
     color: white;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .pill-inactive {
@@ -573,10 +721,6 @@
     align-items: stretch;
     gap: 10px;
     flex: 1;
-
-    /*& > * {
-      flex: 1;
-    }*/
   }
 
   .preview-container {
@@ -584,53 +728,71 @@
     flex-direction: column;
     align-items: center;
     gap: 8px;
+    justify-content: space-between;
+  }
+
+  .ratio-tabs-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    max-width: calc(330px + 10px);
+    height: 48px;
+  }
+
+  .chevron-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
     justify-content: center;
+    padding: 2px;
+    color: #666;
+    border-radius: 4px;
+    transition:
+      background-color 0.1s ease,
+      color 0.1s ease;
+  }
+
+  .chevron-btn:hover:not(:disabled) {
+    color: #333;
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .chevron-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .chevron-btn {
+      color: #aaa;
+    }
+    .chevron-btn:hover:not(:disabled) {
+      color: #fff;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
   }
 
   .ratio-tabs {
+    position: relative;
     width: 100%;
-    max-width: calc(256px + 10px);
+    min-width: 0;
     padding: 4px;
-    /*padding: 30px 4px 4px 4px;
-    margin-top: -26px;*/
+    flex: 1;
     display: flex;
-    justify-content: center;
-    overflow-x: scroll;
+    justify-content: safe center;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
     gap: 4px;
-    /*background: #f0f0f0;*/
     border-radius: 8px;
     z-index: 0;
   }
 
-  .ratio-tab {
-    background: transparent;
-    border: none;
-    padding: 4px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.85em;
-    font-weight: 600;
-    color: #666;
-    transition: all 0.1s ease;
-  }
-
-  .ratio-tab.active {
-    background: white;
-    color: #000;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .ratio-tabs {
-      /*background: #333;*/
-    }
-    .ratio-tab {
-      color: #aaa;
-    }
-    .ratio-tab.active {
-      background: #555;
-      color: #fff;
-    }
+  .ratio-tabs::-webkit-scrollbar {
+    display: none;
   }
 
   .more-options {
@@ -638,40 +800,6 @@
     flex-direction: column;
     gap: 10px;
     margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid #ccc;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .more-options {
-      border-top: 1px solid #555;
-    }
-  }
-
-  .more-options-section {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    font-size: 90%;
-  }
-
-  .more-options-section-label {
-    font-weight: 500;
-    color: #333;
-    width: 150px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .more-options-section-label {
-      color: #eee;
-    }
-  }
-
-  .colour-container {
-    position: relative;
   }
 
   input[type="color"] {
@@ -696,5 +824,94 @@
   .original-painting-actions {
     display: flex;
     gap: 10px;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+
+    & .header-right {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+  }
+
+  .inputs {
+    display: flex;
+    gap: 10px;
+  }
+
+  .extra-option-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 12px;
+
+    & .title {
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .extra-option-card {
+      border-color: #444;
+    }
+  }
+
+  .extra-option-card-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    & .section {
+      display: flex;
+
+      & .section-title {
+        width: 150px;
+      }
+
+      & .section-body {
+        flex: 1;
+      }
+    }
+  }
+
+  .section-sizes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .section-resolution {
+    display: flex;
+    align-items: center;
+
+    & input {
+      flex: 1;
+    }
+  }
+
+  .section-frame {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+
+    & .when-frame-enabled {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+  }
+
+  .section-brightness,
+  .section-contrast {
+    display: flex;
+    align-items: center;
   }
 </style>

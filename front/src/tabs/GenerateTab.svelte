@@ -237,12 +237,27 @@
 
     <ul class="pack-contents">
       {#if $paintingsStore.length > 0}
+        {@const totalRatios = $paintingsStore.reduce(
+          (sum, painting) => sum + painting.cppPainting.getRatios().length,
+          0,
+        )}
+        {@const oneSizePerPainting = $paintingsStore.every(
+          (painting) => painting.cppPainting.getRatios().length === 1,
+        )}
+
         <li class="pack-content-one">
           <span class="bold-section">
             <b>
               {$paintingsStore.length}
-              painting{$paintingsStore.length != 1 ? "s" : ""}
+              {$paintingsStore.length != 1 ? "paintings" : "painting"}
             </b>
+            {#if !oneSizePerPainting}
+              <span>
+                &middot;
+                {totalRatios}
+                {totalRatios === 1 ? "size" : "sizes"}
+              </span>
+            {/if}
             <br />
             <span>{$workspace.getPaintingsNamespaceOverride().get()}</span>
           </span>
@@ -425,6 +440,7 @@
 <style>
   .pill-container {
     display: flex;
+    flex-wrap: wrap;
     gap: 6px;
     margin: 0 10px;
     font-size: 85%;

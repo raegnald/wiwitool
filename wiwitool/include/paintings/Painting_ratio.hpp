@@ -10,8 +10,8 @@ class Painting_ratio {
 public:
   static const Painting_ratio nearest;
 
-  // static const std::vector<Painting_ratio> preferred;
-  static const std::vector<Painting_ratio> available;
+  static const std::vector<Painting_ratio> preferred;
+  static const std::vector<Painting_ratio> reasonable;
 
   // Constructors
 
@@ -22,6 +22,8 @@ public:
 
   template <typename T>
   Painting_ratio(std::pair<T, T> ratio) noexcept : ratio{ratio} { ensure_valid_ratio(); }
+
+  // Recommended painting ratio nearest to a specific width and height in pixels
 
   static Painting_ratio nearest_to(int width, int height) noexcept;
 
@@ -36,6 +38,13 @@ public:
   // Predicates
 
   bool using_nearest_ratio(void) const noexcept;
+
+  static inline bool is_valid(int x, int y) {
+    const bool valid_width = x > 0 and x < MAX_SIDE_SIZE,
+               valid_height = y > 0 and y < MAX_SIDE_SIZE;
+
+    return valid_width and valid_height;
+  }
 
   // Comparison and equality
 
@@ -56,6 +65,7 @@ public:
 
 private:
   using Ratio = std::pair<size_t, size_t>;
+
   static constexpr Ratio nearest_ratio{0, 0};
   static constexpr size_t MAX_SIDE_SIZE = 16; // in units of Minecraft blocks
 

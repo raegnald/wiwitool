@@ -4,14 +4,13 @@
   import Button from "../components/Button.svelte";
 
   export let title: string, author: string;
-  export let showMoreOptions: boolean;
 
   export let onMetadataChange: (e?: Event) => void = () => {};
 </script>
 
 <div class="wrapper">
   <div class="transformation-ratio-selection">
-    <div class="inputs">
+    <!-- <div class="inputs">
       <label>
         <TextCursorIcon />
         <span>Title</span>
@@ -32,10 +31,10 @@
           onchange={onMetadataChange}
         />
       </label>
-    </div>
+    </div> -->
 
     <img class="rightarrow" src="rightarrow.svg" alt="Right arrow" />
-
+    <!--
     <Button
       secondary
       hugeBorder={showMoreOptions}
@@ -43,7 +42,7 @@
       icon="Cog"
     >
       More options
-    </Button>
+    </Button> -->
   </div>
 </div>
 
