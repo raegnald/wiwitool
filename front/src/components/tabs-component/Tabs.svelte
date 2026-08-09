@@ -158,13 +158,15 @@
     border: none;
     cursor: pointer;
     border-radius: 0;
-    border: 2px solid transparent;
+    border: 1px solid transparent;
+    outline: 1px solid transparent;
     border-radius: 23px;
   }
   button.active {
     color: hsl(237 100% 55.5%);
     opacity: 1;
-    border: 2px solid #646cff;
+    border: 1px solid #646cff;
+    outline: 1px solid #646cff;
     background-color: #f7f8ff;
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.05);
   }
