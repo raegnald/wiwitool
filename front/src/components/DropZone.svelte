@@ -98,6 +98,7 @@
     display: block;
     width: 100%;
     cursor: default;
+    box-sizing: border-box;
     border: 2px dashed #aaa;
     border-radius: 12px;
     text-align: center;
