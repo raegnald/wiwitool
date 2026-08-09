@@ -28,6 +28,7 @@
 <style>
   .field {
     position: relative;
+    display: inline-block;
   }
 
   span {
