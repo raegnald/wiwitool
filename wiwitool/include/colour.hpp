@@ -22,6 +22,8 @@ struct rgba {
   rgba(hsv);
 
   static rgba blend(rgba, rgba, float t = 0.5);
+
+  bool operator==(const rgba other) const;
 };
 
 struct hsv {
@@ -42,4 +44,6 @@ struct hsv {
   hsv &operator=(hsv &&) = default;
 
   hsv(rgba);
+
+  bool operator==(const hsv other) const;
 };

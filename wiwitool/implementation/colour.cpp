@@ -73,3 +73,11 @@ rgba rgba::blend(rgba ca, rgba cb, float t) {
 
   return rgba{r, g, b, a};
 }
+
+bool rgba::operator==(const rgba other) const {
+  return r == other.r and g == other.g and b == other.b and a == other.a;
+}
+
+bool hsv::operator==(const hsv other) const {
+  return h == other.h and s == other.s and v == other.v and a == other.a;
+}
