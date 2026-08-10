@@ -27,7 +27,7 @@
     ...props
   } = $props();
 
-  let Icon = $derived(icons[icon]);
+  let Icon = $derived((icons as Record<string, any>)[icon]);
 
   let buttonType: "primary" | "secondary" | "transparent" | "destructive" =
     $derived(
@@ -140,8 +140,7 @@
 
   /* Primary buttons */
 
-  button.primary {
-  }
+  /* button.primary {} */
 
   /* Huge border for all button types */
 
@@ -198,8 +197,7 @@
     }
   }
 
-  button.normal {
-  }
+  /* button.normal {} */
 
   /* Icon buttons */
 
@@ -249,6 +247,9 @@
     background: conic-gradient(from var(--angle), #646cff, #aaa, #aaa, #646cff);
 
     /* Use a mask to cut out the middle, leaving ONLY the gradient border visible */
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
       linear-gradient(#fff 0 0);

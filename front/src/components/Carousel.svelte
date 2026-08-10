@@ -5,7 +5,7 @@
   export interface CarouselItem {
     image?: string;
     alt?: string;
-    content: Snippet;
+    content: any;
   }
 
   let {

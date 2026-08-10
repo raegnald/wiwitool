@@ -8,7 +8,7 @@
 
   export let resetApp: () => void;
 
-  const selectedTab = writable(null);
+  const selectedTab = writable<string | null>(null);
   const tabs: Writable<TabInfo[]> = writable([]);
 
   let homeDialog: HTMLDialogElement;

@@ -11,7 +11,7 @@
     ...props
   } = $props();
 
-  let Icon = $derived(icons[icon]);
+  let Icon = $derived((icons as Record<string, any>)[icon]);
 
   function clickfun(event: MouseEvent) {
     if (!disabled) onclick(event);

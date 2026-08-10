@@ -94,10 +94,4 @@
     flex-direction: column;
     gap: 5px;
   }
-
-  .actions-pack {
-    display: flex;
-    flex-direction: row;
-    gap: 5px;
-  }
 </style>
