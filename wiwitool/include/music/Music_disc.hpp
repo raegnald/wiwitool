@@ -88,7 +88,7 @@ public:
 
   std::vector<uint8_t> encode_ogg(void); // trimmed
 
-  Image_data get_disc_item_image(void);
+  Image_data get_disc_item_image(void) const;
 
   // Serialisation
 

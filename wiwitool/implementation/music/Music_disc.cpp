@@ -261,31 +261,34 @@ Music_disc::internal_vorbis_encode(const std::vector<float> &left,
   return out_data;
 }
 
-Image_data Music_disc::get_disc_item_image(void) {
-  constexpr auto blend = 0.25;
+Image_data Music_disc::get_disc_item_image(void) const {
+  static const std::vector<std::filesystem::path> asset_candidates = {
+      "wiwitool/assets", "assets", "."};
 
   if (cover.empty())
-    return Image_data{"disc.png"};
+    return Image_data{"disc.png", asset_candidates};
 
-  auto cover_mask = Image_data{"disc-mask.png"};
-
+  static const auto cover_mask = Image_data{"disc-mask.png", asset_candidates};
   const auto downscaled = cover.scale(cover_mask.width(), cover_mask.height());
+  auto out{cover_mask};
 
-  for (size_t y = 0; y < cover_mask.height(); y++) {
-    for (size_t x = 0; x < cover_mask.width(); x++) {
-      if (cover_mask.at(x, y).a != 0) {
-        const auto m = cover_mask.at(x, y);
-        const auto d = downscaled.at(x, y);
+  static constexpr auto blend_amount = 0.25; // in [0, 1] range
+  static const auto full_mask = rgba{255, 255, 255, 255};
 
-        const bool should_skip =
-            m.r == 255 and m.b == 255 and m.g == 255 and m.a == 255;
+  out.foreach ([&downscaled](size_t x, size_t y, auto &pixel) {
+    if (pixel.a == 0)
+      return;
 
-        cover_mask.at(x, y) = should_skip ? d : rgba::blend(m, d, blend);
-      }
-    }
-  }
+    const auto cover_pixel = downscaled.at(x, y);
+    const bool should_copy = pixel == full_mask;
 
-  return cover_mask;
+    if (should_copy)
+      pixel = cover_pixel;
+    else // should blend
+      pixel = rgba::blend(pixel, cover_pixel, blend_amount);
+  });
+
+  return out;
 }
 
 void to_json(nlohmann::json &j, const Music_disc &d) {
