@@ -28,7 +28,8 @@
 <style>
   .field {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
   }
 
   span {
@@ -43,12 +44,35 @@
 
   input {
     padding: 0.6rem 0.8rem;
-    border: 1px solid #ccc;
     font: inherit;
     background-color: transparent;
     border-radius: 0;
     border: none;
     border-bottom: 1px solid #ccc;
+  }
+
+  input[type="range"] {
+    border-bottom: none;
+    margin: 0;
+    padding: 0;
+    background-color: revert;
+  }
+
+  input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: #646cff;
+    margin-top: -6px;
+    cursor: pointer;
   }
 
   input:focus {
