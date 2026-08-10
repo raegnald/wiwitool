@@ -55,18 +55,28 @@ public:
       nlohmann::json result = nlohmann::json::array();
 
       for (const auto &p : workspace->get_paintings()) {
-        result.push_back({{"id", p->string_id()},
-                          {"title", p->get_title()},
-                          {"author", p->get_author()},
-                          {"cropX", p->get_crop_x()},
-                          {"cropY", p->get_crop_y()},
-                          {"cropW", p->get_crop_w()},
-                          {"cropH", p->get_crop_h()},
-                          {"contrast", p->get_contrast()},
-                          {"brightness", p->get_brightness()},
-                          {"placeable", p->is_placeable()},
-                          {"hasStonecutterRecipe", p->has_stonecutter_recipe()},
-                          {"pixelPerBlock", p->get_pixels_per_block()}});
+        nlohmann::json item = {{"id", p->string_id()},
+                               {"title", p->get_title()},
+                               {"author", p->get_author()},
+                               {"cropX", p->get_crop_x()},
+                               {"cropY", p->get_crop_y()},
+                               {"cropW", p->get_crop_w()},
+                               {"cropH", p->get_crop_h()},
+                               {"contrast", p->get_contrast()},
+                               {"brightness", p->get_brightness()},
+                               {"placeable", p->is_placeable()},
+                               {"hasStonecutterRecipe", p->has_stonecutter_recipe()},
+                               {"pixelPerBlock", p->get_pixels_per_block()},
+                               {"isProceduralFrame", p->is_frame_procedural()}};
+        if (p->is_frame_procedural()) {
+          auto settings = p->get_procedural_settings();
+          if (settings) {
+            auto t = settings->get_tint();
+            item["frameSeed"] = std::to_string(settings->get_seed());
+            item["tintHex"] = std::format("#{:02x}{:02x}{:02x}", t.r, t.g, t.b);
+          }
+        }
+        result.push_back(item);
       }
 
       return result.dump();
@@ -148,10 +158,20 @@ public:
 
           workspace->add_painting(p);
 
-          return nlohmann::json({{"id", p->string_id()},
-                                 {"title", p->get_title()},
-                                 {"author", p->get_author()}})
-              .dump();
+          nlohmann::json res = {{"id", p->string_id()},
+                                {"title", p->get_title()},
+                                {"author", p->get_author()},
+                                {"isProceduralFrame", p->is_frame_procedural()}};
+          if (p->is_frame_procedural()) {
+            auto settings = p->get_procedural_settings();
+            if (settings) {
+              auto t = settings->get_tint();
+              res["frameSeed"] = std::to_string(settings->get_seed());
+              res["tintHex"] = std::format("#{:02x}{:02x}{:02x}", t.r, t.g, t.b);
+            }
+          }
+
+          return res.dump();
         });
 
     webview->expose("workspace_add_painting_from_bytes",
@@ -165,10 +185,21 @@ public:
                                             : hires;
                       auto p = std::make_shared<Painting>(downscaled);
                       workspace->add_painting(p);
-                      return nlohmann::json({{"id", p->string_id()},
-                                             {"title", p->get_title()},
-                                             {"author", p->get_author()}})
-                          .dump();
+
+                      nlohmann::json res = {{"id", p->string_id()},
+                                            {"title", p->get_title()},
+                                            {"author", p->get_author()},
+                                            {"isProceduralFrame", p->is_frame_procedural()}};
+                      if (p->is_frame_procedural()) {
+                        auto settings = p->get_procedural_settings();
+                        if (settings) {
+                          auto t = settings->get_tint();
+                          res["frameSeed"] = std::to_string(settings->get_seed());
+                          res["tintHex"] = std::format("#{:02x}{:02x}{:02x}", t.r, t.g, t.b);
+                        }
+                      }
+
+                      return res.dump();
                     });
 
     webview->expose("workspace_remove_painting",

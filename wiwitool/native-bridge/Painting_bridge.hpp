@@ -241,6 +241,7 @@ public:
                   settings->set_tint({r, g, b, 255});
                 } catch (...) {}
               }
+              p->invalidate_cache();
             }
           }
         });

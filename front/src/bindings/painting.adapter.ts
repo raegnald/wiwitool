@@ -230,6 +230,12 @@ export class NativePainting implements IPainting {
         this._hasStonecutterRecipe = metadata.hasStonecutterRecipe;
       if (metadata.pixelPerBlock !== undefined)
         this._pixelPerBlock = metadata.pixelPerBlock;
+      if (metadata.isProceduralFrame !== undefined)
+        this._isProceduralFrame = Boolean(metadata.isProceduralFrame);
+      if (metadata.frameSeed !== undefined)
+        this._frameSeed = String(metadata.frameSeed);
+      if (metadata.tintHex !== undefined)
+        this._frameTint = metadata.tintHex;
     }
   }
 
