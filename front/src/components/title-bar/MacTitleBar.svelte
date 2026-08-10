@@ -141,10 +141,13 @@
     font-size: 13px;
     font-weight: normal;
     z-index: 10000;
-    transition: border-color 200ms ease;
+    transition:
+      background 200ms ease,
+      border-color 200ms ease;
   }
 
   .mac-titlebar.main-content-scrolled {
+    background-color: white;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
@@ -250,8 +253,11 @@
       border-bottom-color: rgba(0, 0, 0, 0.12);
     }
 
+    .mac-titlebar.main-content-scrolled.inactive:not(:hover) .mac-btn {
+      background-color: #dcdcdc;
+    }
+
     .mac-titlebar.inactive:not(:hover) .mac-btn {
-      /*background-color: #dcdcdc;*/
       background-color: #dede6f;
       border: 0.25px solid rgba(0, 0, 0, 0.12);
     }
