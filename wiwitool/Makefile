@@ -1,112 +1,130 @@
 # --- Configuration ---
 
-# Compilers
 CXX_NATIVE := clang++
-CXX_WASM   := em++
 AR_NATIVE  := ar
+CXX_WASM   := em++
 AR_WASM    := emar
 
 DEBUG_FLAG ?= -DWIWIDEBUG
 BUILD_FLAGS ?= -g
 
-# Flags common to all build targets
-CPPFLAGS := -Iinclude -Iexternal/json/include -Iexternal/stb -Iexternal/miniz_cpp $(DEBUG_FLAG)
-CXXFLAGS := -Wall -std=c++23 $(BUILD_FLAGS) $(CPPFLAGS)
-
-# Native-specific flags
-# Note: vorbisenc is needed specifically for vorbis_encode_init_vbr
-NATIVE_PKG_FLAGS := $(shell pkg-config --cflags vorbisenc vorbis ogg)
-CXXFLAGS_NATIVE  := $(CXXFLAGS) $(NATIVE_PKG_FLAGS)
-
-# WASM-specific flags (emscripten)
-WASM_PORT_FLAGS := -s USE_VORBIS=1 -s USE_OGG=1 --bind -DEMSCRIPTEN
-CXXFLAGS_WASM   := $(CXXFLAGS) $(WASM_PORT_FLAGS) -O3 -flto -fexceptions
-
-# Directories
 SRC_DIR    := implementation
-WASM_SRC   := wasm
 ASSETS_DIR := assets/
 BUILD_DIR  := build
 
-# Source files
+SAUCER_BUILD_DIR := $(BUILD_DIR)/saucer
+SAUCER_LIB       := $(SAUCER_BUILD_DIR)/libsaucer.a
+
+SAUCER_INCLUDES  := -Iexternal/saucer/include \
+                    -Iexternal/saucer/private \
+                    -Iexternal/saucer/private/saucer \
+                    -I$(SAUCER_BUILD_DIR)/_deps/glaze-src/include \
+                    -I$(SAUCER_BUILD_DIR)/_deps/saucer-fill-src/include \
+                    -I$(SAUCER_BUILD_DIR)/_deps/functional-src/include \
+                    -I$(SAUCER_BUILD_DIR)/_deps/saucer-embed-src/include \
+                    -I$(SAUCER_BUILD_DIR)/_deps/ereignis-src/include \
+                    -I$(SAUCER_BUILD_DIR)/_deps/coco-src/include \
+                    -I$(SAUCER_BUILD_DIR)/_deps/flagpp-src/include \
+                    -I$(SAUCER_BUILD_DIR)/_deps/lockpp-src/include \
+                    -I$(SAUCER_BUILD_DIR)/_deps/rebind-src/include \
+                    -I$(SAUCER_BUILD_DIR)/_deps/polo-src/include \
+                    -DFILL_NAMESPACE=std -DSAUCER_WEBKIT -DSAUCER_WEBKIT_PRIVATE
+
+SAUCER_LIBS      := $(SAUCER_BUILD_DIR)/libsaucer.a \
+                    $(SAUCER_BUILD_DIR)/_deps/coco-build/libcoco.a
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+  PLATFORM_LDFLAGS := -framework WebKit -framework Cocoa -framework CoreGraphics -framework AppKit
+else ifeq ($(UNAME_S),Linux)
+  PLATFORM_LDFLAGS := $(shell pkg-config --libs webkit2gtk-4.1 2>/dev/null || pkg-config --libs webkit2gtk-4.0 2>/dev/null)
+else
+  # Windows
+  PLATFORM_LDFLAGS := -lWebView2Loader
+endif
+
+NATIVE_PKG_FLAGS := $(shell pkg-config --cflags vorbisenc vorbis ogg)
+NATIVE_PKG_LIBS  := $(shell pkg-config --libs vorbisenc vorbis ogg)
+
+CPPFLAGS := -Iinclude -Inative-bridge -Iexternal/json/include -Iexternal/stb -Iexternal/miniz_cpp -Iexternal/pfd $(SAUCER_INCLUDES) $(DEBUG_FLAG)
+CXXFLAGS := -Wall -std=c++23 $(BUILD_FLAGS) $(CPPFLAGS) $(NATIVE_PKG_FLAGS)
+
+WASM_PORT_FLAGS := -s USE_VORBIS=1 -s USE_OGG=1 --bind -DEMSCRIPTEN
+CXXFLAGS_WASM   := -Wall -std=c++23 $(BUILD_FLAGS) -Iinclude -Iexternal/json/include -Iexternal/stb -Iexternal/miniz_cpp $(DEBUG_FLAG) $(WASM_PORT_FLAGS) -O3 -flto -fexceptions
+
 SRCS       := $(shell find $(SRC_DIR) -type f -name '*.cpp')
 
-# External object files
 EXT_OBJS   := external/json/json.o            \
               external/stb/stb_image.o        \
               external/stb/stb_image_write.o  \
               external/stb/stb_perlin.o       \
               external/stb/stb_vorbis.o
 
-# --- Targets ---
+NATIVE_OBJ_DIR := $(BUILD_DIR)/native
+NATIVE_OBJS    := $(patsubst $(SRC_DIR)/%.cpp, $(NATIVE_OBJ_DIR)/%.o, $(SRCS))
+NATIVE_LIB     := $(NATIVE_OBJ_DIR)/libwiwi.a
+DESKTOP_TARGET := $(BUILD_DIR)/wiwitool_desktop
 
-.PHONY: all native wasm clean flags
+WASM_OBJ_DIR := $(BUILD_DIR)/wasm
+WASM_OBJS    := $(patsubst $(SRC_DIR)/%.cpp, $(WASM_OBJ_DIR)/%.o, $(SRCS))
+WASM_TARGET  := $(WASM_OBJ_DIR)/wiwitool.js
 
-all: native wasm
+.PHONY: all native desktop wasm saucer clean flags
 
-# Create build directories
+all: desktop wasm
+
 $(BUILD_DIR)/native:
 	mkdir -p $@
 
 $(BUILD_DIR)/wasm:
 	mkdir -p $@
 
-# ==========================================
-# FLAGS GENERATION (compile_flags.txt)
-# ==========================================
+saucer: $(SAUCER_LIB)
+
+$(SAUCER_LIB):
+	@echo "--- Configuring & Building Saucer ---"
+	mkdir -p $(SAUCER_BUILD_DIR)
+	cmake -B $(SAUCER_BUILD_DIR) -S external/saucer -Dsaucer_no_compiler_version_check=ON -Dsaucer_examples=OFF -Dsaucer_tests=OFF
+	cmake --build $(SAUCER_BUILD_DIR)
 
 flags: compile_flags.txt
 
 compile_flags.txt: Makefile
 	@echo "--- Generating compile_flags.txt ---"
-	@# We use the NATIVE flags here so clangd can find the libvorbis headers on the host machine
-	@echo "$(CXXFLAGS_NATIVE)" | tr ' ' '\n' > compile_flags.txt
+	@echo "$(CXXFLAGS)" | tr ' ' '\n' > compile_flags.txt
 
-# ==========================================
-# NATIVE BUILD (Static Library .a)
-# ==========================================
-
-# Location for native objects
-NATIVE_OBJ_DIR := $(BUILD_DIR)/native
-NATIVE_OBJS    := $(patsubst $(SRC_DIR)/%.cpp, $(NATIVE_OBJ_DIR)/%.o, $(SRCS))
-NATIVE_TARGET  := $(NATIVE_OBJ_DIR)/libwiwi.a
-
-# Added 'compile_flags.txt' as a dependency here
 native: $(BUILD_DIR)/native compile_flags.txt
-	@echo "--- Building Native ---"
+	@echo "--- Building Native Library ---"
+	$(MAKE) -C external clean
 	$(MAKE) -C external CXX=$(CXX_NATIVE) AR=$(AR_NATIVE)
-	$(MAKE) $(NATIVE_TARGET)
+	$(MAKE) $(NATIVE_LIB)
 
-# Compile native objects
 $(NATIVE_OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX_NATIVE) $(CXXFLAGS_NATIVE) -c $< -o $@
+	$(CXX_NATIVE) $(CXXFLAGS) -c $< -o $@
 
-# Rule to create the static library archive
-$(NATIVE_TARGET): $(NATIVE_OBJS)
+$(NATIVE_LIB): $(NATIVE_OBJS)
 	$(AR_NATIVE) rcs $@ $(NATIVE_OBJS) $(EXT_OBJS)
 	@echo "Native lib created at: $@"
 
-# ==========================================
-# WASM BUILD (Module .js/.wasm)
-# ==========================================
-
-# Location for wasm objects
-WASM_OBJ_DIR := $(BUILD_DIR)/wasm
-WASM_OBJS    := $(patsubst $(SRC_DIR)/%.cpp, $(WASM_OBJ_DIR)/%.o, $(SRCS))
-WASM_TARGET  := $(WASM_OBJ_DIR)/wiwitool.js
+desktop: native saucer
+	@echo "--- Building Native Desktop Application ---"
+	$(CXX_NATIVE) $(CXXFLAGS) desktop_main.cpp $(NATIVE_LIB) $(EXT_OBJS) $(SAUCER_LIBS) $(NATIVE_PKG_LIBS) $(PLATFORM_LDFLAGS) -o $(DESKTOP_TARGET)
+	@echo "Native Desktop binary created at: $(DESKTOP_TARGET)"
 
 wasm: $(BUILD_DIR)/wasm
 	@echo "--- Building WebAssembly ---"
+	$(MAKE) -C external clean
 	$(MAKE) -C external CXX=$(CXX_WASM) AR=$(AR_WASM)
 	$(MAKE) $(WASM_TARGET)
+	@mkdir -p ../front/public/wasm
+	cp $(WASM_OBJ_DIR)/wiwitool.js $(WASM_OBJ_DIR)/wiwitool.wasm $(WASM_OBJ_DIR)/wiwitool.data ../front/public/wasm/
+	@echo "WASM module created and copied to front/public/wasm/"
 
-# Compile WASM objects (from implementation/)
 $(WASM_OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX_WASM) $(CXXFLAGS_WASM) -c $< -o $@
 
-# Link everything into the final WASM module
 $(WASM_TARGET): $(WASM_OBJS)
 	$(CXX_WASM) $(CXXFLAGS_WASM) \
 		$(WASM_OBJS) \
@@ -120,11 +138,7 @@ $(WASM_TARGET): $(WASM_OBJS)
 		-s MODULARIZE=1 \
 		-s EXPORT_NAME='createWiwitoolModule' \
 		-s EXPORTED_RUNTIME_METHODS='["FS", "getExceptionMessage"]' \
-		--emit-tsd 'wiwitool.d.ts' \
 		--preload-file $(ASSETS_DIR)@/
-	@echo "WASM module created at: $@"
-
-# --- Cleaning ---
 
 clean:
 	rm -rf $(BUILD_DIR)

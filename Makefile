@@ -1,36 +1,34 @@
-.PHONY: all
+.PHONY: all desktop wasm front clean run-dev run-desktop run-dev-front
 
 export DEBUG_FLAG ?= -DWIWIDEBUG
 export BUILD_FLAGS ?= -g
 
-all: front-dependencies
+all: desktop wasm front
 
-library:
+wasm:
 	$(MAKE) -C wiwitool wasm
 
-clean-library:
-	$(MAKE) -C wiwitool clean
-
-front-dependencies: library
-	mkdir -p front/public/wasm front/src/bindings
+	mkdir -p front/public/wasm front/src/bindings/wasm
 	cp wiwitool/build/wasm/wiwitool.js front/public/wasm/
 	cp wiwitool/build/wasm/wiwitool.wasm front/public/wasm/
 	cp wiwitool/build/wasm/wiwitool.data front/public/wasm/
-	cp wiwitool/build/wasm/*.ts front/src/bindings/
+	cp wiwitool/build/wasm/*.ts front/src/bindings/wasm/
 
-# Debug
+desktop:
+	$(MAKE) -C wiwitool desktop
 
-run-dev: front-dependencies
+front: wasm
+	cd front && npm run build
+
+run-dev: wasm
 	cd front && npm run dev
 
-# Release
+run-desktop: desktop
+	./wiwitool/build/wiwitool_desktop
+
+clean:
+	$(MAKE) -C wiwitool clean
 
 release: export DEBUG_FLAG =
 release: export BUILD_FLAGS = -O3
-release:
-	$(MAKE) clean-library
-	$(MAKE) front-dependencies
-	cd front && npm run build
-
-run-release: release
-	cd front/dist/ && python3 -m http.server 8080
+release: clean wasm front desktop
