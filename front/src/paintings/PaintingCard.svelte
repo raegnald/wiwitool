@@ -803,7 +803,12 @@
     margin-top: 15px;
   }
 
-  input[type="color"] {
+  .colour-container {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .colour-container input[type="color"] {
     position: absolute;
     opacity: 0;
     top: 0;
