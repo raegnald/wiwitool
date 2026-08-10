@@ -98,8 +98,8 @@ void Minecraft_pack::compress_genpath(std::filesystem::path packs_zip) {
 
   miniz_cpp::zip_file zip;
 
-  zip.write(datapack_zip.string());
-  zip.write(respack_zip.string());
+  zip.write(datapack_zip.string(), "datapack.zip");
+  zip.write(respack_zip.string(), "respack.zip");
 
   // Add import file when it exists
   if (std::filesystem::exists(genpath / Serialiser::import_filename)) {

@@ -5,14 +5,12 @@
 
 #include <cstddef>
 #include <filesystem>
-#include <memory>
-#include <print>
-#include <string>
 
 #ifdef EMSCRIPTEN
 std::filesystem::path Minecraft_packer::root_genpath = "/packer";
 #else
-std::filesystem::path Minecraft_packer::root_genpath = std::filesystem::temp_directory_path();
+std::filesystem::path Minecraft_packer::root_genpath =
+    std::filesystem::temp_directory_path() / "wiwitool";
 #endif
 
 void Minecraft_packer::add(Minecraft_pack &pack) {
@@ -23,6 +21,7 @@ std::filesystem::path Minecraft_packer::get_zip(void) {
   const auto zippath = root_genpath / "wiwipacks.zip";
 
   std::filesystem::create_directories(root_genpath);
+  Minecraft_pack::genpath = root_genpath;
 
   // We will suppose no two packs produce the same file. Otherwise,
   // this simplistic approach totally breaks apart!

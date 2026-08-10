@@ -43,8 +43,10 @@ Image_data frame(const Painting_frame_generator &frame_generator,
 }
 
 Image_data miniature_frame(Image_data image) {
-  static const std::filesystem::path frames_directory{"frames/"};
-  static const auto frame_data = Image_data{frames_directory / "painting.png"};
+  static const std::vector<std::filesystem::path> frame_candidates = {
+      "wiwitool/assets/frames", "assets/frames", "frames", "."};
+
+  static const auto frame_data = Image_data{"painting.png", frame_candidates};
   constexpr auto x0 = 3, y0 = 5;
 
   Image_data out{frame_data};

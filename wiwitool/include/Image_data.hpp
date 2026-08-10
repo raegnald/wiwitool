@@ -18,7 +18,8 @@ public:
 
   Image_data(void) = default; // empty image (width == 0 and height == 0)
   Image_data(size_t w, size_t h);
-  Image_data(std::filesystem::path filepath);
+  Image_data(std::filesystem::path filepath,
+             std::vector<std::filesystem::path> directory_candidates = {"."});
   Image_data(std::vector<uint8_t> data);
 
   ~Image_data(void) = default;
@@ -32,10 +33,16 @@ public:
   Image_data &operator=(Image_data &&other) noexcept = default;
 
   // Image attributes
-  inline std::filesystem::path path(void) const noexcept { return path_; };
-  inline std::pair<size_t, size_t> size(void) const noexcept { return {width_, height_}; }
+  inline std::filesystem::path path(void) const noexcept { return path_; }
+
+  inline std::pair<size_t, size_t> size(void) const noexcept {
+    return {width_, height_};
+  }
+
   inline size_t width(void) const noexcept { return width_; }
+
   inline size_t height(void) const noexcept { return height_; }
+
   inline size_t channels(void) const noexcept { return channels_; }
 
   // Predicates
@@ -46,13 +53,58 @@ public:
   const Pixel &at(size_t x, size_t y) const;
 
   inline Pixel *data(void) noexcept { return data_.get(); }
+
   inline const Pixel *data(void) const noexcept { return data_.get(); }
 
   // Image manipulation
 
   // Pixelwise manipulation
-  template <typename Fun> void foreach(Fun f);
-  template <typename Fun> void foreach(Fun f) const;
+
+  template <typename Fun> inline void foreach (Fun f) {
+    constexpr bool x_y_pixel = std::is_invocable_v<Fun, size_t, size_t, Pixel &>;
+    constexpr bool x_y = std::is_invocable_v<Fun, size_t, size_t>;
+    constexpr bool pixel_only = std::is_invocable_v<Fun, Pixel &>;
+
+    for (size_t y = 0; y < height(); ++y) {
+      for (size_t x = 0; x < width(); ++x) {
+        auto &pixel = at(x, y);
+
+        if constexpr (x_y_pixel)
+          f(x, y, pixel);
+        else if constexpr (x_y)
+          f(x, y);
+        else if constexpr (pixel_only)
+          f(pixel);
+        else
+          static_assert(x_y_pixel or x_y or pixel_only,
+                        "for_each_pixel(f) requires f(pixel &), f(size_t, "
+                        "size_t, pixel &), f(size_t, size_t)");
+      }
+    }
+  }
+
+  template <typename Fun> inline void foreach (Fun f) const {
+    constexpr bool x_y_pixel = std::is_invocable_v<Fun, size_t, size_t, Pixel>;
+    constexpr bool x_y = std::is_invocable_v<Fun, size_t, size_t>;
+    constexpr bool pixel_only = std::is_invocable_v<Fun, Pixel>;
+
+    for (size_t y = 0; y < height(); ++y) {
+      for (size_t x = 0; x < width(); ++x) {
+        const auto pixel = at(x, y);
+
+        if constexpr (x_y_pixel)
+          f(x, y, pixel);
+        else if constexpr (x_y)
+          f(x, y);
+        else if constexpr (pixel_only)
+          f(pixel);
+        else
+          static_assert(x_y_pixel or x_y or pixel_only,
+                        "for_each_pixel(f) requires f(pixel), f(size_t, "
+                        "size_t, pixel), f(size_t, size_t)");
+      }
+    }
+  }
 
   // Nearest-neighbour scaling
   [[nodiscard]] Image_data scale(float factor) const;
@@ -79,7 +131,8 @@ public:
     return adjust_contrast_brightness(contrast_factor, 0);
   }
 
-  [[nodiscard]] Image_data inline adjust_brightness(float brightness_shift) const {
+  [[nodiscard]] Image_data inline adjust_brightness(
+      float brightness_shift) const {
     return adjust_contrast_brightness(1.0f, brightness_shift);
   }
 

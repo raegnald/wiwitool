@@ -54,7 +54,8 @@ Image_data Painting::painting_data(Painting_ratio ratio) const {
   if (not paintings.contains(ratio)) {
     wiwidebug {
       const auto [w, h] = ratio.sizes();
-      std::println("Painting {} does not have ratio {}x{}", painting_id, w, h);
+      std::println("Painting {} does not have the requested ratio {}x{}",
+                   painting_id, w, h);
     }
 
     return Image_data{};
@@ -142,7 +143,6 @@ bool Painting::is_frame_nonexistent(void) const {
   return std::holds_alternative<No_frame_generator>(frame_generator);
 }
 
-
 void to_json(nlohmann::json &j, const Painting &p) {
   j = nlohmann::json{{"id", p.painting_id},
                      {"title", p.title},
@@ -208,7 +208,6 @@ void from_json(const nlohmann::json &j, Painting &p) {
   p.refresh();
 }
 
-
 #ifdef EMSCRIPTEN
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
@@ -230,7 +229,8 @@ EMSCRIPTEN_BINDINGS(painting) {
       .constructor(optional_override([](emscripten::val js_array) {
         size_t length = js_array["length"].as<size_t>();
         std::vector<uint8_t> vec(length);
-        emscripten::val memory_view = emscripten::val(emscripten::typed_memory_view(length, vec.data()));
+        emscripten::val memory_view =
+            emscripten::val(emscripten::typed_memory_view(length, vec.data()));
         memory_view.call<void>("set", js_array);
 
         Image_data hires{std::move(vec)};
@@ -292,16 +292,19 @@ EMSCRIPTEN_BINDINGS(painting) {
       .function("originalData", &Painting::original_data)
       .function("croppedOriginalData", &Painting::cropped_original_data)
       .function("iconData", &Painting::icon_data)
-      .function("paintingData", +[](const Painting &self, std::string ratio_str) {
-        return self.painting_data(Painting_ratio::from_string(ratio_str));
-      })
+      .function(
+          "paintingData",
+          +[](const Painting &self, std::string ratio_str) {
+            return self.painting_data(Painting_ratio::from_string(ratio_str));
+          })
 
       // Transformations
       .function("rotateClockwise", &Painting::rotate_clockwise)
       .function("rotateAnticlockwise", &Painting::rotate_anticlockwise)
 
       .property("contrast", &Painting::get_contrast, &Painting::set_contrast)
-      .property("brightness", &Painting::get_brightness, &Painting::set_brightness)
+      .property("brightness", &Painting::get_brightness,
+                &Painting::set_brightness)
 
       .function("useProceduralFrame", &Painting::use_procedural_frame)
       .function("useNoFrame", &Painting::use_no_frame)

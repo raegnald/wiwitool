@@ -175,6 +175,7 @@ std::filesystem::path Wiwiworkspace::generate_zip(void) {
   wiwidebug print_memory_stats("Start generate_zip");
 
   export_count++;
+  std::filesystem::create_directories(Minecraft_pack::genpath);
   Serialiser::serialise(serialise());
 
   wiwidebug print_memory_stats("After workspace serialisation");

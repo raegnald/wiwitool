@@ -13,18 +13,14 @@
 
 const Painting_ratio Painting_ratio::nearest{Painting_ratio::nearest_ratio};
 
-const std::vector<Painting_ratio> Painting_ratio::preferred {
-  {1, 1}, {1, 2},
-  {2, 1}, {2, 2}, {2, 3}, {2, 4},
-  {3, 2}, {3, 3}, {3, 4},
-  {4, 2}, {4, 3}, {4, 4},
+const std::vector<Painting_ratio> Painting_ratio::preferred{
+    {1, 1}, {1, 2}, {2, 1}, {2, 2}, {2, 3}, {2, 4},
+    {3, 2}, {3, 3}, {3, 4}, {4, 2}, {4, 3}, {4, 4},
 };
 
-const std::vector<Painting_ratio> Painting_ratio::reasonable {
-  {1, 1}, {1, 2}, {1, 3}, {1, 4},
-  {2, 1}, {2, 2}, {2, 3}, {2, 4},
-  {3, 1}, {3, 2}, {3, 3}, {3, 4},
-  {4, 1}, {4, 2}, {4, 3}, {4, 4},
+const std::vector<Painting_ratio> Painting_ratio::reasonable{
+    {1, 1}, {1, 2}, {1, 3}, {1, 4}, {2, 1}, {2, 2}, {2, 3}, {2, 4},
+    {3, 1}, {3, 2}, {3, 3}, {3, 4}, {4, 1}, {4, 2}, {4, 3}, {4, 4},
 };
 
 Painting_ratio Painting_ratio::nearest_to(int width, int height) noexcept {
@@ -69,10 +65,14 @@ Painting_ratio parse_ratio_old_format(std::string s) {
   // and 2x1 as "TWO_ONE".
 
   constexpr auto str_value = [](const std::string &str) -> size_t {
-    if (str == "ONE")   return 1;
-    if (str == "TWO")   return 2;
-    if (str == "THREE") return 3;
-    if (str == "FOUR")  return 4;
+    if (str == "ONE")
+      return 1;
+    if (str == "TWO")
+      return 2;
+    if (str == "THREE")
+      return 3;
+    if (str == "FOUR")
+      return 4;
 
     return 0;
   };
@@ -99,11 +99,22 @@ Painting_ratio Painting_ratio::from_string(std::string s) {
   if (s == "ratio_nearest")
     return nearest_ratio;
 
-  // FOTUT: change this loop that goes through all 256 possibilities
-  // to a smarter loop that goes first through the preferred ratios
-  for (auto r : reasonable)
-    if (r.to_string() == s)
-      return r;
+  // Parsing ratio_WxH only if Painting_ratio{w, h} is valid
+  if (s.rfind("ratio_", 0) == 0) {
+    const std::string sub = s.substr(6);
+    const auto x_pos = sub.find('x');
+
+    if (x_pos != std::string::npos) {
+      try {
+        const size_t w = std::stoi(sub.substr(0, x_pos)),
+                     h = std::stoi(sub.substr(x_pos + 1));
+
+        if (is_valid(w, h))
+          return Painting_ratio{w, h};
+
+      } catch (...) {}
+    }
+  }
 
   wiwidebug std::println(
       "Warning: Invalid ratio string '{}', trying old format", s);
@@ -116,9 +127,7 @@ Painting_ratio Painting_ratio::opposite(void) const noexcept {
   return {h, w};
 }
 
-void to_json(nlohmann::json &j, const Painting_ratio &r) {
-  j = r.to_string();
-}
+void to_json(nlohmann::json &j, const Painting_ratio &r) { j = r.to_string(); }
 
 void from_json(const nlohmann::json &j, Painting_ratio &r) {
   r = Painting_ratio::from_string(j.get<std::string>());
@@ -132,6 +141,8 @@ using namespace emscripten;
 
 EMSCRIPTEN_BINDINGS(painting_ratio) {
   class_<Painting_ratio>("PaintingRatio")
+      .constructor<>()
+
       .class_function("getPreferred", optional_override([]() {
                         emscripten::val js_array = emscripten::val::array();
 
@@ -147,6 +158,10 @@ EMSCRIPTEN_BINDINGS(painting_ratio) {
                           js_array.call<void>("push", ratio.to_string());
 
                         return js_array;
-                      }));
+                      }))
+
+      .class_function("fromString", &Painting_ratio::from_string)
+
+      .function("toString", &Painting_ratio::to_string);
 }
 #endif

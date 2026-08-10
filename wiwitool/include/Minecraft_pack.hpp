@@ -16,7 +16,12 @@ private:
   void generate_pack_skeletons(void);
 
 public:
-  static inline std::filesystem::path genpath{"/"};
+#ifdef EMSCRIPTEN
+  static inline std::filesystem::path genpath{"/packer"};
+#else
+  static inline std::filesystem::path genpath{
+      std::filesystem::temp_directory_path() / "wiwitool"};
+#endif
 
   static inline const std::filesystem::path data_subfolder{"data/"};
   static inline const std::filesystem::path assets_subfolder{"assets/"};

@@ -19,11 +19,11 @@ public:
 
   // Copy
   Painting(const Painting &) = default;
-  Painting& operator=(const Painting &) = default;
+  Painting &operator=(const Painting &) = default;
 
   // Move
-  Painting(Painting&& other) noexcept = default;
-  Painting& operator=(Painting&& other) noexcept = default;
+  Painting(Painting &&other) noexcept = default;
+  Painting &operator=(Painting &&other) noexcept = default;
 
   Painting(std::filesystem::path path);
   Painting(std::vector<uint8_t> image_data);
@@ -33,10 +33,12 @@ public:
 
   // Getter/setter title
   inline void set_title(std::string the_title) { title = the_title; }
+
   inline std::string get_title(void) const { return title; }
 
   // Getter/setter author
   inline void set_author(std::string the_author) { author = the_author; }
+
   inline std::string get_author(void) const { return author; }
 
   // Conversion ratios
@@ -73,9 +75,13 @@ public:
     crop_x = x, crop_y = y, crop_w = w, crop_h = h;
     invalidate_cache();
   }
+
   inline double get_crop_x(void) const { return crop_x; }
+
   inline double get_crop_y(void) const { return crop_y; }
+
   inline double get_crop_w(void) const { return crop_w; }
+
   inline double get_crop_h(void) const { return crop_h; }
 
   // Getters for the painting and icon images
@@ -109,26 +115,37 @@ public:
   // Placeable
 
   void set_placeable(bool p) { placeable = p; }
+
   bool is_placeable(void) const { return placeable; }
 
   // Stonecutter recipe
 
   void set_has_stonecutter_recipe(bool b) { stonecutter_recipe = b; }
+
   bool has_stonecutter_recipe(void) const { return stonecutter_recipe; }
 
   // Pixels per block
 
   void set_pixels_per_block(size_t ppb) { pixels_per_block = ppb; }
+
   size_t get_pixels_per_block(void) const { return pixels_per_block; }
 
   // Contrast
 
-  void set_contrast(float c) { contrast = c; invalidate_cache(); }
+  void set_contrast(float c) {
+    contrast = c;
+    invalidate_cache();
+  }
+
   float get_contrast(void) const { return contrast; }
 
   // Brightness
 
-  void set_brightness(int b) { brightness = b; invalidate_cache(); }
+  void set_brightness(int b) {
+    brightness = b;
+    invalidate_cache();
+  }
+
   int get_brightness(void) const { return brightness; }
 
   // Serialisation

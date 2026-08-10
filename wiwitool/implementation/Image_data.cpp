@@ -3,11 +3,11 @@
 #include "util/strutil.hpp"
 #include "util/wiwidebug.hpp"
 
-#include <string>
 #include <cstdlib>
 #include <filesystem>
 #include <print>
 #include <stdexcept>
+#include <string>
 #include <type_traits>
 #include <vector>
 
@@ -20,12 +20,29 @@
 static_assert(std::is_trivially_copyable_v<Image_data::Pixel>);
 static_assert(sizeof(Image_data::Pixel) == 4);
 
-Image_data::Image_data(std::filesystem::path filepath) : path_{filepath} {
+Image_data::Image_data(std::filesystem::path filepath,
+                       std::vector<std::filesystem::path> directory_candidates)
+    : path_{filepath} {
+  using std::filesystem::path;
+
   wiwidebug std::println("Loading image data from path {}", filepath.string());
+
+  path target_path = filepath;
+
+  // We try every candidate/filepath, and the first that matches, we
+  // load it.
+  for (const auto &dir : directory_candidates) {
+    const auto candidate = dir / filepath;
+
+    if (exists(candidate)) {
+      target_path = candidate;
+      break;
+    }
+  }
 
   int w, h;
   const auto imgdata = reinterpret_cast<Pixel *>(
-      stbi_load(filepath.c_str(), &w, &h, nullptr, channels_));
+      stbi_load(target_path.c_str(), &w, &h, nullptr, channels_));
 
   if (not imgdata)
     throw std::runtime_error("Image_data: failed to load " + path_.string());
@@ -62,7 +79,8 @@ Image_data::Image_data(std::vector<uint8_t> data) {
 Image_data::Image_data(size_t w, size_t h) : width_{w}, height_{h} {
   const size_t size = width_ * height_ * sizeof(Pixel);
   data_ = Stb_image{reinterpret_cast<Pixel *>(malloc(size)), free};
-  if (not data_) throw std::runtime_error("Allocation failed");
+  if (not data_)
+    throw std::runtime_error("Allocation failed");
 
   for (size_t y = 0; y < height_; y++)
     for (size_t x = 0; x < width_; x++)
@@ -77,7 +95,8 @@ Image_data::Image_data(const Image_data &other)
 
   if (size > 0) {
     data_ = Stb_image{reinterpret_cast<Pixel *>(malloc(size)), free};
-    if (not data_) throw std::runtime_error("Image_data: allocation failed during copy");
+    if (not data_)
+      throw std::runtime_error("Image_data: allocation failed during copy");
 
     memcpy(this->data_.get(), other.data_.get(), size);
   } else {
@@ -88,7 +107,8 @@ Image_data::Image_data(const Image_data &other)
 // Copy assignment
 Image_data &Image_data::operator=(const Image_data &other) {
   if (this != &other) {
-    if (data_) data_.reset(nullptr);
+    if (data_)
+      data_.reset(nullptr);
 
     path_ = other.path_;
     width_ = other.width_;
@@ -98,11 +118,11 @@ Image_data &Image_data::operator=(const Image_data &other) {
 
     if (size > 0) {
       data_ = Stb_image{reinterpret_cast<Pixel *>(malloc(size)), free};
-      if (not data_) throw std::runtime_error("Image_data: allocation failed during copy");
+      if (not data_)
+        throw std::runtime_error("Image_data: allocation failed during copy");
 
       memcpy(this->data_.get(), other.data_.get(), size);
-    }
-    else {
+    } else {
       data_ = Stb_image{nullptr, [](void *) {}};
     }
   }
@@ -128,52 +148,6 @@ const Image_data::Pixel &Image_data::at(size_t x, size_t y) const {
   return data_.get()[y * width_ + x];
 }
 
-template <typename Fun> void Image_data::foreach(Fun f) {
-  constexpr bool x_y_pixel = std::is_invocable_v<Fun, size_t, size_t, Pixel &>;
-  constexpr bool x_y = std::is_invocable_v<Fun, size_t, size_t>;
-  constexpr bool pixel_only = std::is_invocable_v<Fun, Pixel &>;
-
-  for (size_t y = 0; y < height(); ++y) {
-    for (size_t x = 0; x < width(); ++x) {
-      auto &pixel = at(x, y);
-
-      if constexpr (x_y_pixel)
-        f(x, y, pixel);
-      else if constexpr (x_y)
-        f(x, y);
-      else if constexpr (pixel_only)
-        f(pixel);
-      else
-        static_assert(x_y_pixel or x_y or pixel_only,
-                      "for_each_pixel(f) requires f(pixel &), f(size_t, "
-                      "size_t, pixel &), f(size_t, size_t)");
-    }
-  }
-}
-
-template <typename Fun> void Image_data::foreach(Fun f) const {
-  constexpr bool x_y_pixel = std::is_invocable_v<Fun, size_t, size_t, Pixel>;
-  constexpr bool x_y = std::is_invocable_v<Fun, size_t, size_t>;
-  constexpr bool pixel_only = std::is_invocable_v<Fun, Pixel>;
-
-  for (size_t y = 0; y < height(); ++y) {
-    for (size_t x = 0; x < width(); ++x) {
-      const auto pixel = at(x, y);
-
-      if constexpr (x_y_pixel)
-        f(x, y, pixel);
-      else if constexpr (x_y)
-        f(x, y);
-      else if constexpr (pixel_only)
-        f(pixel);
-      else
-        static_assert(x_y_pixel or x_y or pixel_only,
-                      "for_each_pixel(f) requires f(pixel), f(size_t, "
-                      "size_t, pixel), f(size_t, size_t)");
-    }
-  }
-}
-
 Image_data Image_data::scale(float factor) const {
   return scale(static_cast<size_t>(width() * factor),
                static_cast<size_t>(height() * factor));
@@ -188,8 +162,10 @@ Image_data Image_data::scale(size_t target_w, size_t target_h) const {
   const auto sample = [&](size_t x, size_t y, rgba &pixel) {
     int src_y = y * step_y, src_x = x * step_x;
 
-    if (src_y >= height()) src_y = height() - 1;
-    if (src_x >= width()) src_x = width() - 1;
+    if (src_y >= height())
+      src_y = height() - 1;
+    if (src_x >= width())
+      src_x = width() - 1;
 
     pixel = at(src_x, src_y);
   };
@@ -236,7 +212,6 @@ Image_data Image_data::crop(size_t rw, size_t rh) const {
 
   return crop(x0, y0, new_w, new_h);
 }
-
 
 Image_data Image_data::rotate_clockwise(void) const {
   Image_data out{height(), width()};
@@ -291,13 +266,10 @@ Image_data Image_data::adjust_contrast_brightness(float contrast_factor,
   };
 
   foreach ([&](size_t x, size_t y, const Pixel src) {
-    out.at(x, y) = Pixel{
-      adjust_channel(src.r),
-      adjust_channel(src.g),
-      adjust_channel(src.b),
-      src.a
-    };
-  });
+    out.at(x, y) = Pixel{adjust_channel(src.r), adjust_channel(src.g),
+                         adjust_channel(src.b), src.a};
+  })
+    ;
 
   return out;
 }
@@ -359,17 +331,14 @@ void from_json(const nlohmann::json &j, Image_data &image) {
 
   if (img.is_binary()) {
     image = Image_data{img.get_binary()};
-  }
-  else if (img.is_array()) {
+  } else if (img.is_array()) {
     std::vector<uint8_t> encoded_data;
     img.get_to(encoded_data);
     image = encoded_data.empty() ? Image_data{} : Image_data{encoded_data};
-  }
-  else {
+  } else {
     image = Image_data{};
   }
 }
-
 
 #ifdef EMSCRIPTEN
 #include <emscripten/bind.h>
@@ -380,82 +349,97 @@ using namespace emscripten;
 
 EMSCRIPTEN_BINDINGS(image_data) {
 
-  // 2. Bind the inner Pixel struct as a value object (converts to/from JS Object {r,g,b,a})
+  // 2. Bind the inner Pixel struct as a value object (converts to/from JS
+  // Object {r,g,b,a})
   value_object<Image_data::Pixel>("Pixel")
-    .field("r", &Image_data::Pixel::r)
-    .field("g", &Image_data::Pixel::g)
-    .field("b", &Image_data::Pixel::b)
-    .field("a", &Image_data::Pixel::a);
+      .field("r", &Image_data::Pixel::r)
+      .field("g", &Image_data::Pixel::g)
+      .field("b", &Image_data::Pixel::b)
+      .field("a", &Image_data::Pixel::a);
 
   // 3. Bind Image_data
   class_<Image_data>("ImageData")
-    // Constructors
-    .constructor<>()
-    .constructor<size_t, size_t>()
-    // Wrapper constructor for std::filesystem::path -> std::string
-    .constructor(optional_override([](std::string path_str) {
-      return std::make_unique<Image_data>(std::filesystem::path(path_str));
-    }))
+      // Constructors
+      .constructor<>()
+      .constructor<size_t, size_t>()
+      // Wrapper constructor for std::filesystem::path -> std::string
+      .constructor(optional_override([](std::string path_str) {
+        return std::make_unique<Image_data>(std::filesystem::path(path_str));
+      }))
 
-    // Attributes
-    .property("width", &Image_data::width)
-    .property("height", &Image_data::height)
-    .property("channels", &Image_data::channels)
-    .function("empty", &Image_data::empty)
+      // Attributes
+      .property("width", &Image_data::width)
+      .property("height", &Image_data::height)
+      .property("channels", &Image_data::channels)
+      .function("empty", &Image_data::empty)
 
-    // Path handling (wrapper to return string instead of filesystem::path)
-    .function("path", optional_override([](const Image_data& self) {
-      return self.path().string();
-    }))
+      // Path handling (wrapper to return string instead of filesystem::path)
+      .function("path", optional_override([](const Image_data &self) {
+                  return self.path().string();
+                }))
 
-    // Pixel Access
-    // Helper: Returns a typed view into WASM memory.
-    // This is ZERO-COPY and allows direct use with HTML Canvas APIs.
-    .function("getPixels", optional_override([](const Image_data& self) {
-      const size_t size = self.width() * self.height() * 4; // 4 channels
-      const uint8_t* ptr = reinterpret_cast<const uint8_t*>(self.data());
+      // Pixel Access
+      // Helper: Returns a typed view into WASM memory.
+      // This is ZERO-COPY and allows direct use with HTML Canvas APIs.
+      .function("getPixels", optional_override([](const Image_data &self) {
+                  const size_t size =
+                      self.width() * self.height() * 4; // 4 channels
+                  const uint8_t *ptr =
+                      reinterpret_cast<const uint8_t *>(self.data());
 
-      // Return a Uint8ClampedArray (standard for Canvas ImageData)
-      return val(typed_memory_view(size, ptr));
-    }))
-    // Single pixel access
-    .function("at", select_overload<const Image_data::Pixel&(size_t, size_t) const>(&Image_data::at))
+                  // Return a Uint8ClampedArray (standard for Canvas ImageData)
+                  return val(typed_memory_view(size, ptr));
+                }))
+      // Single pixel access
+      .function(
+          "at",
+          select_overload<const Image_data::Pixel &(size_t, size_t) const>(
+              &Image_data::at))
 
-    // Manipulation (These return new Image_data objects by value)
-    .function("scaleFactor", select_overload<Image_data(float) const>(&Image_data::scale))
-    .function("scaleDims", select_overload<Image_data(size_t, size_t) const>(&Image_data::scale))
+      // Manipulation (These return new Image_data objects by value)
+      .function("scaleFactor",
+                select_overload<Image_data(float) const>(&Image_data::scale))
+      .function("scaleDims", select_overload<Image_data(size_t, size_t) const>(
+                                 &Image_data::scale))
 
-    .function("crop", select_overload<Image_data(size_t, size_t, size_t, size_t) const>(&Image_data::crop))
-    .function("cropRatio", select_overload<Image_data(size_t, size_t) const>(&Image_data::crop))
+      .function(
+          "crop",
+          select_overload<Image_data(size_t, size_t, size_t, size_t) const>(
+              &Image_data::crop))
+      .function("cropRatio", select_overload<Image_data(size_t, size_t) const>(
+                                 &Image_data::crop))
 
-    .function("rotateClockwise", &Image_data::rotate_clockwise)
-    .function("rotateAnticlockwise", &Image_data::rotate_anticlockwise)
-    .function("flipVertically", &Image_data::flip_vertically)
-    .function("flipHorizontally", &Image_data::flip_horizontally)
+      .function("rotateClockwise", &Image_data::rotate_clockwise)
+      .function("rotateAnticlockwise", &Image_data::rotate_anticlockwise)
+      .function("flipVertically", &Image_data::flip_vertically)
+      .function("flipHorizontally", &Image_data::flip_horizontally)
 
-    .function("adjustContrastBrightness", &Image_data::adjust_contrast_brightness)
-    .function("adjustContrast", &Image_data::adjust_contrast)
-    .function("adjustBrightness", &Image_data::adjust_brightness)
+      .function("adjustContrastBrightness",
+                &Image_data::adjust_contrast_brightness)
+      .function("adjustContrast", &Image_data::adjust_contrast)
+      .function("adjustBrightness", &Image_data::adjust_brightness)
 
-    // Export to memory buffer
-    .function("encodePng", optional_override([](const Image_data& self) {
-      std::vector<uint8_t> buffer = self.encode_png();
-      // Safely copy the WASM vector into a JS Uint8Array
-      return val::global("Uint8Array").new_(
-          typed_memory_view(buffer.size(), buffer.data())
-      );
-    }))
+      // Export to memory buffer
+      .function("encodePng", optional_override([](const Image_data &self) {
+                  std::vector<uint8_t> buffer = self.encode_png();
+                  // Safely copy the WASM vector into a JS Uint8Array
+                  return val::global("Uint8Array")
+                      .new_(typed_memory_view(buffer.size(), buffer.data()));
+                }))
 
-    // Export (Wrappers for std::string)
-    .function("saveAs", optional_override([](const Image_data& self, std::string path) {
-      self.save_as(std::filesystem::path(path));
-    }))
-    .function("savePng", optional_override([](const Image_data& self, std::string path) {
-      self.save_png(std::filesystem::path(path));
-    }))
-    .function("saveJpg", optional_override([](const Image_data& self, std::string path, size_t quality) {
-      self.save_jpg(std::filesystem::path(path), quality);
-    }));
-
+      // Export (Wrappers for std::string)
+      .function("saveAs",
+                optional_override([](const Image_data &self, std::string path) {
+                  self.save_as(std::filesystem::path(path));
+                }))
+      .function("savePng",
+                optional_override([](const Image_data &self, std::string path) {
+                  self.save_png(std::filesystem::path(path));
+                }))
+      .function("saveJpg",
+                optional_override([](const Image_data &self, std::string path,
+                                     size_t quality) {
+                  self.save_jpg(std::filesystem::path(path), quality);
+                }));
 }
 #endif
