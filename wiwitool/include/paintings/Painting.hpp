@@ -153,6 +153,11 @@ public:
   friend void to_json(nlohmann::json &j, const Painting &p);
   friend void from_json(const nlohmann::json &j, Painting &p);
 
+  inline void invalidate_cache(void) const {
+    paintings.clear();
+    icon = Image_data{};
+  }
+
 private:
   static constexpr inline size_t default_resolution{16}; // in pixels_per_block
   static inline unsigned int next_painting_id{0};
@@ -178,10 +183,6 @@ private:
   bool placeable{true};
   bool stonecutter_recipe{true};
 
-  inline void invalidate_cache(void) const {
-    paintings.clear();
-    icon = Image_data{};
-  }
 
   inline void compute_painting_and_icon_if_necessary(void) const {
     if (not original_image.empty() and (paintings.empty() or icon.empty()))
