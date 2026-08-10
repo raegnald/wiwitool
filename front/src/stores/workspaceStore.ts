@@ -1,7 +1,7 @@
 import { writable } from "svelte/store";
-import type { Wiwiworkspace } from "../bindings/wiwitool";
+import type { IWorkspace } from "../bindings/interfaces";
 
-export const workspace = writable<Wiwiworkspace | null>(null);
+export const workspace = writable<IWorkspace | null>(null);
 
 export const MAX_WORKSPACE_NAME_LENGTH = 32;
 

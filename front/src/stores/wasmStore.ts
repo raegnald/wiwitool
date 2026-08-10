@@ -1,7 +1,7 @@
 import { writable } from "svelte/store";
 
-import type { MainModule } from "../bindings/wiwitool";
-import type MainModuleFactory from "../bindings/wiwitool";
+import type { MainModule } from "../bindings/wasm/wiwitool";
+import type MainModuleFactory from "../bindings/wasm/wiwitool";
 
 import { toast, ERROR } from "./toastsStore";
 

@@ -1,11 +1,10 @@
 import { writable, type Writable } from "svelte/store";
-import type { Painting } from "../bindings/wiwitool";
+import type { IPainting } from "../bindings/interfaces";
 
 export interface PaintingWrapper {
-  cppPainting: Painting;
+  painting: IPainting;
   selected: boolean;
-  cachedOriginalJS?: globalThis.ImageData;
-  cachedPaintingJS?: globalThis.ImageData;
+  iconUrl?: string;
 }
 
 export const paintingsStore: Writable<PaintingWrapper[]> = writable([]);
