@@ -1,17 +1,16 @@
+<!-- svelte-ignore state_referenced_locally -->
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { Painting } from "../bindings/wiwitool";
+  import type { IPainting } from "../bindings/interfaces";
   import Button from "../components/Button.svelte";
 
-  let {
-    painting,
-    onConfirm,
-    onCancel,
-  }: {
-    painting: Painting;
+  interface Props {
+    painting: IPainting;
     onConfirm: () => void;
     onCancel: () => void;
-  } = $props();
+  }
+
+  let { painting, onConfirm, onCancel }: Props = $props();
 
   let dialog: HTMLDialogElement;
   let canvas: HTMLCanvasElement;
@@ -72,8 +71,8 @@
     cropH = 1;
   }
 
-  function confirm() {
-    painting.setCrop(cropX, cropY, cropW, cropH);
+  async function confirm() {
+    await painting.setCrop(cropX, cropY, cropW, cropH);
     onConfirm();
     dialog.close();
   }
@@ -83,23 +82,24 @@
     dialog.close();
   }
 
-  onMount(() => {
-    const imgData = painting.originalData();
-    originalW = imgData.width;
-    originalH = imgData.height;
+  onMount(async () => {
+    const url = await painting.getPaintingUrl();
+    const img = new Image();
 
-    canvas.width = originalW;
-    canvas.height = originalH;
+    if (!url) return;
 
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      const pixels = imgData.getPixels();
-      const clamped = new Uint8ClampedArray(pixels);
-      const jsImgData = new ImageData(clamped, originalW, originalH);
-      ctx.putImageData(jsImgData, 0, 0);
-    }
-    imgData.delete();
+    img.onload = () => {
+      originalW = img.width;
+      originalH = img.height;
 
+      canvas.width = originalW;
+      canvas.height = originalH;
+
+      const ctx = canvas.getContext("2d");
+      if (ctx) ctx.drawImage(img, 0, 0);
+    };
+
+    img.src = url;
     dialog.showModal();
   });
 

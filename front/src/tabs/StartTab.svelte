@@ -1,6 +1,5 @@
 <script lang="ts">
   import DropZone from "../components/DropZone.svelte";
-  import type { MainModule } from "../bindings/wiwitool";
   import { ERROR, INFO, toast, toasts } from "../stores/toastsStore";
   import { workspace } from "../stores/workspaceStore";
   import {
@@ -8,7 +7,7 @@
     type PaintingWrapper,
   } from "../stores/paintingsStore";
   import Button from "../components/Button.svelte";
-  import { wasmReady } from "../stores/wasmStore";
+  import { backendReady, fileService } from "../services/backendProvider";
   import {
     musicDiscsStore,
     type MusicDiscWrapper,
@@ -22,62 +21,71 @@
     ImageIcon,
     WandSparklesIcon,
   } from "@lucide/svelte";
+  import { slide } from "svelte/transition";
 
   export let move: (id: string) => void;
-  export let module: MainModule;
 
   $: showDropZone = false;
 
-  async function importPacks(file: File) {
-    if (!module || !$workspace) return;
-    toast(INFO, "Importing configuration...");
-
+  async function selectFileFromPicker() {
     try {
-      const buffer = await file.arrayBuffer();
-      const uint8View = new Uint8Array(buffer);
-
-      $workspace.deserialise(uint8View as any);
-
-      retrievePaintings();
-      retrieveMusicDiscs();
-
-      toasts.set([]);
-      toast(INFO, `${$workspace.workspaceName ?? "Workspace"} was imported`);
-      move("paintings");
+      let picked: { name: string; data: Uint8Array; path?: string } | null =
+        null;
+      if ($fileService && typeof $fileService.openProjectFile === "function") {
+        picked = await $fileService.openProjectFile();
+      }
+      if (!picked) return;
+      await processImportBytes(picked.data);
     } catch (e: any) {
-      console.error("Deserialisation failed:", e);
-      toast(ERROR, e.message || "Unknown error during import", 8000);
+      console.error("Import failed:", e);
+      toast(ERROR, e.message || "Error during import", 8000);
     }
   }
 
-  function retrievePaintings() {
-    const cppPaintingsVector = $workspace.getPaintings();
-    const newWrappers: PaintingWrapper[] = [];
+  async function processImportBytes(uint8View: Uint8Array) {
+    if (!$workspace) return;
+    toast(INFO, "Importing configuration...");
 
-    for (let i = 0; i < cppPaintingsVector.size(); i++) {
-      newWrappers.push({
-        cppPainting: cppPaintingsVector.get(i),
-        selected: false,
-      });
+    if ($workspace?.deserialise) {
+      await $workspace.deserialise(uint8View);
     }
 
-    cppPaintingsVector.delete();
+    await retrievePaintings();
+    await retrieveMusicDiscs();
+
+    toasts.set([]);
+    toast(INFO, `${$workspace.workspaceName ?? "Workspace"} was imported`);
+    move("paintings");
+  }
+
+  async function importPacks(file: File) {
+    try {
+      const buffer = await file.arrayBuffer();
+      await processImportBytes(new Uint8Array(buffer));
+    } catch (e: any) {
+      console.error("Deserialisation failed:", e);
+      toast(ERROR, e.message || "Error during import", 8000);
+    }
+  }
+
+  async function retrievePaintings() {
+    if (!$workspace) return;
+    const paintingsList = await $workspace.getPaintings();
+    const newWrappers: PaintingWrapper[] = paintingsList.map((p) => ({
+      painting: p,
+      selected: false,
+    }));
 
     paintingsStore.set(newWrappers);
   }
 
-  function retrieveMusicDiscs() {
-    const cppDiscsVector = $workspace.getMusicDiscs();
-    const newWrappers: MusicDiscWrapper[] = [];
-
-    for (let i = 0; i < cppDiscsVector.size(); i++) {
-      newWrappers.push({
-        cppDisc: cppDiscsVector.get(i),
-        selected: false,
-      });
-    }
-
-    cppDiscsVector.delete();
+  async function retrieveMusicDiscs() {
+    if (!$workspace) return;
+    const discsList = await $workspace.getMusicDiscs();
+    const newWrappers: MusicDiscWrapper[] = discsList.map((d) => ({
+      disc: d,
+      selected: false,
+    }));
 
     musicDiscsStore.set(newWrappers);
   }
@@ -119,7 +127,7 @@
     <Button
       large
       intense
-      loading={!$wasmReady}
+      loading={!$backendReady}
       icon="BadgePlus"
       onclick={() => move("paintings")}
     >
@@ -128,34 +136,34 @@
 
     <Button
       large
-      loading={!$wasmReady}
+      loading={!$backendReady}
       icon="FileUp"
       onclick={() => (showDropZone = !showDropZone)}
     >
       Import an existing pack
     </Button>
   </div>
-  <div
-    class="dropZoneContainer"
-    style:display={showDropZone ? "block" : "none"}
-  >
-    <DropZone handler={importPacks} let:filePicker>
-      <div class="empty-state">
-        <ArchiveRestore size="80" strokeWidth="1.5" class="empty-icon" />
 
-        <h2>Drag and drop an existing configuration file</h2>
-        <center class="with-title pills-horizontal-container">
-          <span class="pill">Wiwitool Project Save file</span>
-        </center>
+  {#if showDropZone}
+    <div class="dropZoneContainer" transition:slide={{ duration: 100 }}>
+      <DropZone handler={importPacks} let:filePicker>
+        <div class="empty-state">
+          <ArchiveRestore size="80" strokeWidth="1.5" class="empty-icon" />
 
-        <div class="empty-actions">
-          <Button icon="FolderInput" onclick={filePicker}>
-            Select from file picker
-          </Button>
+          <h2>Drag and drop an existing configuration file</h2>
+          <center class="with-title pills-horizontal-container">
+            <span class="pill">Wiwitool Project Save file</span>
+          </center>
+
+          <div class="empty-actions">
+            <Button icon="FolderInput" onclick={selectFileFromPicker}>
+              Select from file picker
+            </Button>
+          </div>
         </div>
-      </div>
-    </DropZone>
-  </div>
+      </DropZone>
+    </div>
+  {/if}
 
   <div class="version">
     Wiwitool version {__GIT_TAG__} (commit {__GIT_COMMIT__})

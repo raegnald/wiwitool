@@ -10,54 +10,63 @@
   import ButtonListOptions from "../components/button-list/ButtonListOptions.svelte";
   import ListOption from "../components/button-list/ListOption.svelte";
   import { onMount } from "svelte";
+  import type { INamespaceOverride } from "../bindings/interfaces";
+  import Wiwinput from "../components/Wiwinput.svelte";
 
   export let move: (id: string) => void;
 
-  let iifEnabled = $workspace ? $workspace.invisibleItemFrames : false;
+  let override: INamespaceOverride | null = null;
 
-  let iifNamespaceOverride: string = "";
-  let namespaceOverrideDialog: HTMLDialogElement;
-
-  onMount(() => {
-    iifNamespaceOverride = $workspace.getIIFNamespaceOverride().get();
-  });
-
-  $: if ($workspace) {
-    $workspace.invisibleItemFrames = iifEnabled;
-  }
+  let iifEnabled = false;
+  let iifNameOverride: string = "";
+  let iifNamespaceOverrideDialog: HTMLDialogElement;
 
   let showingInfoIIF = false;
+
+  onMount(async () => {
+    if ($workspace) {
+      if (typeof ($workspace as any).getInvisibleItemFrames === "function") {
+        iifEnabled = await ($workspace as any).getInvisibleItemFrames();
+      } else {
+        iifEnabled = $workspace.invisibleItemFrames;
+      }
+      override = await $workspace.getIIFNamespaceOverride();
+    }
+  });
+
+  $: override?.get().then((name) => (iifNameOverride = name));
 </script>
 
-<dialog bind:this={namespaceOverrideDialog}>
+<dialog bind:this={iifNamespaceOverrideDialog}>
   <div class="modal-content">
-    {#if iifNamespaceOverride.length > 0}
+    {#if iifNameOverride.length > 0}
       <span>Custom namespace will be used</span>
     {:else}
       <span>Using default namespace</span>
     {/if}
 
     <div>
-      <input
+      <Wiwinput
         type="text"
         placeholder="Invisible item frames namespace override"
-        bind:value={iifNamespaceOverride}
-        on:input={() => {
-          iifNamespaceOverride = formatWorkspaceName(iifNamespaceOverride);
+        bind:value={iifNameOverride}
+        oninput={() => (iifNameOverride = formatWorkspaceName(iifNameOverride))}
+        onchange={() => {
+          $workspace
+            ?.getIIFNamespaceOverride()
+            .then((override) => override?.set(iifNameOverride));
         }}
-        on:change={() =>
-          $workspace.getIIFNamespaceOverride().set(iifNamespaceOverride)}
       />
 
       <span
         style={"display: inline-block; width: 60px;" +
-          (iifNamespaceOverride.length >= MAX_WORKSPACE_NAME_LENGTH
+          (iifNameOverride.length >= MAX_WORKSPACE_NAME_LENGTH
             ? "color: orange"
             : "")}
       >
-        {#if iifNamespaceOverride.length > 0}
+        {#if iifNameOverride.length > 0}
           <span style="display: inline-block; width: 25px; text-align: right;">
-            {iifNamespaceOverride.length}
+            {iifNameOverride.length}
           </span>
           / {MAX_WORKSPACE_NAME_LENGTH}
         {/if}
@@ -68,10 +77,12 @@
       <Button
         secondary
         onclick={() => {
-          iifNamespaceOverride = "";
-          $workspace.getIIFNamespaceOverride().set(iifNamespaceOverride);
+          iifNameOverride = "";
+          $workspace
+            ?.getIIFNamespaceOverride()
+            .then((override) => override?.set(iifNameOverride));
         }}
-        disabled={iifNamespaceOverride == ""}
+        disabled={iifNameOverride === ""}
       >
         Clear
       </Button>
@@ -79,7 +90,7 @@
       <Button
         primary
         onclick={() => {
-          namespaceOverrideDialog.close();
+          iifNamespaceOverrideDialog.close();
         }}
       >
         Close
@@ -92,7 +103,12 @@
   <div class="app-card">
     <div style="display: flex; gap: 8px;">
       <div class="check-option title-component">
-        <Wiwicheckbox bind:checked={iifEnabled}>
+        <Wiwicheckbox
+          bind:checked={iifEnabled}
+          onclick={() => {
+            $workspace?.setInvisibleItemFrames(iifEnabled);
+          }}
+        >
           Invisible item frames can be crafted as recipes
         </Wiwicheckbox>
 
@@ -106,7 +122,7 @@
       <ButtonListOptions rightAligned icon="Ellipsis" secondary>
         <ListOption
           disabled={!iifEnabled}
-          onclick={() => namespaceOverrideDialog.showModal()}
+          onclick={() => iifNamespaceOverrideDialog.showModal()}
         >
           Set custom namespace
         </ListOption>

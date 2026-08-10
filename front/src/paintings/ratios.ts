@@ -25,3 +25,7 @@ export function getRatios(): [string] {
 
   return ratios as [string];
 }
+
+export function prettyRatio(cpp_ratio: string) {
+  return cpp_ratio.replace("ratio_", "").replace("x", "×");
+}

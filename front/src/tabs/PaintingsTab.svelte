@@ -1,31 +1,24 @@
 <script lang="ts">
   import { paintingsStore } from "../stores/paintingsStore";
-  import type { MainModule } from "../bindings/wiwitool";
   import {
     formatWorkspaceName,
     MAX_WORKSPACE_NAME_LENGTH,
     workspace,
   } from "../stores/workspaceStore";
-
   import HelpUsingPaintingsTool from "../paintings/HelpUsingPaintingsTool.svelte";
   import DropZone from "../components/DropZone.svelte";
   import PaintingCard from "../paintings/PaintingCard.svelte";
   import BulkActions from "../paintings/BulkActions.svelte";
-  import {
-    ImageUpIcon,
-    InfoIcon,
-    LogOut,
-    Settings,
-    User,
-  } from "@lucide/svelte";
+  import { ImageUpIcon } from "@lucide/svelte";
   import { onMount } from "svelte";
   import Button from "../components/Button.svelte";
   import ButtonListOptions from "../components/button-list/ButtonListOptions.svelte";
   import ListOption from "../components/button-list/ListOption.svelte";
   import ListSectionTitle from "../components/button-list/ListSectionTitle.svelte";
   import { ERROR, toast } from "../stores/toastsStore";
+  import { fileService } from "../services/backendProvider";
+  import Wiwinput from "../components/Wiwinput.svelte";
 
-  export let module: MainModule;
   export let move: (id: string) => void;
 
   let paintingsNamespaceOverride: string = "";
@@ -35,16 +28,11 @@
   $: allSelected = $paintingsStore.every((painting) => painting.selected);
   $: selectedCount = $paintingsStore.filter((p) => p.selected).length;
 
-  onMount(() => {
-    // Ask the user for confirmation when reloading the page
-    window.addEventListener("beforeunload", (event: Event) => {
-      event.preventDefault();
-      event.returnValue = false;
-    });
-
-    paintingsNamespaceOverride = $workspace
-      .getPaintingsNamespaceOverride()
-      .get();
+  onMount(async () => {
+    if ($workspace) {
+      const ns = await $workspace.getPaintingsNamespaceOverride();
+      if (ns) paintingsNamespaceOverride = await ns.get();
+    }
   });
 
   const validImageExtensions = [
@@ -62,32 +50,37 @@
     "bin",
   ];
 
-  async function handleImageDrop(file: File) {
-    if (!module || !$workspace) return;
+  async function openPicker() {
+    if (!$workspace) return;
 
     try {
-      if (
-        !validImageExtensions.includes(
-          file.name.split(".").at(-1).toLowerCase(),
-        )
-      )
-        throw new Error();
+      const picked = await $fileService.openImageFile();
+      if (!picked) return;
 
-      const buffer = await file.arrayBuffer();
-      const uint8View = new Uint8Array(buffer);
+      const painting = await $workspace.addPainting(picked.path || picked.data);
 
-      const cppPainting = new module.Painting(uint8View as any);
-
-      cppPainting.title = file.name.split(".")[0];
-      cppPainting.author = "";
-
-      // Add to C++ workspace
-      $workspace.addPainting(cppPainting);
-
-      // Add to Svelte store
       paintingsStore.update((current) => [
         ...current,
-        { cppPainting, selected: false },
+        { painting, cppPainting: painting, selected: false },
+      ]);
+    } catch (e) {
+      console.error(e);
+      toast(ERROR, "Could not load selected image.");
+    }
+  }
+
+  async function handleImageDrop(file: File) {
+    if (!$workspace) return;
+
+    try {
+      const buffer = await file.arrayBuffer();
+      const painting = await $workspace.addPainting(new Uint8Array(buffer));
+
+      await painting.setTitle(file.name.split(".")[0]);
+
+      paintingsStore.update((current) => [
+        ...current,
+        { painting, cppPainting: painting, selected: false },
       ]);
     } catch (e) {
       console.error(e);
@@ -96,9 +89,7 @@
   }
 
   function toggleSelectAll() {
-    $paintingsStore.forEach((painting) => {
-      painting.selected = !allSelected;
-    });
+    $paintingsStore.forEach((painting) => (painting.selected = !allSelected));
     paintingsStore.update((paintings) => paintings);
   }
 </script>
@@ -112,19 +103,19 @@
     {/if}
 
     <div>
-      <input
+      <Wiwinput
         type="text"
         placeholder="Paintings namespace override"
         bind:value={paintingsNamespaceOverride}
-        on:input={() => {
+        oninput={() => {
           paintingsNamespaceOverride = formatWorkspaceName(
             paintingsNamespaceOverride,
           );
         }}
-        on:change={() =>
+        onchange={async () =>
           $workspace
-            .getPaintingsNamespaceOverride()
-            .set(paintingsNamespaceOverride)}
+            ?.getPaintingsNamespaceOverride()
+            .then((ns) => ns?.set(paintingsNamespaceOverride))}
       />
 
       <span
@@ -148,8 +139,8 @@
         onclick={() => {
           paintingsNamespaceOverride = "";
           $workspace
-            .getPaintingsNamespaceOverride()
-            .set(paintingsNamespaceOverride);
+            ?.getPaintingsNamespaceOverride()
+            .then((ns) => ns?.set(paintingsNamespaceOverride));
         }}
         disabled={paintingsNamespaceOverride == ""}
       >
@@ -184,7 +175,7 @@
         </center>
 
         <div class="empty-actions">
-          <Button icon="FolderInput" onclick={filePicker}>
+          <Button icon="FolderInput" onclick={openPicker}>
             Select from file picker
           </Button>
         </div>
@@ -236,7 +227,7 @@
     </div>
 
     <div>
-      {#each [...$paintingsStore].reverse() as wrapper (wrapper.cppPainting.stringId())}
+      {#each [...$paintingsStore].reverse() as wrapper (wrapper.painting.stringId())}
         <PaintingCard {wrapper} />
       {/each}
     </div>

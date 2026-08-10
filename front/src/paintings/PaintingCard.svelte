@@ -8,27 +8,20 @@
 
   import PaintingActions from "./PaintingActions.svelte";
   import PaintingCanvas from "./PaintingCanvas.svelte";
-  import PaintingParams from "./PaintingParams.svelte";
   import CropModal from "./CropModal.svelte";
-  import type { ImageData } from "../bindings/wiwitool";
   import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
   import SelectableCard from "../components/SelectableCard.svelte";
   import Button from "../components/Button.svelte";
   import {
     RulerIcon,
-    SquareIcon,
-    WandIcon,
     WrenchIcon,
-    ProportionsIcon,
-    TextCursorIcon,
-    UserIcon,
     ChevronRightIcon,
     ChevronLeftIcon,
     WandSparklesIcon,
   } from "@lucide/svelte";
-  import { getLoadedModule } from "../stores/wasmStore";
   import { slide } from "svelte/transition";
   import Wiwinput from "../components/Wiwinput.svelte";
+  import { prettyRatio } from "./ratios";
 
   export let wrapper: PaintingWrapper;
 
@@ -45,7 +38,7 @@
   let title: string;
   let author: string;
 
-  const ALL_RATIOS = getLoadedModule().PaintingRatio.getReasonable();
+  let ALL_RATIOS: string[] = [];
   let activeRatios: string[] = [];
   let previewRatio: string = "";
 
@@ -53,7 +46,7 @@
 
   let isCropped = false;
   let disableFrame = false;
-  let proceduralFrame = wrapper.cppPainting.isFrameProcedural();
+  let proceduralFrame = false;
   let frameTint: string;
   let frameSeed: string;
   let placeable: boolean;
@@ -65,26 +58,27 @@
 
   $: pullFromCpp(wrapper);
 
-  function pullFromCpp(w: PaintingWrapper) {
-    if (!w || !w.cppPainting) return;
+  async function pullFromCpp(w: PaintingWrapper) {
+    const p = w?.painting;
+    if (!w || !p) return;
 
-    title = w.cppPainting.title;
-    author = w.cppPainting.author;
+    title = p.title;
+    author = p.author;
     selected = w.selected;
-    placeable = w.cppPainting.placeable;
-    hasStonecutterRecipe = w.cppPainting.hasStonecutterRecipe;
+    placeable = p.placeable;
+    hasStonecutterRecipe = p.hasStonecutterRecipe;
 
     isCropped =
-      w.cppPainting.cropX !== 0 ||
-      w.cppPainting.cropY !== 0 ||
-      w.cppPainting.cropW !== 1 ||
-      w.cppPainting.cropH !== 1;
+      p.cropX !== 0 || p.cropY !== 0 || p.cropW !== 1 || p.cropH !== 1;
 
     let canvasNeedsUpdate = false;
 
-    const cppRatios = w.cppPainting.getRatios();
+    const rawRatios = typeof p.getRatios === "function" ? p.getRatios() : [];
+    const cppRatios =
+      rawRatios instanceof Promise ? await rawRatios : rawRatios || [];
     if (
-      cppRatios.join(",") !== activeRatios.join(",") // oh my wiwi, this is so nasty
+      Array.isArray(cppRatios) &&
+      cppRatios.join(",") !== activeRatios.join(",")
     ) {
       activeRatios = cppRatios;
       canvasNeedsUpdate = true;
@@ -97,23 +91,26 @@
       centerActiveRatio();
     }
 
-    let currentDownscale = Math.log2(w.cppPainting.pixelPerBlock);
+    let currentDownscale = Math.log2(w.painting.pixelPerBlock || 16);
     if (downscalePower !== currentDownscale) {
       downscalePower = currentDownscale;
       canvasNeedsUpdate = true;
     }
 
-    if (brightness !== w.cppPainting.brightness) {
-      brightness = w.cppPainting.brightness;
+    if (brightness !== w.painting.brightness) {
+      brightness = w.painting.brightness;
       canvasNeedsUpdate = true;
     }
 
-    if (contrast !== w.cppPainting.contrast) {
-      contrast = w.cppPainting.contrast;
+    if (contrast !== w.painting.contrast) {
+      contrast = w.painting.contrast;
       canvasNeedsUpdate = true;
     }
 
-    const settings = w.cppPainting.getProceduralSettings();
+    const settings =
+      typeof p?.getProceduralSettings === "function"
+        ? p.getProceduralSettings()
+        : null;
     if (settings) {
       if (frameSeed !== String(settings.seed)) {
         frameSeed = String(settings.seed);
@@ -125,30 +122,32 @@
       }
     }
 
-    if (!w.cachedOriginalJS || !w.cachedPaintingJS) canvasNeedsUpdate = true;
-
     if (canvasNeedsUpdate) {
-      w.cachedPaintingJS = undefined;
       updateCanvases();
     }
   }
 
   function syncMetadata() {
-    if (!wrapper.cppPainting) return;
-    wrapper.cppPainting.title = title;
-    wrapper.cppPainting.author = author;
+    const p = wrapper?.painting;
+    if (!p) return;
+    p.title = title;
+    p.author = author;
     wrapper.selected = selected;
-    wrapper.cppPainting.placeable = placeable;
-    wrapper.cppPainting.hasStonecutterRecipe = hasStonecutterRecipe;
+    p.placeable = placeable;
+    p.hasStonecutterRecipe = hasStonecutterRecipe;
   }
 
   function hasWrapperChanged() {
-    if (wrapper.cppPainting.pixelPerBlock !== Math.pow(2, downscalePower))
-      return true;
-    if (wrapper.cppPainting.brightness !== brightness) return true;
-    if (Math.abs(wrapper.cppPainting.contrast - contrast) > 0.001) return true;
+    const p = wrapper?.painting;
+    if (!p) return false;
+    if (p.pixelPerBlock !== Math.pow(2, downscalePower)) return true;
+    if (p.brightness !== brightness) return true;
+    if (Math.abs(p.contrast - contrast) > 0.001) return true;
 
-    const settings = wrapper.cppPainting.getProceduralSettings();
+    const settings =
+      typeof p?.getProceduralSettings === "function"
+        ? p.getProceduralSettings()
+        : null;
     if (settings) {
       if (String(settings.seed) !== frameSeed) return true;
       if (settings.tintHex !== frameTint) return true;
@@ -156,35 +155,35 @@
     return false;
   }
 
-  function syncVisualsAndRefresh() {
-    if (!wrapper.cppPainting || !hasWrapperChanged()) return;
+  async function syncVisualsAndRefresh() {
+    const p = wrapper?.painting;
+    if (!p || !hasWrapperChanged()) return;
 
-    wrapper.cppPainting.pixelPerBlock = Math.pow(2, downscalePower);
+    p.pixelPerBlock = Math.pow(2, downscalePower);
 
-    const settings = wrapper.cppPainting.getProceduralSettings();
+    const settings =
+      typeof p?.getProceduralSettings === "function"
+        ? p.getProceduralSettings()
+        : null;
     if (settings) {
       settings.seed = BigInt(frameSeed);
       settings.tintHex = frameTint;
     }
 
-    wrapper.cppPainting.brightness = brightness;
-    wrapper.cppPainting.contrast = contrast;
+    await p.setBrightness?.(brightness);
+    await p.setContrast?.(contrast);
 
-    wrapper.cppPainting.refresh();
-
-    wrapper.cachedPaintingJS = undefined;
     updateCanvases();
   }
 
   function toggleRatio(ratio: string) {
     if (activeRatios.includes(ratio)) {
       if (activeRatios.length === 1) return;
-      wrapper.cppPainting.removeRatio(ratio);
+      wrapper.painting.removeRatio(ratio);
     } else {
-      wrapper.cppPainting.addRatio(ratio);
+      wrapper.painting.addRatio(ratio);
     }
 
-    wrapper.cachedPaintingJS = undefined;
     paintingsStore.set($paintingsStore);
     centerActiveRatio();
   }
@@ -193,7 +192,6 @@
     if (previewRatio === ratio) return;
     previewRatio = ratio;
 
-    wrapper.cachedPaintingJS = undefined;
     renderPainting();
     centerActiveRatio();
   }
@@ -222,10 +220,14 @@
     ) as HTMLElement;
 
     if (activeEl) {
-      activeEl.scrollIntoView({
+      const centerPosition =
+        activeEl.offsetLeft +
+        activeEl.offsetWidth / 2 -
+        ratioTabsContainer.offsetWidth / 2;
+
+      ratioTabsContainer.scrollTo({
+        left: centerPosition,
         behavior: "smooth",
-        block: "nearest",
-        inline: "center",
       });
     }
   }
@@ -244,64 +246,58 @@
     c.style.height = `${cssH}px`;
   }
 
-  function extractJSImageData(img: ImageData) {
-    const width = img.width;
-    const height = img.height;
-
-    const pixelView = img.getPixels();
-    const clampedArray = new Uint8ClampedArray(pixelView);
-
-    return new globalThis.ImageData(clampedArray, width, height);
+  function drawDataUrlToCanvas(canvas: HTMLCanvasElement, dataUrl: string) {
+    if (!canvas || !dataUrl) return;
+    const img = new Image();
+    img.onload = () => {
+      scalePixelCanvas(canvas, img.width, img.height);
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(img, 0, 0);
+      }
+    };
+    img.src = dataUrl;
   }
 
-  function drawJSImageData(
-    canvas: HTMLCanvasElement,
-    jsImageData: globalThis.ImageData,
-  ) {
-    if (!canvas) return;
-
-    scalePixelCanvas(canvas, jsImageData.width, jsImageData.height);
-    const ctx = canvas.getContext("2d");
-    if (ctx) ctx.putImageData(jsImageData, 0, 0);
-  }
-
-  function renderOriginalImage() {
-    if (!wrapper.cachedOriginalJS) {
-      const img = wrapper.cppPainting.croppedOriginalData();
-      wrapper.cachedOriginalJS = extractJSImageData(img);
-      img.delete();
+  async function renderOriginalImage() {
+    const p = wrapper?.painting;
+    if (!p) return;
+    if (typeof p.getPaintingUrl === "function") {
+      const dataUrl = await p.getPaintingUrl("");
+      drawDataUrlToCanvas(originalImageCanvas, dataUrl);
     }
-    drawJSImageData(originalImageCanvas, wrapper.cachedOriginalJS);
   }
 
-  function renderPainting() {
-    if (!wrapper.cachedPaintingJS && activeRatios.length > 0) {
-      const img = wrapper.cppPainting.paintingData(previewRatio);
-      wrapper.cachedPaintingJS = extractJSImageData(img);
-      img.delete();
+  async function renderPainting() {
+    const p = wrapper?.painting;
+    if (!p) return;
+    if (typeof p.getPaintingUrl === "function") {
+      const dataUrl = await p.getPaintingUrl(previewRatio);
+      drawDataUrlToCanvas(paintingCanvas, dataUrl);
     }
-
-    if (wrapper.cachedPaintingJS)
-      drawJSImageData(paintingCanvas, wrapper.cachedPaintingJS);
   }
 
-  function rotateClockwise() {
-    wrapper.cppPainting.rotateClockwise();
-    wrapper.cachedOriginalJS = wrapper.cachedPaintingJS = undefined;
+  async function rotateClockwise() {
+    await wrapper.painting.rotateClockwise();
+    await pullFromCpp(wrapper);
+    updateCanvases();
     paintingsStore.set($paintingsStore);
   }
 
-  function rotateAnticlockwise() {
-    wrapper.cppPainting.rotateAnticlockwise();
-    wrapper.cachedOriginalJS = wrapper.cachedPaintingJS = undefined;
+  async function rotateAnticlockwise() {
+    await wrapper.painting.rotateAnticlockwise();
+    await pullFromCpp(wrapper);
+    updateCanvases();
     paintingsStore.set($paintingsStore);
   }
 
-  function remove() {
-    $workspace.removePainting(wrapper.cppPainting.stringId());
+  async function remove() {
+    const target = wrapper?.painting;
+    if (!target) return;
+    if ($workspace) await $workspace.removePainting(target.stringId());
     paintingsStore.update((list) => list.filter((p) => p !== wrapper));
-
-    wrapper.cppPainting.delete();
+    if (typeof target.dispose === "function") await target.dispose();
   }
 
   function crop() {
@@ -310,24 +306,31 @@
 
   function handleCropConfirm() {
     showCropModal = false;
-    wrapper.cachedPaintingJS = wrapper.cachedOriginalJS = undefined;
     updateCanvases();
   }
 
-  function clone() {
-    const newCppPainting = wrapper.cppPainting.clone();
-    newCppPainting.title = title + " (copy)";
+  async function clone() {
+    const target = wrapper?.painting;
+    if (!target || !$workspace) return;
 
-    $workspace.addPainting(newCppPainting);
+    let newPainting: any;
+    if (typeof (target as any).clone === "function") {
+      newPainting = await (target as any).clone();
+    } else {
+      newPainting = await $workspace.addPainting(target.stringId());
+    }
+    if (newPainting?.setTitle) {
+      await newPainting.setTitle((title || "Painting") + " (copy)");
+    }
 
     paintingsStore.update((list) => {
       const index = list.findIndex(
-        (p) => p.cppPainting.stringId() === wrapper.cppPainting.stringId(),
+        (p) => p.painting.stringId() === target.stringId(),
       );
 
       const newList = [...list];
       newList.splice(index + 1, 0, {
-        cppPainting: newCppPainting,
+        painting: newPainting,
         selected: false,
       });
 
@@ -335,21 +338,22 @@
     });
   }
 
-  function prettyRatio(cpp_ratio: string) {
-    return cpp_ratio.replace("ratio_", "").replace("x", "×");
-  }
-
   function updateCanvases() {
     renderPainting();
     renderOriginalImage();
   }
 
-  onMount(updateCanvases);
+  onMount(async () => {
+    if ($workspace) {
+      ALL_RATIOS = await $workspace.getReasonableRatios();
+    }
+    updateCanvases();
+  });
 </script>
 
 {#if showCropModal}
   <CropModal
-    painting={wrapper.cppPainting}
+    painting={wrapper.painting}
     onConfirm={handleCropConfirm}
     onCancel={() => (showCropModal = false)}
   />
@@ -402,7 +406,6 @@
         {clone}
         {remove}
         updateSelected={() => {
-          console.info("Miauuu");
           wrapper.selected = selected;
           $paintingsStore = $paintingsStore;
         }}
@@ -437,12 +440,11 @@
         </div>
       </div>
 
-      <PaintingParams
-        bind:title
-        bind:author
-        bind:showMoreOptions
-        onMetadataChange={syncMetadata}
-      />
+      <div class="arrow-wrapper">
+        <div class="transformation-ratio-selection">
+          <img class="rightarrow" src="rightarrow.svg" alt="Right arrow" />
+        </div>
+      </div>
 
       <div class="preview-container">
         <PaintingCanvas bind:canvas={paintingCanvas} />
@@ -521,7 +523,7 @@
             </div>
 
             <div class="section-body section-resolution">
-              <input
+              <Wiwinput
                 type="range"
                 min="3"
                 max="8"
@@ -557,7 +559,7 @@
             </div>
 
             <div class="section-body section-brightness">
-              <input
+              <Wiwinput
                 type="range"
                 min="-255"
                 max="255"
@@ -587,7 +589,7 @@
             </div>
 
             <div class="section-body section-contrast">
-              <input
+              <Wiwinput
                 type="range"
                 min="0"
                 max="10"
@@ -621,10 +623,9 @@
                 small
                 bind:checked={disableFrame}
                 onclick={() => {
-                  if (disableFrame) wrapper.cppPainting.useNoFrame();
-                  else wrapper.cppPainting.useProceduralFrame();
+                  if (disableFrame) wrapper.painting.useNoFrame();
+                  else wrapper.painting.useProceduralFrame();
 
-                  wrapper.cachedPaintingJS = undefined;
                   updateCanvases();
                 }}
               >
@@ -890,10 +891,6 @@
   .section-resolution {
     display: flex;
     align-items: center;
-
-    & input {
-      flex: 1;
-    }
   }
 
   .section-frame {
@@ -913,5 +910,26 @@
   .section-contrast {
     display: flex;
     align-items: center;
+  }
+
+  .arrow-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+  }
+  .transformation-ratio-selection {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0 10px;
+    user-select: none;
+  }
+
+  .rightarrow {
+    width: 100%;
+    margin-bottom: 40px;
   }
 </style>

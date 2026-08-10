@@ -1,22 +1,14 @@
 <script lang="ts">
-  import {
-    ProportionsIcon,
-    RotateCcwIcon,
-    RotateCwIcon,
-    UserIcon,
-    TextCursorIcon,
-    Trash2Icon,
-  } from "@lucide/svelte";
   import { paintingsStore } from "../stores/paintingsStore";
-  import RatioSelect from "./RatioSelect.svelte";
   import Button from "../components/Button.svelte";
+  import Wiwinput from "../components/Wiwinput.svelte";
 
   $: hasSelected = $paintingsStore.some((painting) => painting.selected);
 
   function rotateSelectedCCW() {
     $paintingsStore.forEach((painting) => {
       if (painting.selected) {
-        painting.cppPainting.rotateAnticlockwise();
+        painting.painting.rotateAnticlockwise();
       }
     });
     paintingsStore.update((paintings) => paintings);
@@ -25,7 +17,7 @@
   function rotateSelectedCW() {
     $paintingsStore.forEach((painting) => {
       if (painting.selected) {
-        painting.cppPainting.rotateClockwise();
+        painting.painting.rotateClockwise();
       }
     });
     paintingsStore.update((paintings) => paintings);
@@ -34,20 +26,17 @@
   function deleteSelected() {
     paintingsStore.update((paintings) =>
       paintings.filter((painting) => {
-        let shouldDelete = painting.selected;
-        if (shouldDelete) painting.cppPainting.delete();
-        return !shouldDelete;
+        if (painting.selected) painting.painting.dispose();
+        return !painting.selected;
       }),
     );
   }
 
   let dialog: HTMLDialogElement;
-  let editMode: "title" | "author" | "aspect ratio" | "delete selected";
+  let editMode: "title" | "author" | "delete selected";
   let bulkInput = "";
 
-  function openModal(
-    mode: "title" | "author" | "aspect ratio" | "delete selected",
-  ) {
+  function openModal(mode: "title" | "author" | "delete selected") {
     editMode = mode;
     bulkInput = ""; // clear previous input
     dialog.showModal();
@@ -58,11 +47,9 @@
       paintings.forEach((p) => {
         if (p.selected) {
           if (editMode === "title") {
-            p.cppPainting.title = bulkInput;
+            p.painting.title = bulkInput;
           } else if (editMode == "author") {
-            p.cppPainting.author = bulkInput;
-          } else if (editMode == "aspect ratio") {
-            p.cppPainting.ratio = bulkInput;
+            p.painting.author = bulkInput;
           }
         }
       });
@@ -97,15 +84,11 @@
     <div class="modal-content">
       <span>Set {editMode} for selected paintings</span>
 
-      {#if editMode == "aspect ratio"}
-        <RatioSelect bind:value={bulkInput} />
-      {:else}
-        <input
-          type="text"
-          bind:value={bulkInput}
-          placeholder="Enter new {editMode}..."
-        />
-      {/if}
+      <Wiwinput
+        type="text"
+        bind:value={bulkInput}
+        placeholder="Enter new {editMode}..."
+      />
 
       <div class="modal-actions">
         <Button transparent onclick={() => dialog.close()}>Cancel</Button>
@@ -117,12 +100,6 @@
 
 {#if hasSelected}
   <div id="bulk-tools">
-    <Button
-      onclick={() => openModal("aspect ratio")}
-      title="Set aspect ratio for selected paintings"
-      icon="Proportions"
-    />
-
     <Button
       onclick={rotateSelectedCCW}
       title="Rotate selected paintings counterclockwise"

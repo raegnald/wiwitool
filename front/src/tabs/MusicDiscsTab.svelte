@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { MainModule } from "../bindings/wiwitool";
   import {
     formatWorkspaceName,
     MAX_WORKSPACE_NAME_LENGTH,
@@ -21,7 +20,9 @@
   import ListOption from "../components/button-list/ListOption.svelte";
   import ListSectionTitle from "../components/button-list/ListSectionTitle.svelte";
 
-  export let module: MainModule;
+  import { fileService } from "../services/backendProvider";
+  import Wiwinput from "../components/Wiwinput.svelte";
+
   export let move: (id: string) => void;
 
   let musicDiscsNamespaceOverride: string = "";
@@ -32,67 +33,82 @@
   $: allSelected = $musicDiscsStore.every((musicDisc) => musicDisc.selected);
   $: selectedCount = $musicDiscsStore.filter((disc) => disc.selected).length;
 
-  onMount(() => {
-    musicDiscsNamespaceOverride = $workspace
-      .getMusicDiscsNamespaceOverride()
-      .get();
+  onMount(async () => {
+    if ($workspace) {
+      const ns = await $workspace.getMusicDiscsNamespaceOverride();
+      if (ns) musicDiscsNamespaceOverride = await ns.get();
+    }
   });
 
-  async function handleDrop(file: File) {
-    if (!module || !$workspace) return;
-
-    const cppDisc = new module.MusicDisc();
-
+  async function processAudioTags(fileOrBlob: Blob, disc: any) {
     try {
-      const metadata = await parseBlob(file);
-
-      cppDisc.title = metadata.common.title || file.name.split(".")[0];
-      cppDisc.artist = metadata.common.artist || "";
-
-      const picture = metadata.common.picture?.[0];
-      if (picture && picture.data) {
-        const cleanBytes = new Uint8Array(picture.data);
-        cppDisc.setOriginalCoverFromBytes(cleanBytes);
+      const metadata = await parseBlob(fileOrBlob);
+      if (metadata?.common) {
+        if (metadata.common.title) {
+          await disc.setTitle(metadata.common.title);
+        }
+        if (metadata.common.artist) {
+          await disc.setArtist(metadata.common.artist);
+        }
+        if (metadata.common.picture && metadata.common.picture.length > 0) {
+          const pic = metadata.common.picture[0];
+          const picBytes = new Uint8Array(pic.data);
+          if (typeof disc.setOriginalCoverFromBytes === "function") {
+            await disc.setOriginalCoverFromBytes(picBytes);
+          } else if (typeof disc.setCoverFromBytes === "function") {
+            await disc.setCoverFromBytes(picBytes);
+          }
+        }
       }
-    } catch (e) {
-      console.warn("Could not parse audio metadata:", e);
-      cppDisc.title = file.name.split(".")[0];
-      cppDisc.artist = "Unknown";
+    } catch (err) {
+      console.warn("Could not parse embedded audio tags/artwork:", err);
     }
+  }
 
-    // Decoding the heavy PCM audio
-    const buffer = await file.arrayBuffer();
-    let audioContext = new AudioContext();
-    let audioBuffer = await audioContext.decodeAudioData(buffer);
+  async function openPicker() {
+    if (!$workspace) return;
+    try {
+      const picked = await $fileService.openAudioFile();
+      if (!picked) return;
+      const disc = await $workspace.addMusicDisc(picked.path || picked.data);
+      if (picked.name) await disc.setTitle(picked.name.split(".")[0]);
 
-    let leftChannel = audioBuffer.getChannelData(0);
-    let rightChannel =
-      audioBuffer.numberOfChannels > 1 ? audioBuffer.getChannelData(1) : null;
+      if (picked.data && picked.data.length > 0) {
+        const blob = new Blob([picked.data as BlobPart]);
+        await processAudioTags(blob, disc);
+      } else if (picked.path) {
+        try {
+          const res = await fetch(picked.path);
+          const blob = await res.blob();
+          await processAudioTags(blob, disc);
+        } catch (e) {}
+      }
 
-    let leftBytes = new Uint8Array(
-      leftChannel.buffer,
-      leftChannel.byteOffset,
-      leftChannel.byteLength,
-    );
+      musicDiscsStore.update((current) => [
+        ...current,
+        { disc, selected: false },
+      ]);
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
-    let rightBytes = rightChannel
-      ? new Uint8Array(
-          rightChannel.buffer,
-          rightChannel.byteOffset,
-          rightChannel.byteLength,
-        )
-      : new Uint8Array();
+  async function handleDrop(file: File) {
+    if (!$workspace) return;
+    try {
+      const input = (file as any).path || file;
+      const disc = await $workspace.addMusicDisc(input);
+      if (file.name) await disc.setTitle(file.name.split(".")[0]);
 
-    console.log("Encoding audio to OGG...");
-    cppDisc.setPcmAudio(leftBytes, rightBytes, audioBuffer.sampleRate);
-    console.log("Encoding complete!");
+      await processAudioTags(file, disc);
 
-    $workspace.addMusicDisc(cppDisc);
-
-    musicDiscsStore.update((current) => [
-      ...current,
-      { cppDisc, selected: false },
-    ]);
+      musicDiscsStore.update((current) => [
+        ...current,
+        { disc, selected: false },
+      ]);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   function getSupportedAudioFormats() {
@@ -126,19 +142,19 @@
     {/if}
 
     <div>
-      <input
+      <Wiwinput
         type="text"
         placeholder="Music discs namespace override"
         bind:value={musicDiscsNamespaceOverride}
-        on:input={() => {
+        oninput={() => {
           musicDiscsNamespaceOverride = formatWorkspaceName(
             musicDiscsNamespaceOverride,
           );
         }}
-        on:change={() =>
+        onchange={() =>
           $workspace
-            .getMusicDiscsNamespaceOverride()
-            .set(musicDiscsNamespaceOverride)}
+            ?.getMusicDiscsNamespaceOverride()
+            .then((ns) => ns?.set(musicDiscsNamespaceOverride))}
       />
 
       <span
@@ -162,8 +178,8 @@
         onclick={() => {
           musicDiscsNamespaceOverride = "";
           $workspace
-            .getMusicDiscsNamespaceOverride()
-            .set(musicDiscsNamespaceOverride);
+            ?.getMusicDiscsNamespaceOverride()
+            .then((ns) => ns?.set(musicDiscsNamespaceOverride));
         }}
         disabled={musicDiscsNamespaceOverride == ""}
       >
@@ -198,7 +214,7 @@
         </center>
 
         <div class="empty-actions">
-          <Button icon="FolderInput" onclick={filePicker}>
+          <Button icon="FolderInput" onclick={openPicker}>
             Select from file picker
           </Button>
         </div>
@@ -251,8 +267,8 @@
       </div>
     {/if}
 
-    {#each [...$musicDiscsStore].reverse() as wrapper (wrapper.cppDisc.stringId())}
-      <MusicDiscCard {module} {wrapper} />
+    {#each [...$musicDiscsStore].reverse() as wrapper ((wrapper.disc || wrapper.disc).stringId())}
+      <MusicDiscCard {wrapper} />
     {/each}
   </div>
 

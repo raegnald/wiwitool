@@ -1,31 +1,30 @@
 <script lang="ts">
   import { paintingsStore } from "../stores/paintingsStore";
-  import {
-    type ImageData,
-    type MainModule,
-    type MinecraftPacker,
-  } from "../bindings/wiwitool";
   import { formatWorkspaceName, workspace } from "../stores/workspaceStore";
   import Button from "../components/Button.svelte";
-  import { formatRatio } from "../paintings/ratios";
   import { musicDiscsStore } from "../stores/musicDiscsStore";
-  import { formatSeconds } from "../music/seconds";
   import { ImageUpIcon, PackageOpenIcon } from "@lucide/svelte";
   import { onDestroy, onMount } from "svelte";
   import DropZone from "../components/DropZone.svelte";
 
-  export let module: MainModule;
+  import { fileService } from "../services/backendProvider";
+  import Wiwinput from "../components/Wiwinput.svelte";
+  import { prettyRatio } from "../paintings/ratios";
+
   export let move: (id: string) => void;
 
-  let workspaceName: string = null;
+  let workspaceName: string = "";
   let workspaceIconSrc: string = "";
 
-  let firstTimePack: boolean = false;
+  let firstTimePack: boolean = true;
   let generating = false;
 
-  $: if (workspaceName != null) {
-    $workspace.workspaceName = workspaceName =
-      formatWorkspaceName(workspaceName);
+  $: if (workspaceName && $workspace) {
+    const formatted = formatWorkspaceName(workspaceName);
+    if (formatted !== workspaceName) {
+      workspaceName = formatted;
+    }
+    $workspace.setWorkspaceName(workspaceName);
   }
 
   $: validGeneratableConfig =
@@ -33,113 +32,80 @@
     $musicDiscsStore.length > 0 ||
     ($workspace && $workspace.invisibleItemFrames);
 
-  onMount(() => {
-    workspaceName = $workspace.workspaceName;
-    firstTimePack = $workspace.isWorkspaceNew();
+  let iifNamespace: string = "";
 
-    updateWorkspaceIcon();
+  async function updateWorkspaceIcon() {
+    if (!$workspace) return;
+    try {
+      workspaceIconSrc = (await $workspace.getWorkspaceImageUrl()) || "";
+    } catch (e) {
+      console.error("Failed to load workspace icon:", e);
+    }
+  }
+
+  async function updateIIFNamespace() {
+    if (!$workspace) return;
+    try {
+      const override = await $workspace.getIIFNamespaceOverride();
+      if (override) {
+        iifNamespace = (await override.get()) || "";
+      }
+    } catch (e) {
+      console.error("Failed to load IIF namespace:", e);
+    }
+  }
+
+  onMount(async () => {
+    if ($workspace) {
+      const currentName =
+        typeof ($workspace as any).getWorkspaceName === "function"
+          ? await ($workspace as any).getWorkspaceName()
+          : $workspace.workspaceName;
+      workspaceName = currentName || "";
+
+      if (typeof ($workspace as any).isWorkspaceNew === "function") {
+        firstTimePack = await ($workspace as any).isWorkspaceNew();
+      }
+
+      await updateWorkspaceIcon();
+      await updateIIFNamespace();
+    }
   });
 
   onDestroy(() => {
-    if (workspaceIconSrc) URL.revokeObjectURL(workspaceIconSrc);
+    if (workspaceIconSrc && workspaceIconSrc.startsWith("blob:")) {
+      URL.revokeObjectURL(workspaceIconSrc);
+    }
   });
 
   async function generatePacks() {
     generating = true;
-    await new Promise((resolve) => setTimeout(resolve, 50));
-
-    $workspace.workspaceName = workspaceName;
-
     try {
-      const zipPath = $workspace.generateZip();
-      download(zipPath);
-    } catch (e: any) {
-      // Check if the error is a C++ memory pointer
-      if (typeof e === "number" && module.getExceptionMessage) {
-        const [type, message] = module.getExceptionMessage(e);
-        console.error(`C++ Exception (${type}): ${message}`);
-        // alert(`Failed to generate packs!\nType: ${type}\nMessage: ${message}`);
-      } else {
-        console.error("Unknown JS Error generating packs:", e);
-        // alert("Failed to generate packs! Check console for details.");
+      if ($workspace) {
+        if (workspaceName) await $workspace.setWorkspaceName(workspaceName);
+        const zipDataOrPath = await $workspace.generateZip();
+        await $fileService.savePackFile(
+          ($workspace.workspaceName || "wiwitool_pack") + ".zip",
+          zipDataOrPath,
+        );
+        firstTimePack = false;
       }
+    } catch (e: any) {
+      console.error("Error generating packs:", e);
     } finally {
       generating = false;
     }
-  }
-
-  function updateWorkspaceIcon() {
-    const icon = $workspace.workspaceImage;
-
-    if (icon && !icon.empty()) {
-      const pngBytes = icon.encodePng();
-      const blob = new Blob([pngBytes], { type: "image/png" });
-
-      if (workspaceIconSrc) URL.revokeObjectURL(workspaceIconSrc);
-      workspaceIconSrc = URL.createObjectURL(blob);
-      icon.delete();
-    } else {
-      if (workspaceIconSrc) URL.revokeObjectURL(workspaceIconSrc);
-      workspaceIconSrc = "";
-    }
-  }
-
-  async function loadWorkspaceIcon(file: File) {
-    const buffer = await file.arrayBuffer();
-    const uint8View = new Uint8Array(buffer);
-
-    $workspace.setWorkspaceIconFromBytes(uint8View);
-    updateWorkspaceIcon();
-  }
-
-  function download(zipPath: string) {
-    if (!module) return;
-
-    try {
-      const fileContent = module.FS.readFile(zipPath);
-
-      const blob = new Blob([fileContent], { type: "application/zip" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-
-      a.href = url;
-      a.download = $workspace.workspaceName + ".zip";
-      a.click();
-
-      URL.revokeObjectURL(url);
-
-      module.FS.unlink(zipPath);
-    } catch (e) {
-      console.error("Error reading generated file:", e);
-      alert("Generation finished, but failed to read zip");
-    }
-  }
-
-  function encodeImage(imgData: ImageData) {
-    const blob = new Blob([imgData.encodePng()], { type: "image/png" });
-    return URL.createObjectURL(blob);
-  }
-
-  function prettyRatio(cpp_ratio: string) {
-    return cpp_ratio.replace("ratio_", "").replace("x", "×");
   }
 </script>
 
 {#if validGeneratableConfig}
   <div class="app-card project-details">
-    <div
-      style={`
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        justify-content: space-between;
-      `}
-    >
+    <div style="flex: 1">
       <div style="flex: 1">
-        <span>Project name &nbsp;</span>
-        <input
+        <Wiwinput
           type="text"
-          bind:value={workspaceName}
+          placeholder="Project name"
+          value={workspaceName}
           disabled={!firstTimePack}
         />
 
@@ -152,10 +118,11 @@
               existing items. Choose wisely as it can't be changed later.
             </span>
           {:else}
-            <div style="display: flex; gap: 10px; align-items: center;">
-              <span>
-                The pack name should not be changed after your first export.
-              </span>
+            <div>
+              <p>
+                The name of your pack should not be changed after the first
+                export.
+              </p>
               <Button small secondary onclick={() => (firstTimePack = true)}>
                 I know what I'm doing
               </Button>
@@ -170,9 +137,11 @@
             transparent
             small
             destructive
-            onclick={() => {
-              $workspace.resetWorkspaceImage();
-              updateWorkspaceIcon();
+            onclick={async () => {
+              if ($workspace) {
+                await $workspace.resetWorkspaceImage();
+                await updateWorkspaceIcon();
+              }
             }}
           >
             Reset project icon
@@ -195,7 +164,13 @@
         ${workspaceIconSrc ? "background-color: transparent;" : ""}
         overflow: hidden;
       `}
-        handler={loadWorkspaceIcon}
+        handler={async (file) => {
+          if ($workspace) {
+            const input = (file as any).path || file;
+            await $workspace.setWorkspaceImage(input);
+            await updateWorkspaceIcon();
+          }
+        }}
         let:filePicker
       >
         {#if workspaceIconSrc}
@@ -237,47 +212,35 @@
 
     <ul class="pack-contents">
       {#if $paintingsStore.length > 0}
-        {@const totalRatios = $paintingsStore.reduce(
-          (sum, painting) => sum + painting.cppPainting.getRatios().length,
-          0,
-        )}
-        {@const oneSizePerPainting = $paintingsStore.every(
-          (painting) => painting.cppPainting.getRatios().length === 1,
-        )}
-
         <li class="pack-content-one">
           <span class="bold-section">
             <b>
               {$paintingsStore.length}
               {$paintingsStore.length != 1 ? "paintings" : "painting"}
             </b>
-            {#if !oneSizePerPainting}
-              <span>
-                &middot;
-                {totalRatios}
-                {totalRatios === 1 ? "size" : "sizes"}
-              </span>
-            {/if}
-            <br />
-            <span>{$workspace.getPaintingsNamespaceOverride().get()}</span>
           </span>
           <ul>
-            {#each [...$paintingsStore].reverse() as wrapper (wrapper.cppPainting.stringId())}
+            {#each [...$paintingsStore].reverse() as wrapper (wrapper.painting.stringId())}
+              {@const p = wrapper.painting}
               <li class="centered">
-                <img
-                  class="item-image"
-                  src={encodeImage(wrapper.cppPainting.iconData())}
-                  alt="Painting icon"
-                />
-                {#if wrapper.cppPainting.author}
-                  {wrapper.cppPainting.author} &ndash;
-                {/if}
-                {wrapper.cppPainting.title}
-                <div class="pill-container">
-                  {#each wrapper.cppPainting.getRatios() as ratio, index}
-                    <span class="pill">{prettyRatio(ratio)}</span>
-                  {/each}
-                </div>
+                {#await p.getIconUrl() then iconUrl}
+                  {#if iconUrl}
+                    <img class="item-image" src={iconUrl} alt={p.title} />
+                  {/if}
+                {/await}
+                <span>
+                  {#if p.author}
+                    {p.author} &ndash;
+                  {/if}
+                  {p.title}
+                </span>
+                {#await p.getRatios() then ratios}
+                  <div class="pill-container">
+                    {#each ratios as ratio, index}
+                      <span class="pill">{prettyRatio(ratio)}</span>
+                    {/each}
+                  </div>
+                {/await}
               </li>
             {/each}
 
@@ -302,22 +265,22 @@
               {$musicDiscsStore.length}
               music disc{$musicDiscsStore.length != 1 ? "s" : ""}
             </b>
-            <br />
-            <span>{$workspace.getMusicDiscsNamespaceOverride().get()}</span>
           </span>
           <ul>
-            {#each [...$musicDiscsStore].reverse() as wrapper (wrapper.cppDisc.stringId())}
+            {#each [...$musicDiscsStore].reverse() as wrapper (wrapper.disc.stringId())}
+              {@const d = wrapper.disc}
               <li class="centered">
-                <img
-                  class="item-image"
-                  src={encodeImage(wrapper.cppDisc.getDiscItemImage())}
-                  alt="Painting icon"
-                />
-                {#if wrapper.cppDisc.artist}
-                  {wrapper.cppDisc.artist} &ndash;
-                {/if}
-                {wrapper.cppDisc.title}
-                ({formatSeconds(wrapper.cppDisc.getTrimmedDuration())})
+                {#await d.getCoverUrl() then coverUrl}
+                  {#if coverUrl}
+                    <img class="item-image" src={coverUrl} alt={d.title} />
+                  {/if}
+                {/await}
+                <span>
+                  {#if d.artist}
+                    {d.artist} &ndash;
+                  {/if}
+                  {d.title}
+                </span>
               </li>
             {/each}
 
@@ -339,8 +302,10 @@
         <li class="pack-content-one">
           <span class="bold-section">
             <b>Invisible item frames</b>
-            <br />
-            <span>{$workspace.getIIFNamespaceOverride().get()}</span>
+            {#if iifNamespace}
+              <br />
+              <span>{iifNamespace}</span>
+            {/if}
           </span>
           <ul>
             <li class="centered">

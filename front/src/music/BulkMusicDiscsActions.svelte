@@ -1,5 +1,6 @@
 <script lang="ts">
   import Button from "../components/Button.svelte";
+  import Wiwinput from "../components/Wiwinput.svelte";
   import { musicDiscsStore } from "../stores/musicDiscsStore";
 
   $: hasSelected = $musicDiscsStore.some((musicDisc) => musicDisc.selected);
@@ -8,7 +9,7 @@
     musicDiscsStore.update((musicDiscs) =>
       musicDiscs.filter((musicDisc) => {
         let shouldDelete = musicDisc.selected;
-        if (shouldDelete) musicDisc.cppDisc.delete();
+        if (shouldDelete) musicDisc.disc.dispose?.();
         return !shouldDelete;
       }),
     );
@@ -36,14 +37,14 @@
       discs.forEach((d) => {
         if (d.selected) {
           if (editMode === "artist") {
-            d.cppDisc.artist = bulkInput;
+            d.disc.artist = bulkInput;
           } else if (editMode == "silence gap") {
-            // d.cppDisc. = bulkInput;
+            // d.disc. = bulkInput;
             alert("Silence gap not implmented!"); // FOTUT
           } else if (editMode == "comparator output") {
-            d.cppDisc.comparatorOutput = parseInt(bulkInput);
+            d.disc.comparatorOutput = parseInt(bulkInput);
           } else if (editMode == "randomise each") {
-            d.cppDisc.comparatorOutput = Math.floor(Math.random() * 14 + 1);
+            d.disc.comparatorOutput = Math.floor(Math.random() * 14 + 1);
           }
         }
       });
@@ -79,13 +80,13 @@
       <span>Set {editMode} for selected music discs</span>
 
       {#if editMode == "artist"}
-        <input
+        <Wiwinput
           type="text"
           bind:value={bulkInput}
           placeholder="Enter new artist..."
         />
       {:else if editMode == "comparator output"}
-        <input
+        <Wiwinput
           type="number"
           min="1"
           max="15"
@@ -93,7 +94,7 @@
           placeholder="Enter new {editMode}..."
         />
       {:else if editMode == "silence gap"}
-        <input
+        <Wiwinput
           type="number"
           min="0"
           bind:value={bulkInput}

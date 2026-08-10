@@ -1,10 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { getWasmModule, wasmReady } from "./stores/wasmStore";
   import { workspace } from "./stores/workspaceStore";
-  import type { MainModule } from "./bindings/wiwitool";
 
   import Toasts from "./components/Toasts.svelte";
+  import DynamicTitleBar from "./components/title-bar/DynamicTitleBar.svelte";
 
   import Tabs from "./components/tabs-component/Tabs.svelte";
   import Tab from "./components/tabs-component/Tab.svelte";
@@ -13,76 +12,99 @@
   import MiscTab from "./tabs/MiscTab.svelte";
   import GenerateTab from "./tabs/GenerateTab.svelte";
   import StartTab from "./tabs/StartTab.svelte";
-  import ComponentsShowcaseTab from "./tabs/ComponentsShowcaseTab.svelte";
 
   import { paintingsStore } from "./stores/paintingsStore";
   import ChangelogTab from "./tabs/ChangelogTab.svelte";
   import MusicDiscsTab from "./tabs/MusicDiscsTab.svelte";
   import { musicDiscsStore } from "./stores/musicDiscsStore";
 
-  let module: MainModule | null = $state.raw(null);
+  import { backendType, initialiseBackend } from "./services/backendProvider";
 
-  function resetApp() {
+  let mainContentScrolled = $state(false);
+
+  function handleMainContentScroll(event: Event) {
+    const element = event.currentTarget as HTMLDivElement;
+    mainContentScrolled = element.scrollTop > 0;
+  }
+
+  async function resetApp() {
     paintingsStore.set([]);
     musicDiscsStore.set([]);
-    $workspace.delete();
-    $workspace = new module.Wiwiworkspace();
+    if ($workspace) {
+      await $workspace.dispose();
+    }
+    $workspace = await initialiseBackend();
   }
 
   onMount(async () => {
-    module = await getWasmModule();
-    $workspace = new module.Wiwiworkspace();
+    try {
+      const activeWs = await initialiseBackend();
+      $workspace = activeWs;
+    } catch (e) {
+      console.error("[App] Backend initialisation failed:", e);
+    }
   });
 </script>
 
-<div>
-  <div id="wiwi-logo-wide">
-    <img src="/logo-wide.svg" alt="Wide logo" />
-  </div>
+<div class="app-container">
+  {#if $backendType === "native"}
+    <DynamicTitleBar {mainContentScrolled} />
+  {/if}
 
-  <Tabs {resetApp}>
-    <Tab hidden title="Start" id="start" let:move>
-      <StartTab {module} {move} />
-    </Tab>
+  <div class="main-scroll-content" onscroll={handleMainContentScroll}>
+    <div id="wiwi-logo-wide">
+      <img src="/logo-wide.svg" alt="Wide logo" />
+    </div>
 
-    {#if import.meta.env.DEV}
-      <Tab title="Components showcase (dev)" id="dummy">
-        <ComponentsShowcaseTab />
+    <Tabs {resetApp}>
+      <Tab hidden title="Start" id="start" let:move>
+        <StartTab {move} />
       </Tab>
-    {/if}
 
-    <Tab hidden title="Changelog" id="changelog" let:move>
-      <ChangelogTab {move} />
-    </Tab>
+      <Tab hidden title="Changelog" id="changelog" let:move>
+        <ChangelogTab {move} />
+      </Tab>
 
-    <Tab title="Paintings" id="paintings" let:move>
-      <PaintingsTab {module} {move} />
-    </Tab>
+      <Tab title="Paintings" id="paintings" let:move>
+        <PaintingsTab {move} />
+      </Tab>
 
-    <Tab title="Music discs" id="discs" let:move>
-      <MusicDiscsTab {module} {move} />
-    </Tab>
+      <Tab title="Music discs" id="discs" let:move>
+        <MusicDiscsTab {move} />
+      </Tab>
 
-    <Tab title="Miscellaneous" id="misc" let:move>
-      <MiscTab {move} />
-    </Tab>
+      <Tab title="Miscellaneous" id="misc" let:move>
+        <MiscTab {move} />
+      </Tab>
 
-    <Tab title="Generate" id="generate" let:move>
-      <GenerateTab {module} {move} />
-    </Tab>
-  </Tabs>
+      <Tab title="Generate" id="generate" let:move>
+        <GenerateTab {move} />
+      </Tab>
+    </Tabs>
 
-  <Toasts />
+    <Toasts />
+  </div>
 </div>
 
 <style>
-  main {
-    margin-bottom: 200px;
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+
+  .main-scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   #wiwi-logo-wide {
     display: flex;
     justify-content: center;
+    padding: 0 10px;
   }
 
   #wiwi-logo-wide img {

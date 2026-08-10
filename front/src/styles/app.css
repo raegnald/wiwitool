@@ -35,9 +35,20 @@ a:hover {
   color: #747bff;
 }
 
+html,
 body {
+  height: 100vh;
   margin: 0;
   padding: 0;
+  overflow: hidden;
+}
+
+#app {
+  height: 100vh;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 h1 {
@@ -78,13 +89,18 @@ dialog {
 }
 
 #app {
-  padding: 2rem 0;
+  padding: 0;
+  margin: 0;
 }
 
 #main-content,
 .app-width {
   max-width: 1024px;
   margin: 0 auto;
+}
+
+#main-content {
+  margin: 0 auto 6em;
 }
 
 details {

@@ -66,43 +66,37 @@
         <td>You can use your own paintings in Minecraft.</td>
       </tr>
       <tr>
+        <!-- svelte-ignore a11y_img_redundant_alt -->
         <td><img src="/before.jpg" alt="Source picture" /></td>
         <td>You load <img src="/rightarrow.svg" alt="Arrow" /></td>
-        <td
-          ><img
-            class="fill-space"
-            src="/faviconcropped.png"
-            alt="App icon"
-          /></td
-        >
+        <td>
+          <img class="fill-space" src="/faviconcropped.png" alt="App icon" />
+        </td>
         <td>Wiwitool generates <img src="/rightarrow.svg" alt="Arrow" /></td>
-        <td
-          ><img
-            class="fill-space"
-            src="/after.png"
-            alt="Transformed image"
-          /></td
-        >
+        <td>
+          <!-- svelte-ignore a11y_img_redundant_alt -->
+          <img class="fill-space" src="/after.png" alt="Transformed image" />
+        </td>
         <td>Import into Minecraft <img src="/rightarrow.svg" alt="Arrow" /></td>
-        <td
-          ><img
+        <td>
+          <img
             src="/painting-in-minecraft.png"
             alt="Viewing the resulting painting in Minecraft"
-          /></td
-        >
+          />
+        </td>
       </tr>
       <tr>
-        <td
-          ><code>sunset.jpg</code>,
-          <code>landscape.png</code>...</td
-        >
+        <td>
+          <code>sunset.jpg</code>,
+          <code>landscape.png</code>...
+        </td>
         <td></td>
         <td><span class="jb9 wiwitool-text">The Wiwitool</span></td>
         <td></td>
-        <td
-          ><code>datapack.zip</code> &
-          <code>respack.zip</code></td
-        >
+        <td>
+          <code>datapack.zip</code> &
+          <code>respack.zip</code>
+        </td>
         <td></td>
         <td>Enjoy your paintings!</td>
       </tr>

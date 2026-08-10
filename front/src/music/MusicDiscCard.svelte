@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
-  import type { MainModule } from "../bindings/wiwitool";
   import {
     musicDiscsStore,
     type MusicDiscWrapper,
@@ -13,16 +12,14 @@
   import {
     MicVocal,
     AudioLines,
-    NotepadText,
     Zap,
     Timer,
     ImageUpIcon,
-    RotateCcw,
   } from "@lucide/svelte";
   import { workspace } from "../stores/workspaceStore";
   import Wiwicheckbox from "../components/Wiwicheckbox.svelte";
+  import Wiwinput from "../components/Wiwinput.svelte";
 
-  export let module: MainModule;
   export let wrapper: MusicDiscWrapper;
 
   let selected = false;
@@ -46,88 +43,88 @@
 
   let deleteDiscDialog: HTMLDialogElement;
 
+  let hasOriginalCover = false;
+
   $: showMoreOptions = false;
 
-  $: if (wrapper && wrapper.cppDisc) {
+  $: if (wrapper && wrapper.disc) {
     selected = wrapper.selected;
-    title = wrapper.cppDisc.title;
-    artist = wrapper.cppDisc.artist;
-    comparatorOutput = wrapper.cppDisc.comparatorOutput;
-    silenceGap = wrapper.cppDisc.silenceGap;
-    hasStonecutterRecipe = wrapper.cppDisc.hasStonecutterRecipe;
-    isCoverModified = wrapper.cppDisc.isCoverModified();
+    title = wrapper.disc.title;
+    artist = wrapper.disc.artist;
+    comparatorOutput = wrapper.disc.comparatorOutput;
+    silenceGap = wrapper.disc.silenceGap;
+    hasStonecutterRecipe = wrapper.disc.hasStonecutterRecipe;
+    updateCoverState();
+  }
+
+  async function updateCoverState() {
+    if (!wrapper?.disc) return;
+    isCoverModified = Boolean(await wrapper.disc.isCoverModified());
+    hasOriginalCover = Boolean(await wrapper.disc.hasOriginalCover());
   }
 
   function syncMetadataToCpp() {
-    wrapper.cppDisc.title = title;
-    wrapper.cppDisc.artist = artist;
-    wrapper.cppDisc.comparatorOutput = comparatorOutput;
-    wrapper.cppDisc.silenceGap = silenceGap;
-    wrapper.cppDisc.hasStonecutterRecipe = hasStonecutterRecipe;
+    wrapper.disc.title = title;
+    wrapper.disc.artist = artist;
+    wrapper.disc.comparatorOutput = comparatorOutput;
+    wrapper.disc.silenceGap = silenceGap;
+    wrapper.disc.hasStonecutterRecipe = hasStonecutterRecipe;
   }
 
-  function handleTrimChange(start: number, end: number) {
+  async function handleTrimChange(start: number, end: number) {
     trimStart = start;
     trimEnd = end;
-    wrapper.cppDisc.setTrim(trimStart, trimEnd);
+    await wrapper.disc.setTrim(trimStart, trimEnd);
   }
 
-  onMount(() => {
-    title = wrapper.cppDisc.title;
-    artist = wrapper.cppDisc.artist;
-    duration = wrapper.cppDisc.getDurationSeconds();
-    comparatorOutput = wrapper.cppDisc.comparatorOutput;
+  onMount(async () => {
+    title = wrapper.disc.title;
+    artist = wrapper.disc.artist;
+    duration = await wrapper.disc.getDurationSeconds();
+    comparatorOutput = wrapper.disc.comparatorOutput;
 
-    trimStart = wrapper.cppDisc.getTrimStart();
-    if (trimStart < 0) trimStart = 0;
+    const ts = await wrapper.disc.getTrimStart();
+    trimStart = ts < 0 ? 0 : ts;
 
-    trimEnd = wrapper.cppDisc.getTrimEnd();
-    if (trimEnd < 0) trimEnd = duration;
+    const te = await wrapper.disc.getTrimEnd();
+    trimEnd = te < 0 ? duration : te;
 
     // Setup Audio Player
-    const oggBytes = wrapper.cppDisc.getOggAudioData();
-    if (oggBytes.length > 0) {
-      const blob = new Blob([oggBytes], { type: "audio/ogg" });
+    const oggBytes = await wrapper.disc.getOggAudioData();
+    if (oggBytes && oggBytes.length > 0) {
+      const blob = new Blob([oggBytes as BlobPart], { type: "audio/ogg" });
       audioSrc = URL.createObjectURL(blob);
     }
 
     // Extract Waveform
-    const waveView = wrapper.cppDisc.getWaveform();
-    waveformData = new Float32Array(waveView);
+    const waveView = await wrapper.disc.getWaveform();
+    waveformData =
+      waveView instanceof Float32Array
+        ? waveView
+        : new Float32Array(waveView || []);
 
     // Extract Cover Art
-    updateCoverImgSrc();
+    await updateCoverImgSrc();
   });
 
   onDestroy(() => {
     if (audioSrc) URL.revokeObjectURL(audioSrc);
-    if (coverImgSrc) URL.revokeObjectURL(coverImgSrc);
   });
 
-  function updateCoverImgSrc() {
-    const coverImage = wrapper.cppDisc.getDiscItemImage();
-    if (coverImage && !coverImage.empty()) {
-      const pngBytes = coverImage.encodePng();
-      const blob = new Blob([pngBytes], { type: "image/png" });
-
-      if (coverImgSrc) URL.revokeObjectURL(coverImgSrc);
-      coverImgSrc = URL.createObjectURL(blob);
-      coverImage.delete();
-    } else {
-      if (coverImgSrc) URL.revokeObjectURL(coverImgSrc);
-      coverImgSrc = "";
-    }
+  async function updateCoverImgSrc() {
+    coverImgSrc = (await wrapper.disc.getCoverUrl()) || "";
+    await updateCoverState();
   }
 
-  function removeCoverImage() {
-    wrapper.cppDisc.removeCover();
-    updateCoverImgSrc();
+  async function removeCoverImage() {
+    await wrapper.disc.removeCover();
+    await updateCoverImgSrc();
     wrapper = wrapper;
   }
 
-  function restoreOriginalCover() {
-    wrapper.cppDisc.restoreOriginalCover();
-    updateCoverImgSrc();
+  async function restoreOriginalCover() {
+    await wrapper.disc.restoreOriginalCover();
+    await updateCoverImgSrc();
     wrapper = wrapper;
   }
 
@@ -135,20 +132,18 @@
     const buffer = await file.arrayBuffer();
     const uint8View = new Uint8Array(buffer);
 
-    wrapper.cppDisc.setCoverFromBytes(uint8View);
-    updateCoverImgSrc();
+    await wrapper.disc.setCoverFromBytes(uint8View);
+    await updateCoverImgSrc();
 
     wrapper = wrapper;
   }
 
-  function remove() {
-    const idToRemove = wrapper.cppDisc.stringId();
-
-    $workspace.removeMusicDisc(idToRemove);
-
+  async function remove() {
+    const idToRemove = wrapper.disc.stringId();
+    if ($workspace) await $workspace.removeMusicDisc(idToRemove);
     musicDiscsStore.update((list) => list.filter((p) => p !== wrapper));
-
-    wrapper.cppDisc.delete();
+    if (typeof wrapper.disc.dispose === "function")
+      await wrapper.disc.dispose();
   }
 </script>
 
@@ -191,7 +186,7 @@
           {audioSrc}
           {waveformData}
           {duration}
-          discId={wrapper.cppDisc.stringId()}
+          discId={wrapper.disc.stringId()}
           {trimStart}
           {trimEnd}
           onTrimChange={handleTrimChange}
@@ -205,7 +200,7 @@
               <AudioLines />
               <span>Title </span>
             </div>
-            <input
+            <Wiwinput
               type="text"
               style="width: 100%"
               bind:value={title}
@@ -218,7 +213,7 @@
               <MicVocal />
               <span>Artist </span>
             </div>
-            <input
+            <Wiwinput
               type="text"
               style="width: 100%"
               bind:value={artist}
@@ -241,7 +236,7 @@
               <Zap />
               <span style="display: block ruby">Comparator output </span>
             </div>
-            <input
+            <Wiwinput
               id="compout-input"
               type="number"
               bind:value={comparatorOutput}
@@ -260,7 +255,7 @@
                 </abbr>
               </span>
             </div>
-            <input
+            <Wiwinput
               type="number"
               bind:value={silenceGap}
               oninput={syncMetadataToCpp}
@@ -324,7 +319,7 @@
           title="Remove cover"
         />
 
-        {#if wrapper.cppDisc.hasOriginalCover() && isCoverModified}
+        {#if hasOriginalCover && isCoverModified}
           <Button
             small
             transparent
@@ -401,10 +396,6 @@
     align-items: center;
     gap: 10px;
     flex: 1;
-  }
-
-  .metadata label input {
-    width: 100%;
   }
 
   .centered {
