@@ -5,6 +5,8 @@
   let {
     icon = "",
 
+    classes = "",
+
     disabled = false,
 
     primary = false,
@@ -29,16 +31,9 @@
 
   let Icon = $derived((icons as Record<string, any>)[icon]);
 
-  let buttonType: "primary" | "secondary" | "transparent" | "destructive" =
-    $derived(
-      destructive
-        ? "destructive"
-        : transparent
-          ? "transparent"
-          : secondary
-            ? "secondary"
-            : "primary",
-    );
+  let buttonType: "primary" | "secondary" | "transparent" = $derived(
+    transparent ? "transparent" : secondary ? "secondary" : "primary",
+  );
 
   let buttonShape: "normal" | "icon" = $derived(
     children == undefined ? "icon" : "normal",
@@ -66,7 +61,8 @@
 </script>
 
 <button
-  class="{buttonType} {buttonShape} {buttonSize}"
+  class="{buttonType} {buttonShape} {buttonSize} {classes}"
+  class:destructive
   class:grow
   class:hugeBorder
   class:intense
@@ -110,8 +106,8 @@
 
   @media (prefers-color-scheme: dark) {
     button {
-      background-color: #1a1a1a;
-      border: 1px solid #777;
+      background-color: #1f1f1f;
+      border: 1px solid #555;
     }
   }
 
@@ -180,9 +176,11 @@
 
   /* Destructive buttons */
 
-  button.destructive {
-    background-color: #ffcccc;
-    border: 2px solid #ffaaaa;
+  @media (prefers-color-scheme: light) {
+    button.destructive {
+      color: #662525;
+      background-color: #fceded;
+    }
   }
 
   button.destructive:hover {
@@ -191,9 +189,7 @@
 
   @media (prefers-color-scheme: dark) {
     button.destructive {
-      background-color: #e21f1f;
-      color: #f4d9d9;
-      border: 2px solid #f4d9d9;
+      color: #fc9f9f;
     }
   }
 
@@ -258,5 +254,17 @@
 
     pointer-events: none;
     animation: rotate-gradient 3s linear infinite;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    button.intense::after {
+      background: conic-gradient(
+        from var(--angle),
+        #646cff,
+        #555,
+        #555,
+        #646cff
+      );
+    }
   }
 </style>

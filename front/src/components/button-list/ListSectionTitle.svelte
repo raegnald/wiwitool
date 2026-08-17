@@ -15,5 +15,11 @@
     color: grey;
     border-top: 1px solid lightgrey;
     cursor: default;
+
+    @media (prefers-color-scheme: dark) {
+      & {
+        border-color: #444;
+      }
+    }
   }
 </style>

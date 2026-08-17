@@ -74,7 +74,7 @@
   @media (prefers-color-scheme: dark) {
     .dropdown-list {
       background: #1a1a1a;
-      border-color: #777;
+      border-color: #555;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     }
   }
