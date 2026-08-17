@@ -101,30 +101,35 @@
 {#if hasSelected}
   <div id="bulk-tools">
     <Button
+      transparent
       onclick={rotateSelectedCCW}
       title="Rotate selected paintings counterclockwise"
       icon="RotateCcw"
     />
 
     <Button
+      transparent
       onclick={rotateSelectedCW}
       title="Rotate selected paintings clockwise"
       icon="RotateCw"
     />
 
     <Button
+      transparent
       onclick={() => openModal("author")}
       title="Set author for selected paintings"
       icon="User"
     />
 
     <Button
+      transparent
       onclick={() => openModal("title")}
       title="Set title for selected paintings"
       icon="TextCursor"
     />
 
     <Button
+      transparent
       destructive
       onclick={() => openModal("delete selected")}
       title="Delete selected paintings"
@@ -135,21 +140,10 @@
 
 <style>
   #bulk-tools {
-    position: sticky;
-    bottom: 5px;
-    gap: 5px;
+    padding: 12px;
     display: flex;
-    width: 46px;
-    flex-direction: column;
-    padding: 5px;
+    gap: 6px;
     justify-content: center;
     align-items: center;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
-  }
-
-  @media only screen and (min-width: 1200px) {
-    #bulk-tools {
-      transform: translate(-73px, -10px);
-    }
   }
 </style>
