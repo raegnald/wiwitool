@@ -162,6 +162,7 @@
   .indicator {
     width: 10px;
     height: 10px;
+    padding: 0;
     border-radius: 50%;
     background: #ccc;
     border: none;
