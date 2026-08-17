@@ -3,6 +3,7 @@
   import { LoaderCircleIcon } from "@lucide/svelte";
 
   export let handler: (file: File) => Promise<void>;
+  export let classes: string = "";
 
   let isDragOver = false;
   let totalFiles = 0;
@@ -60,7 +61,7 @@
 </script>
 
 <div
-  class="drop-zone"
+  class="drop-zone {classes}"
   class:hover={isDragOver}
   class:processing={isProcessing}
   on:drop={handleDrop}
