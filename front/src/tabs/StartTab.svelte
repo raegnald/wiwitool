@@ -1,4 +1,6 @@
 <script lang="ts">
+  import wwtLogo from "../../public/logo-wide.svg";
+  import wwtLogoDark from "../../public/logo-wide-dark.svg";
   import DropZone from "../components/DropZone.svelte";
   import { ERROR, INFO, toast, toasts } from "../stores/toastsStore";
   import { workspace } from "../stores/workspaceStore";
@@ -92,6 +94,13 @@
 </script>
 
 <div class="app-card">
+  <div class="logo-container">
+    <picture>
+      <source srcset={wwtLogoDark} media="(prefers-color-scheme: dark)" />
+      <img id="start-logo" src={wwtLogo} alt="Wiwitool logo" />
+    </picture>
+  </div>
+
   <Carousel
     intervalMs={6000}
     items={[
@@ -114,67 +123,72 @@
     ]}
   />
 
-  <p>
-    Welcome to <span class="jb9">The Wiwitool</span>! The Wiwitool is a
-    mix-and-match Minecraft resource pack and data pack generator that allows
-    you to turn your photos into Minecraft paintings, to <i>block out</i> to
-    your favourite tunes and choose from other simple
-    <abbr title="Quality of Life">QOL</abbr> features. You can either create a new
-    pack or import an existing one.
-  </p>
+  <div class="start-page-content">
+    <p>
+      Welcome to <span class="jb9">The Wiwitool</span>! The Wiwitool is a
+      mix-and-match Minecraft resource pack and data pack generator that allows
+      you to turn your photos into Minecraft paintings, to <i>block out</i> to
+      your favourite tunes and choose from other simple
+      <abbr title="Quality of Life">QOL</abbr> features. You can either create a new
+      pack or import an existing one.
+    </p>
 
-  <div id="center">
-    <Button
-      large
-      intense
-      loading={!$backendReady}
-      icon="BadgePlus"
-      onclick={() => move("paintings")}
-    >
-      Create a new pack
-    </Button>
+    <div id="center">
+      <Button
+        large
+        intense
+        loading={!$backendReady}
+        icon="BadgePlus"
+        onclick={() => move("paintings")}
+      >
+        Create a new pack
+      </Button>
 
-    <Button
-      large
-      loading={!$backendReady}
-      icon="FileUp"
-      onclick={() => (showDropZone = !showDropZone)}
-    >
-      Import an existing pack
-    </Button>
-  </div>
-
-  {#if showDropZone}
-    <div class="dropZoneContainer" transition:slide={{ duration: 100 }}>
-      <DropZone handler={importPacks} let:filePicker>
-        <div class="empty-state">
-          <ArchiveRestore size="80" strokeWidth="1.5" class="empty-icon" />
-
-          <h2>Drag and drop an existing configuration file</h2>
-          <center class="with-title pills-horizontal-container">
-            <span class="pill">Wiwitool Project Save file</span>
-          </center>
-
-          <div class="empty-actions">
-            <Button icon="FolderInput" onclick={selectFileFromPicker}>
-              Select from file picker
-            </Button>
-          </div>
-        </div>
-      </DropZone>
+      <Button
+        large
+        loading={!$backendReady}
+        icon="FileUp"
+        onclick={() => (showDropZone = !showDropZone)}
+      >
+        Import an existing pack
+      </Button>
     </div>
-  {/if}
 
-  <div class="version">
-    Wiwitool version {__GIT_TAG__} (commit {__GIT_COMMIT__})
-    <Button secondary onclick={() => move("changelog")}>Changelog</Button>
+    {#if showDropZone}
+      <div
+        class="dropZoneContainer"
+        transition:slide={{ duration: 100, axis: "y" }}
+      >
+        <DropZone handler={importPacks} let:filePicker>
+          <div class="empty-state">
+            <ArchiveRestore size="80" strokeWidth="1.5" class="empty-icon" />
+
+            <h2>Drag and drop an existing configuration file</h2>
+            <center class="with-title pills-horizontal-container">
+              <span class="pill">Wiwitool Project Save file</span>
+            </center>
+
+            <div class="empty-actions">
+              <Button icon="FolderInput" onclick={selectFileFromPicker}>
+                Select from file picker
+              </Button>
+            </div>
+          </div>
+        </DropZone>
+      </div>
+    {/if}
+
+    <div class="version">
+      Wiwitool version {__GIT_TAG__} (commit {__GIT_COMMIT__})
+      <Button secondary onclick={() => move("changelog")}>Changelog</Button>
+    </div>
+
+    <center>
+      <a href="https://github.com/raegnald/wiwitool/issues/" target="_blank">
+        <Button transparent icon="Github">Suggest a change or feature</Button>
+      </a>
+    </center>
   </div>
-
-  <center>
-    <a href="https://github.com/raegnald/wiwitool/issues/" target="_blank">
-      <Button transparent icon="Github">Suggest a change or feature</Button>
-    </a>
-  </center>
 </div>
 
 {#snippet feature1()}
@@ -208,6 +222,26 @@
 {/snippet}
 
 <style>
+  .app-card {
+    padding-bottom: 50px;
+  }
+
+  .logo-container {
+    display: flex;
+    justify-content: center;
+    margin: 100px auto 50px;
+  }
+
+  #start-logo {
+    max-width: 600px;
+  }
+
+  .start-page-content {
+    width: 100%;
+    max-width: 700px;
+    margin: 25px auto;
+  }
+
   .dropZoneContainer {
     padding-top: 20px;
   }

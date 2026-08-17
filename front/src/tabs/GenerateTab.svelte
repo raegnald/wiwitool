@@ -403,6 +403,15 @@
 </div>
 
 <style>
+  .app-card {
+    height: 100%;
+  }
+
+  .empty-state {
+    height: 100%;
+    padding: 0;
+  }
+
   .pill-container {
     display: flex;
     flex-wrap: wrap;

@@ -20,12 +20,17 @@
 
   import { backendType, initialiseBackend } from "./services/backendProvider";
 
-  let mainContentScrolled = $state(false);
+  import {
+    House,
+    FileClock,
+    Image,
+    Disc3,
+    GripHorizontal,
+    Download,
+    HouseIcon,
+  } from "@lucide/svelte";
 
-  function handleMainContentScroll(event: Event) {
-    const element = event.currentTarget as HTMLDivElement;
-    mainContentScrolled = element.scrollTop > 0;
-  }
+  let mainContentScrolled = $state(false);
 
   async function resetApp() {
     paintingsStore.set([]);
@@ -47,37 +52,38 @@
 </script>
 
 <div class="app-container">
-  {#if $backendType === "native"}
-    <DynamicTitleBar {mainContentScrolled} />
-  {/if}
+  <DynamicTitleBar {mainContentScrolled} />
 
-  <div class="main-scroll-content" onscroll={handleMainContentScroll}>
-    <div id="wiwi-logo-wide">
-      <img src="/logo-wide.svg" alt="Wide logo" />
-    </div>
-
-    <Tabs {resetApp}>
-      <Tab hidden title="Start" id="start" let:move>
+  <div class="main-content">
+    <Tabs {resetApp} {mainContentScrolled}>
+      <Tab hidden title="Start" id="start" icon={House} let:move>
         <StartTab {move} />
       </Tab>
 
-      <Tab hidden title="Changelog" id="changelog" let:move>
+      <Tab hidden title="Changelog" id="changelog" icon={FileClock} let:move>
         <ChangelogTab {move} />
       </Tab>
 
-      <Tab title="Paintings" id="paintings" let:move>
+      <Tab
+        title="Paintings"
+        id="paintings"
+        icon={Image}
+        activeBackground="#f7f8ff"
+        activeBackgroundDark="#222"
+        let:move
+      >
         <PaintingsTab {move} />
       </Tab>
 
-      <Tab title="Music discs" id="discs" let:move>
+      <Tab title="Music discs" id="discs" icon={Disc3} let:move>
         <MusicDiscsTab {move} />
       </Tab>
 
-      <Tab title="Miscellaneous" id="misc" let:move>
+      <Tab title="Misc" id="misc" icon={GripHorizontal} let:move>
         <MiscTab {move} />
       </Tab>
 
-      <Tab title="Generate" id="generate" let:move>
+      <Tab title="Generate" id="generate" icon={Download} let:move>
         <GenerateTab {move} />
       </Tab>
     </Tabs>
@@ -95,27 +101,8 @@
     overflow: hidden;
   }
 
-  .main-scroll-content {
+  .main-content {
     flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
-
-  #wiwi-logo-wide {
-    display: flex;
-    justify-content: center;
-    padding: 0 10px;
-  }
-
-  #wiwi-logo-wide img {
-    margin: 50px 0;
-    width: 100%;
-    max-width: 768px;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    #wiwi-logo-wide img {
-      content: url("/logo-wide-dark.svg");
-    }
+    overflow: hidden;
   }
 </style>

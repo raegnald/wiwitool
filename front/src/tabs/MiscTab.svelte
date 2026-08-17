@@ -142,13 +142,6 @@
       />
     </div>
   </div>
-
-  <div class="pagination">
-    <Button class="secondary" onclick={() => move("discs")} icon="ArrowLeft">
-      Previous
-    </Button>
-    <Button onclick={() => move("generate")} icon="ArrowRight">Next</Button>
-  </div>
 </div>
 
 <style>

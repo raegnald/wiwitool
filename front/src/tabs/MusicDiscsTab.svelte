@@ -272,20 +272,6 @@
     {/each}
   </div>
 
-  <div class="pagination">
-    <Button
-      class="secondary"
-      onclick={() => move("paintings")}
-      icon="ArrowLeft"
-    >
-      Previous
-    </Button>
-
-    <Button onclick={() => move("misc")} icon="ArrowRight">
-      {$musicDiscsStore.length > 0 ? "Next" : "Skip"}
-    </Button>
-  </div>
-
   <BulkMusicDiscsActions />
 </main>
 
