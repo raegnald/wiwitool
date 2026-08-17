@@ -72,7 +72,7 @@
   .titlebar {
     height: 38px;
     flex-shrink: 0;
-    background: #18181b;
+    background: #242424;
     color: #e4e4e7;
     display: flex;
     align-items: center;
@@ -91,6 +91,14 @@
     font-size: 13px;
     font-weight: 500;
     z-index: 10000;
+    margin-bottom: 5px;
+  }
+
+  @media (prefers-color-scheme: light) {
+    .titlebar {
+      background: #ffff7e;
+      color: #111;
+    }
   }
 
   .titlebar-drag {
@@ -139,6 +147,17 @@
   .control-btn:hover {
     background: #27272a;
     color: #ffffff;
+  }
+
+  @media (prefers-color-scheme: light) {
+    .control-btn {
+      color: #666;
+    }
+
+    .control-btn:hover {
+      background: rgba(0, 0, 0, 0.1);
+      color: #111;
+    }
   }
 
   .control-btn.close:hover {

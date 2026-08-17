@@ -4,20 +4,29 @@
   import MacTitleBar from "./MacTitleBar.svelte";
   import WindowsTitleBar from "./WindowsTitleBar.svelte";
 
+  import { pageTitle } from "../../stores/titleStore";
+  import { forceWindowsTitlebar, getWindowType } from "./titleBar";
+
   let props: TitleBarProps = $props();
+  let title: string | undefined = $derived(
+    "Wiwitool · " + (props.title || $pageTitle),
+  );
 
-  let isMac = $state(false);
-
-  if (typeof window !== "undefined") {
-    const platform = (navigator.platform || "").toUpperCase();
-    const userAgent = navigator.userAgent || "";
-    isMac = platform.includes("MAC") || /Macintosh|Mac OS X/i.test(userAgent);
-  }
+  let type = getWindowType();
 </script>
 
-{#if isMac}
-  <MacTitleBar {...props} />
-{:else}
-  <!-- Default -->
-  <WindowsTitleBar {...props} />
+{#if type === "windows"}
+  <WindowsTitleBar {...props} {title} />
+{:else if type === "mac"}
+  <MacTitleBar {...props} {title} />
+{:else if type === "web" || type === "unknown"}
+  <div class="safe-space"></div>
 {/if}
+
+<style>
+  .safe-space {
+    height: 10px;
+    margin: 0;
+    padding: 0;
+  }
+</style>

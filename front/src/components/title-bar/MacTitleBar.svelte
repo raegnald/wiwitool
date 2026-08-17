@@ -208,7 +208,7 @@
     gap: 7px;
     height: 100%;
     flex-grow: 1;
-    opacity: 0;
+    /*opacity: 0;*/
     transition: opacity 200ms ease;
   }
 
