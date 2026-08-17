@@ -78,14 +78,18 @@ table td:nth-child(odd) {
   width: 19.5%;
 }
 
-.app-card,
-#bulk-tools,
+/*.app-card,*/
 dialog {
   border: 1px solid #ccc;
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 20px;
+}
+
+.app-card {
+  max-width: 1024px;
+  margin: 0 auto;
 }
 
 #app {
@@ -95,12 +99,12 @@ dialog {
 
 #main-content,
 .app-width {
-  max-width: 1024px;
-  margin: 0 auto;
+  /*max-width: 1024px;
+  margin: 0 auto;*/
 }
 
 #main-content {
-  margin: 0 auto 6em;
+  margin: 0;
 }
 
 details {
@@ -127,16 +131,6 @@ select {
 select {
   padding: 0.5em 0.7em;
   border: 1px solid #bbb;
-}
-
-.title-component {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.title-component h2 {
-  margin: 0;
 }
 
 dialog {
@@ -186,7 +180,6 @@ dialog::backdrop {
   }
 
   .app-card,
-  #bulk-tools,
   dialog {
     background-color: #292929;
     border-color: #666;
@@ -243,10 +236,6 @@ svg {
   margin: 0 0 10px 0;
   color: #333;
   font-weight: 600;
-}
-
-.empty-state center.with-title {
-  /*margin: 0 0 20px 0;*/
 }
 
 .empty-state p {
@@ -404,4 +393,16 @@ input[type="range"]:focus-visible::-moz-range-thumb {
 input[type="range"]:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* Common, reusable classes for components */
+
+.elements-beside {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.space-between {
+  justify-content: space-between;
 }

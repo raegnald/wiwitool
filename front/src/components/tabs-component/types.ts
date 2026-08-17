@@ -1,9 +1,13 @@
+import type { Component } from "svelte";
 import type { Writable } from "svelte/store";
 
 export interface TabInfo {
   id: string;
   title: string;
+  icon?: Component;
   hidden: boolean;
+  activeBackground?: string;
+  activeBackgroundDark?: string;
 }
 
 export interface TabsContext {
