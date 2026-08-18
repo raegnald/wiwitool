@@ -4,19 +4,17 @@
 
 #include <algorithm>
 #include <cmath>
-#include <algorithm>
 #include <cstdlib>
 #include <format>
 #include <print>
 
-#include <vorbis/vorbisenc.h>
+#include "nlohmann/json.hpp"
 #include "nlohmann/json_fwd.hpp"
-#include "stb_vorbis.h"
+
+#include <stb_vorbis.h>
+#include <vorbis/vorbisenc.h>
 
 #include "util/wiwidebug.hpp"
-
-#include "nlohmann/json.hpp"
-
 
 Music_disc::Music_disc(void) : disc_id{next_disc_id++} {}
 

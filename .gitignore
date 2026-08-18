@@ -12,3 +12,4 @@ cuadros-python/
 *.exe
 *.o
 *.a
+.cache/
