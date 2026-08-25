@@ -13,7 +13,6 @@
   import MiscTab from "./tabs/MiscTab.svelte";
   import GenerateTab from "./tabs/GenerateTab.svelte";
   import StartTab from "./tabs/StartTab.svelte";
-  import ComponentsShowcaseTab from "./tabs/ComponentsShowcaseTab.svelte";
 
   import { paintingsStore } from "./stores/paintingsStore";
   import ChangelogTab from "./tabs/ChangelogTab.svelte";
@@ -44,12 +43,6 @@
     <Tab hidden title="Start" id="start" let:move>
       <StartTab {module} {move} />
     </Tab>
-
-    {#if import.meta.env.DEV}
-      <Tab title="Components showcase (dev)" id="dummy">
-        <ComponentsShowcaseTab />
-      </Tab>
-    {/if}
 
     <Tab hidden title="Changelog" id="changelog" let:move>
       <ChangelogTab {move} />
